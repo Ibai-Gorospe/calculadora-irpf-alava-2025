@@ -74,11 +74,29 @@ function deducViudedad(bi) {
   return 0;
 }
 
+// Art. 87 NF 33/2013: deducción por adquisición de vivienda habitual
+function deducViviendaCompra(cantidadAnual, perfil = "general") {
+  if (cantidadAnual <= 0) return 0;
+  const pct = perfil === "joven" ? 0.23 : 0.18;
+  const max = perfil === "joven" ? 1955 : 1530;
+  return Math.min(+(cantidadAnual * pct).toFixed(2), max);
+}
+
+// Art. 86 NF 33/2013: deducción por alquiler de vivienda habitual
+function deducAlquiler(alquilerAnual, perfil = "general") {
+  if (alquilerAnual <= 0) return 0;
+  const pct = perfil === "joven" ? 0.30 : perfil === "familia" ? 0.25 : 0.20;
+  const max = perfil === "joven" ? 2400 : perfil === "familia" ? 2000 : 1600;
+  return Math.min(+(alquilerAnual * pct).toFixed(2), max);
+}
+
 // Cálculo individual de una persona
 function calcPersona({
   bruto, ret, redExtra, hijosShare,
   tipoContrato = "indefinido", rentasNoLab = 0, discapacidad = "ninguna",
   viudedad = false, cuidado = "ninguno", otrasDeducNF3 = 0,
+  viviendaCompra = 0, viviendaPerfil = "general",
+  alquilerAnual = 0, alquilerPerfil = "general",
 }) {
   const ss       = calcSS(bruto, tipoContrato);
   const dif      = Math.max(0, bruto - ss);
@@ -92,11 +110,13 @@ function calcPersona({
   const dedViud  = viudedad ? deducViudedad(bi) : 0;
   const dedCuid  = cuidado === "profesional" ? 500 : cuidado === "empleado_hogar" ? 250 : 0;
   const dedOtras = +otrasDeducNF3;
-  const cl       = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras);
+  const dedViv   = deducViviendaCompra(viviendaCompra, viviendaPerfil);
+  const dedAlq   = deducAlquiler(alquilerAnual, alquilerPerfil);
+  const cl       = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras - dedViv - dedAlq);
   const resultado = +(ret - cl).toFixed(2);
   const teReal   = bruto > 0 ? cl / bruto : 0;
   const teRet    = bruto > 0 ? ret / bruto : 0;
-  return { bruto, ret, ss, dif, bonif, rnt, bi, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, cl, resultado, teReal, teRet, redExtra };
+  return { bruto, ret, ss, dif, bonif, rnt, bi, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, dedViv, dedAlq, cl, resultado, teReal, teRet, redExtra };
 }
 
 // Cálculo declaración conjunta
@@ -104,8 +124,12 @@ function calcConjunta({
   brutoA, retA, redExtraA, brutoB, retB, redExtraB, hijosTotal,
   tipoContratoA = "indefinido", rentasNoLabA = 0, discapacidadA = "ninguna",
   viudedadA = false, cuidadoA = "ninguno", otrasDeducNF3A = 0,
+  viviendaCompraA = 0, viviendaPerfilA = "general",
+  alquilerAnualA = 0, alquilerPerfilA = "general",
   tipoContratoB = "indefinido", rentasNoLabB = 0, discapacidadB = "ninguna",
   viudedadB = false, cuidadoB = "ninguno", otrasDeducNF3B = 0,
+  viviendaCompraB = 0, viviendaPerfilB = "general",
+  alquilerAnualB = 0, alquilerPerfilB = "general",
 }) {
   const ssA   = calcSS(brutoA, tipoContratoA);
   const ssB   = calcSS(brutoB, tipoContratoB);
@@ -127,13 +151,15 @@ function calcConjunta({
   const dedCuid  = (cuidadoA === "profesional" ? 500 : cuidadoA === "empleado_hogar" ? 250 : 0)
                  + (cuidadoB === "profesional" ? 500 : cuidadoB === "empleado_hogar" ? 250 : 0);
   const dedOtras = +otrasDeducNF3A + +otrasDeducNF3B;
-  const cl    = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras);
+  const dedViv   = deducViviendaCompra(viviendaCompraA, viviendaPerfilA) + deducViviendaCompra(viviendaCompraB, viviendaPerfilB);
+  const dedAlq   = deducAlquiler(alquilerAnualA, alquilerPerfilA) + deducAlquiler(alquilerAnualB, alquilerPerfilB);
+  const cl    = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras - dedViv - dedAlq);
   const retTotal = retA + retB;
   const resultado = +(retTotal - cl).toFixed(2);
   const teReal = (brutoA + brutoB) > 0 ? cl / (brutoA + brutoB) : 0;
   return {
     brutoA, brutoB, ssA, ssB, difA, difB, bonA, bonB, rntA, rntB,
-    biSum, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, cl, resultado, retTotal, teReal,
+    biSum, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, dedViv, dedAlq, cl, resultado, retTotal, teReal,
     redExtraA, redExtraB,
   };
 }
@@ -146,6 +172,8 @@ const personInit = {
   bruto: "", ret: "", redExtra: "",
   tipoContrato: "indefinido", rentasNoLab: "", discapacidad: "ninguna",
   viudedad: false, cuidado: "ninguno", otrasDeducNF3: "",
+  viviendaCompra: "", viviendaPerfil: "general",
+  alquilerAnual: "", alquilerPerfil: "general",
 };
 
 const initialState = {
@@ -167,6 +195,7 @@ function reducer(state, action) {
     };
     case "SET_HIJOS_M6":   return { ...state, hijosM6: action.value };
     case "SET_HIJOS_6A15": return { ...state, hijos6a15: action.value };
+    case "RESET_B": return { ...state, personB: { ...personInit } };
     case "RESET": return initialState;
     default: return state;
   }
@@ -272,7 +301,7 @@ function NumInput({ label, value, onChange, hint, tooltipText, accent = T.cobalt
   );
 }
 
-function HijosSelector({ value, onChange, hijosM6, onChangeM6, hijos6a15, onChangej6a15 }) {
+function HijosSelector({ value, onChange, hijosM6, onChangeM6, hijos6a15, onChangej6a15, soloMode = false }) {
   const dedBase   = deducHijosTotal(value, 0, 0);
   const dedTotal  = deducHijosTotal(value, hijosM6, hijos6a15);
   const compExtra = dedTotal - dedBase;
@@ -337,8 +366,14 @@ function HijosSelector({ value, onChange, hijosM6, onChangeM6, hijos6a15, onChan
           <div style={{ marginTop: 10, background: T.goldL, border: `1px solid ${T.goldAcc}44`, borderRadius: 8, padding: "10px 12px", fontSize: 11, color: T.gold, lineHeight: 1.7 }}>
             <div style={{ fontWeight: 700 }}>Deducción base: {eur(dedBase)}{compExtra > 0 ? ` + ${eur(compExtra)} (suplemento edad)` : ""}</div>
             <div style={{ fontWeight: 700 }}>Total: {eur(dedTotal)}</div>
-            <div>Individual (50% c/u): {eur(dedTotal / 2)} por progenitor</div>
-            <div>Conjunta (100%): {eur(dedTotal)} completa</div>
+            {soloMode ? (
+              <div>Individual (100%): {eur(dedTotal)}</div>
+            ) : (
+              <>
+                <div>Individual (50% c/u): {eur(dedTotal / 2)} por progenitor</div>
+                <div>Conjunta (100%): {eur(dedTotal)} completa</div>
+              </>
+            )}
           </div>
         </>
       )}
@@ -375,7 +410,8 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
   );
 
   const hasExtras = data.rentasNoLab || data.discapacidad !== "ninguna" || data.viudedad
-    || data.cuidado !== "ninguno" || data.otrasDeducNF3;
+    || data.cuidado !== "ninguno" || data.otrasDeducNF3
+    || data.viviendaCompra || data.alquilerAnual;
 
   return (
     <div style={{
@@ -442,7 +478,7 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
           transition: "all .15s",
         }}
       >
-        <span>Deducciones adicionales NF 3/2025{hasExtras ? " ✓" : ""}</span>
+        <span>Deducciones adicionales y vivienda{hasExtras ? " ✓" : ""}</span>
         <span style={{ fontSize: 10, opacity: 0.6 }}>{expanded ? "▴" : "▾"}</span>
       </button>
 
@@ -496,6 +532,55 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             tooltipText="Art. 83 bis: hasta 200 €/año para hombres que reducen su jornada para cuidar hijos <4 años. Art. 83 ter: hasta 1.500 €/año (2.250 € si parto/adopción múltiple) para mujeres que se reincorporan al trabajo."
             accent={accent} accentLight={accentLight}
           />
+
+          {/* Vivienda habitual */}
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.borderSoft}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 8 }}>
+              Vivienda habitual
+            </div>
+            <NumInput
+              label="Pagos hipoteca anual (art. 87)"
+              value={data.viviendaCompra}
+              onChange={v => set("viviendaCompra", v)}
+              hint="Amortización + intereses anuales"
+              tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €/año). Joven <36 o familia numerosa: 23% (máx. 1.955 €/año). Art. 87 NF 33/2013."
+              accent={accent} accentLight={accentLight}
+            />
+            <SmallSelector
+              lbl="Perfil vivienda compra (art. 87)"
+              value={data.viviendaPerfil}
+              onChange={v => set("viviendaPerfil", v)}
+              options={[
+                { value: "general", label: "General (18%, máx 1.530 €)" },
+                { value: "joven",   label: "<36 / Fam. num. (23%, máx 1.955 €)" },
+              ]}
+              tooltipText="Menores de 36 años y familias numerosas tienen porcentajes y límites ampliados. Art. 87 NF 33/2013 (modif. NF 3/2025)."
+            />
+            <NumInput
+              label="Alquiler vivienda habitual (art. 86)"
+              value={data.alquilerAnual}
+              onChange={v => set("alquilerAnual", v)}
+              hint="Importe total del alquiler pagado en el año"
+              tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €/año). <30 años: 30% (máx. 2.400 €). Fam. numerosa: 25% (máx. 2.000 €). Art. 86 NF 33/2013."
+              accent={accent} accentLight={accentLight}
+            />
+            <SmallSelector
+              lbl="Perfil alquiler (art. 86)"
+              value={data.alquilerPerfil}
+              onChange={v => set("alquilerPerfil", v)}
+              options={[
+                { value: "general", label: "General (20%, máx 1.600 €)" },
+                { value: "joven",   label: "<30 años (30%, máx 2.400 €)" },
+                { value: "familia", label: "Fam. num. (25%, máx 2.000 €)" },
+              ]}
+              tooltipText="Perfil mejorado para menores de 30 años y familias numerosas. Art. 86 NF 33/2013."
+            />
+            {data.viviendaCompra && data.alquilerAnual && (
+              <div style={{ fontSize: 10, color: T.red, padding: "4px 0" }}>
+                Normalmente no se aplican ambas deducciones simultáneamente (compra + alquiler)
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -610,6 +695,12 @@ function WaterfallDesglose({ data, label, accent }) {
           )}
           {(data.dedOtras ?? 0) > 0 && (
             <WaterfallRow label="Otras deducciones NF 3/2025 (arts. 83 bis/ter)" value={data.dedOtras} type="minus" />
+          )}
+          {(data.dedViv ?? 0) > 0 && (
+            <WaterfallRow label="Deducción vivienda habitual (art. 87 NF 33/2013)" value={data.dedViv} type="minus" />
+          )}
+          {(data.dedAlq ?? 0) > 0 && (
+            <WaterfallRow label="Deducción alquiler vivienda (art. 86 NF 33/2013)" value={data.dedAlq} type="minus" />
           )}
           <WaterfallRow label="CUOTA LÍQUIDA (IRPF a pagar)" value={data.cl} type="total" />
           <div style={{ height: 12 }} />
@@ -729,6 +820,8 @@ function TablaComparativa({ scenarios }) {
     { label: "− Deducc. viudedad",        key: "dedViud",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. cuidado",         key: "dedCuid",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Otras deducc. NF 3/2025", key: "dedOtras", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. vivienda (art. 87)",  key: "dedViv",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. alquiler (art. 86)",  key: "dedAlq",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "CUOTA LÍQUIDA",             key: "cl",       fmt: eur, bold: true, highlight: true },
     { label: "Retenciones",          key: "retTotal",     fmt: eur },
     { label: "RESULTADO",            key: "resultado",    fmt: signedEur, bold: true, resultRow: true },
@@ -785,6 +878,23 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
   if (!scenarios?.length) return null;
   const sorted = [...scenarios].sort((a, b) => b.resultado - a.resultado);
   const best = sorted[0];
+  const hasConj = scenarios.some(s => s.id.startsWith("CONJ"));
+
+  // Modo solo: sin escenarios conjuntos
+  if (!hasConj) {
+    return (
+      <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 8 }}>
+          Declaración individual
+        </div>
+        <div style={{ fontSize: 12, color: T.inkMid, lineHeight: 1.6 }}>
+          Solo se muestra la declaración individual. Para comparar con la declaración conjunta, añade los datos de una segunda persona (Persona B).
+          {hijos > 0 && ` Con hijos, la deducción de ${eur(deducHijosTotal(hijos, hijosM6, hijos6a15))} se aplica al 100% como progenitor único declarante.`}
+        </div>
+      </div>
+    );
+  }
+
   const drivers = [];
 
   // Analizar drivers de la diferencia
@@ -851,6 +961,7 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
 export default function IRPFAlava2025() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [activeTab, setActiveTab] = useState("comparativa");
+  const [showPersonB, setShowPersonB] = useState(false);
 
   const aB    = n(state.personA.bruto);
   const aR    = n(state.personA.ret);
@@ -861,6 +972,10 @@ export default function IRPFAlava2025() {
   const aViu  = state.personA.viudedad;
   const aCuid = state.personA.cuidado;
   const aOt   = n(state.personA.otrasDeducNF3);
+  const aVivC = n(state.personA.viviendaCompra);
+  const aVivP = state.personA.viviendaPerfil;
+  const aAlq  = n(state.personA.alquilerAnual);
+  const aAlqP = state.personA.alquilerPerfil;
 
   const bB    = n(state.personB.bruto);
   const bR    = n(state.personB.ret);
@@ -871,45 +986,99 @@ export default function IRPFAlava2025() {
   const bViu  = state.personB.viudedad;
   const bCuid = state.personB.cuidado;
   const bOt   = n(state.personB.otrasDeducNF3);
+  const bVivC = n(state.personB.viviendaCompra);
+  const bVivP = state.personB.viviendaPerfil;
+  const bAlq  = n(state.personB.alquilerAnual);
+  const bAlqP = state.personB.alquilerPerfil;
 
   const hj      = state.hijos;
   const hjM6    = state.hijosM6;
   const hj6a15  = state.hijos6a15;
-  const ready   = aB > 0 && bB > 0;
+  const ready   = aB > 0;
+  const hasPairData = showPersonB && bB > 0;
 
   // ── Cálculos ──────────────────────────────────────────────────────────────
   const calc = useMemo(() => {
     if (!ready) return null;
     const dedHTotal = deducHijosTotal(hj, hjM6, hj6a15);
-    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt };
-    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt };
+    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt, viviendaCompra: aVivC, viviendaPerfil: aVivP, alquilerAnual: aAlq, alquilerPerfil: aAlqP };
 
-    // Individuales
-    const a_sh = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: 0,              ...commonA });
-    const b_sh = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: 0,              ...commonB });
-    const a_ch = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: dedHTotal / 2, ...commonA });
+    // Persona A individual (siempre)
+    const a_sh = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: 0, ...commonA });
+    const hijosShareA = hasPairData ? dedHTotal / 2 : dedHTotal;
+    const a_ch = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: hijosShareA, ...commonA });
+
+    if (!hasPairData) {
+      return { a_sh, a_ch, solo: true };
+    }
+
+    // Persona B individual + conjuntas (solo cuando hay pareja)
+    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt, viviendaCompra: bVivC, viviendaPerfil: bVivP, alquilerAnual: bAlq, alquilerPerfil: bAlqP };
+    const b_sh = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: 0, ...commonB });
     const b_ch = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: dedHTotal / 2, ...commonB });
 
-    // Conjuntas
     const conjParams = {
       brutoA: aB, retA: aR, redExtraA: aRe, brutoB: bB, retB: bR, redExtraB: bRe,
       tipoContratoA: aTc, rentasNoLabA: aRnl, discapacidadA: aDisc, viudedadA: aViu, cuidadoA: aCuid, otrasDeducNF3A: aOt,
+      viviendaCompraA: aVivC, viviendaPerfilA: aVivP, alquilerAnualA: aAlq, alquilerPerfilA: aAlqP,
       tipoContratoB: bTc, rentasNoLabB: bRnl, discapacidadB: bDisc, viudedadB: bViu, cuidadoB: bCuid, otrasDeducNF3B: bOt,
+      viviendaCompraB: bVivC, viviendaPerfilB: bVivP, alquilerAnualB: bAlq, alquilerPerfilB: bAlqP,
     };
     const c_sh = calcConjunta({ ...conjParams, hijosTotal: 0 });
     const c_ch = calcConjunta({ ...conjParams, hijosTotal: dedHTotal });
 
-    return { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch };
-  }, [aB, aR, aRe, aTc, aRnl, aDisc, aViu, aCuid, aOt,
-      bB, bR, bRe, bTc, bRnl, bDisc, bViu, bCuid, bOt,
-      hj, hjM6, hj6a15, ready]);
+    return { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch, solo: false };
+  }, [aB, aR, aRe, aTc, aRnl, aDisc, aViu, aCuid, aOt, aVivC, aVivP, aAlq, aAlqP,
+      bB, bR, bRe, bTc, bRnl, bDisc, bViu, bCuid, bOt, bVivC, bVivP, bAlq, bAlqP,
+      hj, hjM6, hj6a15, ready, hasPairData]);
 
   // ── Escenarios ────────────────────────────────────────────────────────────
   const scenarios = useMemo(() => {
     if (!calc) return [];
-    const { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch } = calc;
     const hasH    = hj > 0;
     const dedHTxt = eur(deducHijosTotal(hj, hjM6, hj6a15));
+
+    if (calc.solo) {
+      // Modo solo: solo escenarios individuales de Persona A
+      const { a_sh, a_ch } = calc;
+      const list = [
+        {
+          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
+          sublabel: "Declaración individual, sin deducción de descendientes",
+          accentColor: T.cobalt,
+          resultado: a_sh.resultado,
+          brutoTotal: aB, ssTotal: a_sh.ss,
+          bonifTotal: a_sh.bonif, rntTotal: a_sh.rnt,
+          redTotal: aRe, redConj: 0, bl: a_sh.bl,
+          ci: a_sh.ci, minoracion: MINORACION,
+          dedH: 0, dedViud: a_sh.dedViud,
+          dedCuid: a_sh.dedCuid, dedOtras: a_sh.dedOtras,
+          dedViv: a_sh.dedViv, dedAlq: a_sh.dedAlq,
+          cl: a_sh.cl, retTotal: aR,
+          warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
+          _calcA: a_sh,
+        },
+        ...(hasH ? [{
+          id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
+          sublabel: "Declaración individual, 100% deducción de descendientes",
+          accentColor: T.cobalt,
+          resultado: a_ch.resultado,
+          brutoTotal: aB, ssTotal: a_ch.ss,
+          bonifTotal: a_ch.bonif, rntTotal: a_ch.rnt,
+          redTotal: aRe, redConj: 0, bl: a_ch.bl,
+          ci: a_ch.ci, minoracion: MINORACION,
+          dedH: a_ch.dedH, dedViud: a_ch.dedViud,
+          dedCuid: a_ch.dedCuid, dedOtras: a_ch.dedOtras,
+          dedViv: a_ch.dedViv, dedAlq: a_ch.dedAlq,
+          cl: a_ch.cl, retTotal: aR,
+          _calcA: a_ch,
+        }] : []),
+      ];
+      return list.sort((a, b) => b.resultado - a.resultado);
+    }
+
+    // Modo pareja: escenarios individuales + conjuntas
+    const { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch } = calc;
     const list = [
       {
         id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
@@ -922,6 +1091,7 @@ export default function IRPFAlava2025() {
         ci: a_sh.ci + b_sh.ci, minoracion: MINORACION * 2,
         dedH: 0, dedViud: a_sh.dedViud + b_sh.dedViud,
         dedCuid: a_sh.dedCuid + b_sh.dedCuid, dedOtras: a_sh.dedOtras + b_sh.dedOtras,
+        dedViv: a_sh.dedViv + b_sh.dedViv, dedAlq: a_sh.dedAlq + b_sh.dedAlq,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + bR,
         warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
         _calcA: a_sh, _calcB: b_sh,
@@ -937,6 +1107,7 @@ export default function IRPFAlava2025() {
         ci: a_ch.ci + b_ch.ci, minoracion: MINORACION * 2,
         dedH: a_ch.dedH + b_ch.dedH, dedViud: a_ch.dedViud + b_ch.dedViud,
         dedCuid: a_ch.dedCuid + b_ch.dedCuid, dedOtras: a_ch.dedOtras + b_ch.dedOtras,
+        dedViv: a_ch.dedViv + b_ch.dedViv, dedAlq: a_ch.dedAlq + b_ch.dedAlq,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + bR,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcA: a_ch, _calcB: b_ch,
@@ -951,6 +1122,7 @@ export default function IRPFAlava2025() {
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_sh.bl,
         ci: c_sh.ci, minoracion: MINORACION,
         dedH: 0, dedViud: c_sh.dedViud, dedCuid: c_sh.dedCuid, dedOtras: c_sh.dedOtras,
+        dedViv: c_sh.dedViv, dedAlq: c_sh.dedAlq,
         cl: c_sh.cl, retTotal: aR + bR,
         warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
         _calcConj: c_sh,
@@ -965,6 +1137,7 @@ export default function IRPFAlava2025() {
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_ch.bl,
         ci: c_ch.ci, minoracion: MINORACION,
         dedH: c_ch.dedH, dedViud: c_ch.dedViud, dedCuid: c_ch.dedCuid, dedOtras: c_ch.dedOtras,
+        dedViv: c_ch.dedViv, dedAlq: c_ch.dedAlq,
         cl: c_ch.cl, retTotal: aR + bR,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcConj: c_ch,
@@ -1000,7 +1173,7 @@ export default function IRPFAlava2025() {
                 Calculadora IRPF Álava 2025
               </div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,.5)", marginTop: 3 }}>
-                Declaración 2026 · Comparativa individual vs conjunta · Solo rendimientos del trabajo
+                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · Solo rendimientos del trabajo
               </div>
             </div>
             {ready && optimo && (
@@ -1028,10 +1201,42 @@ export default function IRPFAlava2025() {
               label="Persona A" letter="A" accent={T.cobalt} accentLight={T.cobaltL}
               data={state.personA} dispatch={dispatch} actionType="SET_A"
             />
-            <PersonaInputs
-              label="Persona B" letter="B" accent={T.teal} accentLight={T.tealL}
-              data={state.personB} dispatch={dispatch} actionType="SET_B"
-            />
+            {showPersonB ? (
+              <div style={{ position: "relative" }}>
+                <PersonaInputs
+                  label="Persona B" letter="B" accent={T.teal} accentLight={T.tealL}
+                  data={state.personB} dispatch={dispatch} actionType="SET_B"
+                />
+                <button
+                  onClick={() => { setShowPersonB(false); dispatch({ type: "RESET_B" }); }}
+                  style={{
+                    position: "absolute", top: 8, right: 8,
+                    background: T.redL, border: `1px solid ${T.redAcc}44`,
+                    borderRadius: 6, padding: "4px 10px", fontSize: 10,
+                    color: T.red, cursor: "pointer", fontFamily: T.fontSans,
+                    fontWeight: 600,
+                  }}
+                >
+                  Quitar pareja
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowPersonB(true)}
+                style={{
+                  background: T.tealL, border: `2px dashed ${T.teal}44`,
+                  borderRadius: 12, padding: "18px 20px",
+                  cursor: "pointer", fontSize: 13, color: T.teal,
+                  fontFamily: T.fontSans, fontWeight: 600,
+                  textAlign: "center", transition: "all .15s", width: "100%",
+                }}
+              >
+                + Añadir pareja (Persona B)
+                <div style={{ fontSize: 11, color: T.inkFaint, fontWeight: 400, marginTop: 4 }}>
+                  Para comparar declaración individual vs conjunta
+                </div>
+              </button>
+            )}
 
             {/* Hijos */}
             <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 12, padding: 20 }}>
@@ -1042,12 +1247,13 @@ export default function IRPFAlava2025() {
                 onChangeM6={v => dispatch({ type: "SET_HIJOS_M6", value: v })}
                 hijos6a15={hj6a15}
                 onChangej6a15={v => dispatch({ type: "SET_HIJOS_6A15", value: v })}
+                soloMode={!showPersonB}
               />
             </div>
 
             {/* Reset */}
             <button
-              onClick={() => dispatch({ type: "RESET" })}
+              onClick={() => { dispatch({ type: "RESET" }); setShowPersonB(false); }}
               style={{ background: "none", border: `1px solid ${T.border}`, borderRadius: 8, padding: "10px", fontSize: 12, color: T.inkFaint, cursor: "pointer", fontFamily: T.fontSans }}
             >
               ↺ Limpiar todos los datos
@@ -1055,7 +1261,7 @@ export default function IRPFAlava2025() {
 
             {/* Aviso */}
             <div style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "12px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
-              ⚠️ Incluye: rendimientos del trabajo, discapacidad (art. 23.3), viudedad, cuidado de dependientes y deducciones NF 3/2025. No incluye: capital inmobiliario/mobiliario, actividades económicas, deducción por edad (art. 83), ascendientes (art. 81), alquiler ni vivienda. Consulta Rentafácil (Hacienda Foral de Álava) o un asesor fiscal.
+              ⚠️ Incluye: rendimientos del trabajo, discapacidad (art. 23.3), viudedad, cuidado de dependientes, deducciones NF 3/2025, vivienda habitual (art. 87) y alquiler (art. 86). No incluye: capital inmobiliario/mobiliario, actividades económicas, deducción por edad (art. 83), ascendientes (art. 81). Consulta Rentafácil (Hacienda Foral de Álava) o un asesor fiscal.
             </div>
           </div>
 
@@ -1065,10 +1271,12 @@ export default function IRPFAlava2025() {
               /* Estado vacío */
               <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 16, padding: "80px 40px", textAlign: "center" }}>
                 <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.2 }}>⟷</div>
-                <div style={{ fontSize: 17, color: T.inkMid, marginBottom: 8, fontWeight: 600 }}>Introduce los datos de ambas personas</div>
+                <div style={{ fontSize: 17, color: T.inkMid, marginBottom: 8, fontWeight: 600 }}>Introduce los ingresos de Persona A</div>
                 <div style={{ fontSize: 13, color: T.inkFaint, lineHeight: 1.6 }}>
                   Los escenarios se calculan en tiempo real.<br />
-                  Compara individual vs conjunta, con y sin deducción de hijos.
+                  {showPersonB
+                    ? "Compara individual vs conjunta, con y sin deducción de hijos."
+                    : "Añade una pareja para comparar individual vs conjunta."}
                 </div>
               </div>
             ) : (
@@ -1120,25 +1328,30 @@ export default function IRPFAlava2025() {
                       Declaración individual
                     </div>
                     <WaterfallDesglose data={{ ...calc.a_sh, bruto: aB, ret: aR, teRet: aR / aB }} label="Persona A — Individual sin hijos" accent={T.cobalt} />
-                    {hj > 0 && <WaterfallDesglose data={{ ...calc.a_ch, bruto: aB, ret: aR, teRet: aR / aB }} label={`Persona A — Individual con hijos (50% = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />}
-                    <WaterfallDesglose data={{ ...calc.b_sh, bruto: bB, ret: bR, teRet: bR / bB }} label="Persona B — Individual sin hijos" accent={T.teal} />
-                    {hj > 0 && <WaterfallDesglose data={{ ...calc.b_ch, bruto: bB, ret: bR, teRet: bR / bB }} label={`Persona B — Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />}
+                    {hj > 0 && <WaterfallDesglose data={{ ...calc.a_ch, bruto: aB, ret: aR, teRet: aR / aB }} label={`Persona A — Individual con hijos (${calc.solo ? "100%" : "50%"} = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />}
 
-                    {/* Conjuntas */}
-                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.gold, marginBottom: 8, marginTop: 20 }}>
-                      Declaración conjunta
-                    </div>
-                    <WaterfallDesglose
-                      data={{ ...calc.c_sh, bruto: aB + bB, ss: calc.c_sh.ssA + calc.c_sh.ssB, bonif: calc.c_sh.bonA + calc.c_sh.bonB, rnt: calc.c_sh.rntA + calc.c_sh.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_sh.teReal }}
-                      label="Conjunta sin hijos — ambos en una sola declaración"
-                      accent={T.gold}
-                    />
-                    {hj > 0 && (
-                      <WaterfallDesglose
-                        data={{ ...calc.c_ch, bruto: aB + bB, ss: calc.c_ch.ssA + calc.c_ch.ssB, bonif: calc.c_ch.bonA + calc.c_ch.bonB, rnt: calc.c_ch.rntA + calc.c_ch.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_ch.teReal }}
-                        label={`Conjunta con hijos (100% = ${eur(calc.c_ch.dedH)}) — opción óptima si hijos`}
-                        accent={T.gold}
-                      />
+                    {!calc.solo && (
+                      <>
+                        <WaterfallDesglose data={{ ...calc.b_sh, bruto: bB, ret: bR, teRet: bR / bB }} label="Persona B — Individual sin hijos" accent={T.teal} />
+                        {hj > 0 && <WaterfallDesglose data={{ ...calc.b_ch, bruto: bB, ret: bR, teRet: bR / bB }} label={`Persona B — Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />}
+
+                        {/* Conjuntas */}
+                        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.gold, marginBottom: 8, marginTop: 20 }}>
+                          Declaración conjunta
+                        </div>
+                        <WaterfallDesglose
+                          data={{ ...calc.c_sh, bruto: aB + bB, ss: calc.c_sh.ssA + calc.c_sh.ssB, bonif: calc.c_sh.bonA + calc.c_sh.bonB, rnt: calc.c_sh.rntA + calc.c_sh.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_sh.teReal }}
+                          label="Conjunta sin hijos — ambos en una sola declaración"
+                          accent={T.gold}
+                        />
+                        {hj > 0 && (
+                          <WaterfallDesglose
+                            data={{ ...calc.c_ch, bruto: aB + bB, ss: calc.c_ch.ssA + calc.c_ch.ssB, bonif: calc.c_ch.bonA + calc.c_ch.bonB, rnt: calc.c_ch.rntA + calc.c_ch.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_ch.teReal }}
+                            label={`Conjunta con hijos (100% = ${eur(calc.c_ch.dedH)}) — opción óptima si hijos`}
+                            accent={T.gold}
+                          />
+                        )}
+                      </>
                     )}
                   </div>
                 )}
