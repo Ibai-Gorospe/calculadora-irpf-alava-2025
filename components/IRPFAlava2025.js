@@ -18,9 +18,25 @@ const SMI_2025 = 16576;
 const DEDUC_EDAD_65 = 385;       // Art. 83 NF 33/2013 (NF 26/2023): >65 años
 const DEDUC_EDAD_75 = 700;       // Art. 83 NF 33/2013 (NF 26/2023): >75 años
 const DEDUC_ASCENDIENTE = 423.72; // Art. 81 NF 19/2024: por ascendiente conviviente
-const DEDUC_DISCAP_CUOTA = { "33-65": 1025.64, "65+": 1464.54 }; // Art. 82 NF 19/2024
+const DEDUC_DISCAP_CUOTA = { "33-65": 1025.64, "65+": 1464.54, "gradoII": 1756.75, "gradoIII": 2191.03 }; // Art. 82.1 NF 33/2013, redacción NF 19/2024
 
 const DEDUC_HIJOS = [734.80, 909.70, 1532.30, 1811.70, 2366.10];
+
+// Art. 80 NF 3/2025: anualidades por alimentos a hijos por decisión judicial
+const ALIMENTOS_PCT = 0.15;          // 15% de las cantidades abonadas
+const ALIMENTOS_LIMITE_PCT = 0.30;   // límite: 30% de la deducción art. 79 por descendiente
+
+// NF 35/2021 (mecenazgo Álava): deducción por donaciones
+const DONACIONES_PCT = 0.30;           // Art. 20 NF 35/2021: 30% general
+const DONACIONES_PRIORIT_PCT = 0.45;   // Art. 25 NF 35/2021: actividades prioritarias
+const DONACIONES_BASE_MAX_PCT = 0.30;  // Art. 91 NF 33/2013: máx 30% base liquidable
+
+// Inversión en empresas de nueva creación
+const INVERSION_NUEVA_PCT = 0.10;
+const INVERSION_NUEVA_MAX = 6000;
+
+// Validación: límite aportaciones planes pensiones (arts. 70-72 NF 33/2013)
+const PENSION_LIMIT_TOTAL = 13000;  // 5.000 individual + 8.000 empresarial
 
 const ESCALA_GRAL = [
   [0,       17720,    0,        0.23],
@@ -80,11 +96,12 @@ function deducViudedad(bi) {
 }
 
 // Art. 87 NF 33/2013 (mod. NF 3/2025): deducción por adquisición de vivienda habitual
-function deducViviendaCompra(cantidadAnual, perfil = "general") {
+function deducViviendaCompra(cantidadAnual, perfil = "general", primerAnio = false) {
   if (cantidadAnual <= 0) return 0;
   // general: 18%/1.530€ | municipio <4.000 hab: 20%/1.836€ | joven <36 / fam.num: 25%/2.346€
   const pct = perfil === "joven" ? 0.25 : perfil === "municipio" ? 0.20 : 0.18;
-  const max = perfil === "joven" ? 2346 : perfil === "municipio" ? 1836 : 1530;
+  // Art. 87.4ter NF 3/2025: sin límite en el primer año de adquisición para <36
+  const max = (perfil === "joven" && primerAnio) ? Infinity : (perfil === "joven" ? 2346 : perfil === "municipio" ? 1836 : 1530);
   return Math.min(+(cantidadAnual * pct).toFixed(2), max);
 }
 
@@ -139,6 +156,43 @@ function calcCapInm(ingresos, gastos, esVivienda) {
   return esVivienda ? +(rci * 0.40).toFixed(2) : +rci.toFixed(2);
 }
 
+// Art. 19.2 NF 33/2013: reducción 40% para rendimientos irregulares (generados en >2 años)
+function reduccionIrregular(importe, aplicaReduccion) {
+  if (!aplicaReduccion || importe <= 0) return importe;
+  return +(importe * 0.60).toFixed(2); // se tributa el 60% (reducción del 40%)
+}
+
+// Art. 80 NF 3/2025: deducción por anualidades por alimentos a hijos (decisión judicial)
+function deducAlimentos(alimentosPagados, numHijosAlimentos) {
+  if (alimentosPagados <= 0 || numHijosAlimentos <= 0) return 0;
+  // Límite por hijo: 30% de la deducción art. 79 para ese descendiente
+  const limiteTotal = DEDUC_HIJOS.slice(0, Math.min(numHijosAlimentos, DEDUC_HIJOS.length))
+    .reduce((sum, d) => sum + d * ALIMENTOS_LIMITE_PCT, 0);
+  return Math.min(+(alimentosPagados * ALIMENTOS_PCT).toFixed(2), +limiteTotal.toFixed(2));
+}
+
+// Art. 82 NF 33/2013: deducción por discapacidad/dependencia de familiares convivientes
+function deducDiscapFamiliar(numFamiliares, grado) {
+  if (numFamiliares <= 0 || !grado || grado === "ninguna") return 0;
+  return +((DEDUC_DISCAP_CUOTA[grado] || 0) * numFamiliares).toFixed(2);
+}
+
+// NF 35/2021: deducción por donaciones a entidades de mecenazgo
+function deducDonaciones(donaciones, baseLiquidable, esPrioritaria = false) {
+  if (donaciones <= 0) return 0;
+  // Art. 91 NF 33/2013: base máxima = 30% de la base liquidable
+  const baseMaxima = baseLiquidable * DONACIONES_BASE_MAX_PCT;
+  const baseDeduccion = Math.min(donaciones, baseMaxima);
+  const pct = esPrioritaria ? DONACIONES_PRIORIT_PCT : DONACIONES_PCT;
+  return +(baseDeduccion * pct).toFixed(2);
+}
+
+// Deducción por inversión en empresas de nueva creación
+function deducInversion(inversion) {
+  if (inversion <= 0) return 0;
+  return Math.min(+(inversion * INVERSION_NUEVA_PCT).toFixed(2), INVERSION_NUEVA_MAX);
+}
+
 // Cálculo individual de una persona
 function calcPersona({
   bruto, ret, redExtra, hijosShare,
@@ -149,9 +203,27 @@ function calcPersona({
   edad = "menor65", despoblacion = false, ascendientes = 0,
   ingresosCap_inm = 0, gastosCap_inm = 0, esViviendaInq = false,
   capMob = 0, retCapMob = 0, gananciasPatr = 0,
+  // Otros rendimientos del trabajo
+  retribEspecie = 0, stockOptions = 0, stockOptionsReduccion = false,
+  rescatePension = 0, rescatePensionReduccion = false,
+  // Anualidades por alimentos
+  anualidadesAlimentos = 0, numHijosAlimentos = 0,
+  // Discapacidad familiares
+  discapFamiliar = 0, discapFamiliarGrado = "ninguna",
+  // Art. 81 bis
+  asistPersonal = 0,
+  // Art. 87.4ter
+  viviendaPrimerAnio = false,
+  // Donaciones e inversión
+  donaciones = 0, donacionesPrioritarias = false, inversionNuevaCreacion = 0,
 }) {
   const ss       = calcSS(bruto, tipoContrato);
-  const dif      = Math.max(0, bruto - ss);
+  // Otros rdtos. trabajo (SS solo sobre salario bruto, no sobre especie/opciones/rescate)
+  const stockOptsNeto = reduccionIrregular(stockOptions, stockOptionsReduccion);
+  const rescateNeto = reduccionIrregular(rescatePension, rescatePensionReduccion);
+  const otrosRdtosTrabajo = retribEspecie + stockOptsNeto + rescateNeto;
+  const brutoFiscal = bruto + otrosRdtosTrabajo;
+  const dif      = Math.max(0, brutoFiscal - ss);
   // Capital inmobiliario (base general) — se calcula antes de bonif para Art. 23.2
   const rciNeto  = calcCapInm(ingresosCap_inm, gastosCap_inm, esViviendaInq);
   // Art. 23.2: rentas no laborales = rentasNoLab manual + capital inmobiliario + capital mobiliario + ganancias
@@ -179,15 +251,21 @@ function calcPersona({
   const dedDiscap = deducDiscapCuota(discapacidad);
   const dedCuid  = cuidado === "profesional" ? 500 : cuidado === "empleado_hogar" ? 250 : 0;
   const dedOtras = +otrasDeducNF3;
-  const dedViv   = deducViviendaCompra(viviendaCompra, viviendaPerfil);
+  const dedViv   = deducViviendaCompra(viviendaCompra, viviendaPerfil, viviendaPrimerAnio);
   const dedAlq   = deducAlquiler(alquilerAnual, alquilerPerfil);
   const dedAsc   = +(ascendientes * DEDUC_ASCENDIENTE).toFixed(2);
-  const cl       = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc);
+  // Nuevas deducciones
+  const dedAlim      = deducAlimentos(anualidadesAlimentos, numHijosAlimentos);
+  const dedDiscapFam = deducDiscapFamiliar(discapFamiliar, discapFamiliarGrado);
+  const dedAsistPers = Math.min(Math.max(0, +asistPersonal) * 0.30, 900); // Art. 81 bis: 30% pagado, máx 900 €
+  const dedDon       = deducDonaciones(donaciones, bl, donacionesPrioritarias);
+  const dedInv       = deducInversion(inversionNuevaCreacion);
+  const cl       = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc - dedAlim - dedDiscapFam - dedAsistPers - dedDon - dedInv);
   const resultado = +(ret + retCapMob - cl).toFixed(2);
-  const ingresosTotal = bruto + rciNeto + Math.max(0, capMob) + Math.max(0, gananciasPatr);
+  const ingresosTotal = brutoFiscal + rciNeto + Math.max(0, capMob) + Math.max(0, gananciasPatr);
   const teReal   = ingresosTotal > 0 ? cl / ingresosTotal : 0;
-  const teRet    = bruto > 0 ? (ret + retCapMob) / ingresosTotal : 0;
-  return { bruto, ret, ss, dif, bonif, rnt, rciNeto, bi, bl, ba, ci_gral, ci_ahorro, ci, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, cl, resultado, teReal, teRet, redExtra, retCapMob };
+  const teRet    = brutoFiscal > 0 ? (ret + retCapMob) / ingresosTotal : 0;
+  return { bruto: brutoFiscal, brutoSalario: bruto, ret, ss, dif, bonif, rnt, rciNeto, bi, bl, ba, ci_gral, ci_ahorro, ci, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, dedAlim, dedDiscapFam, dedAsistPers, dedDon, dedInv, cl, resultado, teReal, teRet, redExtra, retCapMob, otrosRdtosTrabajo };
 }
 
 // Cálculo declaración conjunta
@@ -207,11 +285,34 @@ function calcConjunta({
   capMobA = 0, retCapMobA = 0, gananciasPatrA = 0,
   ingresosCap_inmB = 0, gastosCap_inmB = 0, esViviendaInqB = false,
   capMobB = 0, retCapMobB = 0, gananciasPatrB = 0,
+  // Otros rendimientos del trabajo
+  retribEspecieA = 0, stockOptionsA = 0, stockOptionsReduccionA = false,
+  rescatePensionA = 0, rescatePensionReduccionA = false,
+  retribEspecieB = 0, stockOptionsB = 0, stockOptionsReduccionB = false,
+  rescatePensionB = 0, rescatePensionReduccionB = false,
+  // Anualidades por alimentos
+  anualidadesAlimentosA = 0, numHijosAlimentosA = 0,
+  anualidadesAlimentosB = 0, numHijosAlimentosB = 0,
+  // Discapacidad familiares
+  discapFamiliarA = 0, discapFamiliarGradoA = "ninguna",
+  discapFamiliarB = 0, discapFamiliarGradoB = "ninguna",
+  // Art. 81 bis
+  asistPersonalA = 0, asistPersonalB = 0,
+  // Art. 87.4ter
+  viviendaPrimerAnioA = false, viviendaPrimerAnioB = false,
+  // Donaciones e inversión
+  donacionesA = 0, donacionesPrioritariasA = false, inversionNuevaCreacionA = 0,
+  donacionesB = 0, donacionesPrioritariasB = false, inversionNuevaCreacionB = 0,
 }) {
   const ssA   = calcSS(brutoA, tipoContratoA);
   const ssB   = calcSS(brutoB, tipoContratoB);
-  const difA  = Math.max(0, brutoA - ssA);
-  const difB  = Math.max(0, brutoB - ssB);
+  // Otros rdtos. trabajo
+  const otrosRdtosA = retribEspecieA + reduccionIrregular(stockOptionsA, stockOptionsReduccionA) + reduccionIrregular(rescatePensionA, rescatePensionReduccionA);
+  const otrosRdtosB = retribEspecieB + reduccionIrregular(stockOptionsB, stockOptionsReduccionB) + reduccionIrregular(rescatePensionB, rescatePensionReduccionB);
+  const brutoFiscalA = brutoA + otrosRdtosA;
+  const brutoFiscalB = brutoB + otrosRdtosB;
+  const difA  = Math.max(0, brutoFiscalA - ssA);
+  const difB  = Math.max(0, brutoFiscalB - ssB);
   // Capital inmobiliario
   const rciNetoA = calcCapInm(ingresosCap_inmA, gastosCap_inmA, esViviendaInqA);
   const rciNetoB = calcCapInm(ingresosCap_inmB, gastosCap_inmB, esViviendaInqB);
@@ -255,19 +356,28 @@ function calcConjunta({
   const dedCuid  = (cuidadoA === "profesional" ? 500 : cuidadoA === "empleado_hogar" ? 250 : 0)
                  + (cuidadoB === "profesional" ? 500 : cuidadoB === "empleado_hogar" ? 250 : 0);
   const dedOtras = +otrasDeducNF3A + +otrasDeducNF3B;
-  const dedViv   = deducViviendaCompra(viviendaCompraA, viviendaPerfilA) + deducViviendaCompra(viviendaCompraB, viviendaPerfilB);
+  const dedViv   = deducViviendaCompra(viviendaCompraA, viviendaPerfilA, viviendaPrimerAnioA) + deducViviendaCompra(viviendaCompraB, viviendaPerfilB, viviendaPrimerAnioB);
   const dedAlq   = deducAlquiler(alquilerAnualA, alquilerPerfilA) + deducAlquiler(alquilerAnualB, alquilerPerfilB);
   const dedAsc   = +((ascendientesA + ascendientesB) * DEDUC_ASCENDIENTE).toFixed(2);
-  const cl    = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc);
+  // Nuevas deducciones
+  const dedAlim      = deducAlimentos(anualidadesAlimentosA, numHijosAlimentosA) + deducAlimentos(anualidadesAlimentosB, numHijosAlimentosB);
+  const dedDiscapFam = deducDiscapFamiliar(discapFamiliarA, discapFamiliarGradoA) + deducDiscapFamiliar(discapFamiliarB, discapFamiliarGradoB);
+  const dedAsistPers = Math.min(Math.max(0, +asistPersonalA) * 0.30, 900) + Math.min(Math.max(0, +asistPersonalB) * 0.30, 900);
+  const dedDon       = deducDonaciones(donacionesA, bl, donacionesPrioritariasA) + deducDonaciones(donacionesB, bl, donacionesPrioritariasB);
+  const dedInv       = deducInversion(inversionNuevaCreacionA) + deducInversion(inversionNuevaCreacionB);
+  const cl    = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc - dedAlim - dedDiscapFam - dedAsistPers - dedDon - dedInv);
   const retTotal = retA + retCapMobA + retB + retCapMobB;
   const resultado = +(retTotal - cl).toFixed(2);
-  const ingresosTotal = brutoA + brutoB + rciNetoA + rciNetoB + Math.max(0, capMobA + capMobB) + Math.max(0, gananciasPatrA + gananciasPatrB);
+  const ingresosTotal = brutoFiscalA + brutoFiscalB + rciNetoA + rciNetoB + Math.max(0, capMobA + capMobB) + Math.max(0, gananciasPatrA + gananciasPatrB);
   const teReal = ingresosTotal > 0 ? cl / ingresosTotal : 0;
+  const otrosRdtosTotal = otrosRdtosA + otrosRdtosB;
   return {
-    brutoA, brutoB, ssA, ssB, difA, difB, bonA, bonB, rntA, rntB,
+    brutoA: brutoFiscalA, brutoB: brutoFiscalB, brutoSalarioA: brutoA, brutoSalarioB: brutoB,
+    ssA, ssB, difA, difB, bonA, bonB, rntA, rntB,
     rciNetoA, rciNetoB, biSum, bl, ba, ci_gral, ci_ahorro, ci, minTotal, pm,
     dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc,
-    cl, resultado, retTotal, teReal, redExtraA, redExtraB,
+    dedAlim, dedDiscapFam, dedAsistPers, dedDon, dedInv,
+    cl, resultado, retTotal, teReal, redExtraA, redExtraB, otrosRdtosTotal,
   };
 }
 
@@ -286,6 +396,27 @@ const personInit = {
   ingresosCap_inm: "", gastosCap_inm: "", esViviendaInq: false,
   capMob: "", retCapMob: "",
   gananciasPatr: "",
+  // Otros rendimientos del trabajo
+  retribEspecie: "",               // Art. 16: retribución en especie (valoración fiscal neta)
+  stockOptions: "",                // Art. 19: ganancia por stock options
+  stockOptionsReduccion: false,    // Art. 19.2: reducción 40% irregular >2 años
+  rescatePension: "",              // Art. 18: rescate planes pensiones/EPSV
+  rescatePensionReduccion: false,  // Reducción 40% capital pre-2014
+  // Anualidades por alimentos
+  anualidadesAlimentos: "",        // Art. 80: importe anual por decisión judicial
+  numHijosAlimentos: 1,            // Nº hijos que reciben alimentos (para límite)
+  // Discapacidad familiares convivientes
+  discapFamiliar: 0,               // Nº familiares convivientes con discapacidad
+  discapFamiliarGrado: "ninguna",  // Grado del/los familiares
+  // Art. 81 bis: asistentes personales
+  asistPersonal: "",               // Importe pagado asistente personal (DF 39/2014)
+  // Art. 87.4ter: primer año adquisición <36
+  viviendaPrimerAnio: false,
+  // Donaciones NF 35/2021
+  donaciones: "",                  // Importe donaciones entidades mecenazgo
+  donacionesPrioritarias: false,   // ¿Actividades prioritarias? (45% vs 30%)
+  // Inversión nueva creación
+  inversionNuevaCreacion: "",
 };
 
 const initialState = {
@@ -525,9 +656,13 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
   const hasExtras = data.rentasNoLab || data.discapacidad !== "ninguna" || data.viudedad
     || data.cuidado !== "ninguno" || data.otrasDeducNF3
     || data.viviendaCompra || data.alquilerAnual
-    || data.edad !== "menor65" || data.despoblacion || data.ascendientes > 0;
+    || data.edad !== "menor65" || data.despoblacion || data.ascendientes > 0
+    || data.discapFamiliar > 0 || n(data.asistPersonal) > 0
+    || n(data.anualidadesAlimentos) > 0 || n(data.donaciones) > 0
+    || n(data.inversionNuevaCreacion) > 0;
 
   const hasOtrasRentas = data.ingresosCap_inm || data.capMob || data.gananciasPatr || data.retCapMob;
+  const hasOtrosRdtos = n(data.retribEspecie) > 0 || n(data.stockOptions) > 0 || n(data.rescatePension) > 0;
 
   return (
     <div style={{
@@ -567,6 +702,12 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
         tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsión social. Límite general 2025: 5.000 € individuales + 8.000 € empresariales (art. 70-72 NF 33/2013)."
         accent={accent} accentLight={accentLight}
       />
+
+      {n(data.redExtra) > PENSION_LIMIT_TOTAL && (
+        <div style={{ fontSize: 10, color: T.red, padding: "4px 0 8px", lineHeight: 1.5 }}>
+          Las reducciones de base superan el límite de {eur(PENSION_LIMIT_TOTAL)} (5.000 € individual + 8.000 € empresarial).
+        </div>
+      )}
 
       {/* Tipo de contrato — siempre visible, afecta a cotización SS */}
       <SmallSelector
@@ -609,6 +750,11 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
           {data.cuidado !== "ninguno" && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Cuidado</span>}
           {n(data.viviendaCompra) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Hipoteca</span>}
           {n(data.alquilerAnual) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Alquiler</span>}
+          {data.discapFamiliar > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Disc. fam.</span>}
+          {n(data.asistPersonal) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Asist.</span>}
+          {n(data.anualidadesAlimentos) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Alimentos</span>}
+          {n(data.donaciones) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Donaciones</span>}
+          {n(data.inversionNuevaCreacion) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Inversión</span>}
         </div>
       )}
 
@@ -638,17 +784,43 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             ]}
             tooltipText="Deducción por edad: 385 € (>65) o 700 € (>75), BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción viudedad: se aplica la más beneficiosa. Art. 83 NF 33/2013."
           />
-          <SmallSelector
-            lbl="Discapacidad reconocida (arts. 23.3 + 82)"
-            value={data.discapacidad}
-            onChange={v => set("discapacidad", v)}
-            options={[
-              { value: "ninguna", label: "Sin discapacidad" },
-              { value: "33-65",   label: "≥33% y <65%" },
-              { value: "65+",     label: "≥65% / mov. reducida" },
-            ]}
-            tooltipText="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% o +250%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%) o 1.464,54 € (≥65%). Grados superiores (Grado II/III) consultar asesor."
-          />
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.inkMid, marginBottom: 5, display: "flex", alignItems: "center", gap: 4 }}>
+              Discapacidad / dependencia (arts. 23.3 + 82)
+              <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III)."><span /></Tooltip>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4, marginBottom: 4 }}>
+              {[
+                { value: "ninguna", label: "Sin discapacidad" },
+                { value: "33-65",   label: "≥33% <65%" },
+                { value: "65+",     label: "≥65% / Gr.I" },
+              ].map(opt => (
+                <button key={opt.value} onClick={() => set("discapacidad", opt.value)} style={{
+                  padding: "10px 6px", fontSize: 11, fontWeight: 600,
+                  background: data.discapacidad === opt.value ? accent : T.surface,
+                  color: data.discapacidad === opt.value ? "#fff" : T.inkMid,
+                  border: `1.5px solid ${data.discapacidad === opt.value ? accent : T.border}`,
+                  borderRadius: 8, cursor: "pointer", fontFamily: T.fontSans,
+                  transition: "all .15s", lineHeight: 1.3, minHeight: 44,
+                }}>{opt.label}</button>
+              ))}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+              {[
+                { value: "gradoII",  label: "Grado II severa (1.756,75 €)" },
+                { value: "gradoIII", label: "Grado III gran dep. (2.191,03 €)" },
+              ].map(opt => (
+                <button key={opt.value} onClick={() => set("discapacidad", opt.value)} style={{
+                  padding: "10px 6px", fontSize: 11, fontWeight: 600,
+                  background: data.discapacidad === opt.value ? accent : T.surface,
+                  color: data.discapacidad === opt.value ? "#fff" : T.inkMid,
+                  border: `1.5px solid ${data.discapacidad === opt.value ? accent : T.border}`,
+                  borderRadius: 8, cursor: "pointer", fontFamily: T.fontSans,
+                  transition: "all .15s", lineHeight: 1.3, minHeight: 44,
+                }}>{opt.label}</button>
+              ))}
+            </div>
+          </div>
           <SmallSelector
             lbl="Viudedad (art. 82 bis NF 3/2025)"
             value={data.viudedad ? "si" : "no"}
@@ -697,6 +869,55 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 años o familiares dependientes/discapacitados. 250 € (general) o 500 € si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
           />
 
+          {/* ── Discapacidad familiares convivientes ── */}
+          <SmallSelector
+            lbl="Familiares convivientes con discapacidad (art. 82)"
+            value={String(data.discapFamiliar)}
+            onChange={v => set("discapFamiliar", parseInt(v) || 0)}
+            options={[
+              { value: "0", label: "Ninguno" },
+              { value: "1", label: "1 familiar" },
+              { value: "2", label: "2 familiares" },
+              { value: "3", label: "3 familiares" },
+            ]}
+            tooltipText="Deducción por cada familiar conviviente con discapacidad/dependencia reconocida. Mismos importes que para el contribuyente según grado. Art. 82 NF 19/2024."
+          />
+          {data.discapFamiliar > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.inkMid, marginBottom: 5, display: "flex", alignItems: "center", gap: 4 }}>
+                Grado discapacidad del/los familiar/es
+                <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'."><span /></Tooltip>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 4 }}>
+                {[
+                  { value: "33-65",   label: "≥33% <65% (1.025,64 €)" },
+                  { value: "65+",     label: "≥65% / Gr.I (1.464,54 €)" },
+                  { value: "gradoII", label: "Gr. II (1.756,75 €)" },
+                  { value: "gradoIII",label: "Gr. III (2.191,03 €)" },
+                ].map(opt => (
+                  <button key={opt.value} onClick={() => set("discapFamiliarGrado", opt.value)} style={{
+                    padding: "10px 6px", fontSize: 11, fontWeight: 600,
+                    background: data.discapFamiliarGrado === opt.value ? accent : T.surface,
+                    color: data.discapFamiliarGrado === opt.value ? "#fff" : T.inkMid,
+                    border: `1.5px solid ${data.discapFamiliarGrado === opt.value ? accent : T.border}`,
+                    borderRadius: 8, cursor: "pointer", fontFamily: T.fontSans,
+                    transition: "all .15s", lineHeight: 1.3, minHeight: 44,
+                  }}>{opt.label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Asistente personal ── */}
+          <NumInput
+            label="Gasto asistente personal (art. 81 bis)"
+            value={data.asistPersonal}
+            onChange={v => set("asistPersonal", v)}
+            hint="Para titulares de la prestación de asistencia personal (DF 39/2014)"
+            tooltipText="Deducción del 30% de las cantidades pagadas por contratar asistentes personales, con un máximo de 900 € anuales. Solo para titulares de la prestación de asistencia personal del sistema de dependencia (DF 39/2014). Art. 81 bis NF 33/2013."
+            accent={accent} accentLight={accentLight}
+          />
+
           {/* ── Sección: Rentas y reducciones ────────── */}
           <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
@@ -718,6 +939,28 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               tooltipText="Art. 83 bis: hasta 200 €/año para hombres que reducen su jornada para cuidar hijos <4 años. Art. 83 ter: hasta 1.500 €/año (2.250 € si parto/adopción múltiple) para mujeres que se reincorporan al trabajo."
               accent={accent} accentLight={accentLight}
             />
+            <NumInput
+              label="Anualidades por alimentos a hijos (art. 80)"
+              value={data.anualidadesAlimentos}
+              onChange={v => set("anualidadesAlimentos", v)}
+              hint="Importe anual por decisión judicial"
+              tooltipText="Deducción del 15% de las anualidades por alimentos satisfechas a los hijos por decisión judicial. Límite por hijo: 30% de la deducción del art. 79 correspondiente a ese hijo. Art. 80 NF 3/2025."
+              accent={accent} accentLight={accentLight}
+            />
+            {n(data.anualidadesAlimentos) > 0 && (
+              <SmallSelector
+                lbl="Nº hijos que reciben alimentos"
+                value={String(data.numHijosAlimentos)}
+                onChange={v => set("numHijosAlimentos", parseInt(v) || 1)}
+                options={[
+                  { value: "1", label: "1 hijo" },
+                  { value: "2", label: "2 hijos" },
+                  { value: "3", label: "3 hijos" },
+                  { value: "4", label: "4 hijos" },
+                ]}
+                tooltipText="Número de hijos a los que se satisfacen anualidades por alimentos. Se necesita para calcular el límite del 30% de la deducción del art. 79 por cada hijo."
+              />
+            )}
           </div>
 
           {/* ── Sección: Vivienda habitual ────────── */}
@@ -744,6 +987,22 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               ]}
               tooltipText="General: 18%/1.530 €. Municipio <4.000 hab.: 20%/1.836 €. Menores de 36 años y familias numerosas: 25%/2.346 €. Art. 87 NF 33/2013 (mod. NF 3/2025)."
             />
+            {data.viviendaPerfil === "joven" && n(data.viviendaCompra) > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={data.viviendaPrimerAnio}
+                    onChange={e => set("viviendaPrimerAnio", e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: "pointer" }}
+                  />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>Primer año de adquisición (art. 87.4ter)</div>
+                    <div style={{ fontSize: 10, color: T.inkFaint }}>Sin límite máximo en la deducción para menores de 36 años</div>
+                  </div>
+                </label>
+              </div>
+            )}
             <NumInput
               label="Alquiler vivienda habitual (art. 86)"
               value={data.alquilerAnual}
@@ -768,12 +1027,150 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               </div>
             )}
           </div>
+
+          {/* ── Sección: Incentivos fiscales ────────── */}
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+              Incentivos fiscales
+            </div>
+            <NumInput
+              label="Donaciones a entidades cualificadas (NF 35/2021)"
+              value={data.donaciones}
+              onChange={v => set("donaciones", v)}
+              hint="Fundaciones, asociaciones de utilidad pública, etc."
+              tooltipText="Deducción del 30% (general) o 45% (actividades prioritarias de mecenazgo) de las donaciones a entidades beneficiarias de mecenazgo. Base máxima: 30% de la base liquidable (art. 91 NF 33/2013). NF 35/2021 de régimen fiscal del mecenazgo."
+              accent={accent} accentLight={accentLight}
+            />
+            {n(data.donaciones) > 0 && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    checked={data.donacionesPrioritarias}
+                    onChange={e => set("donacionesPrioritarias", e.target.checked)}
+                    style={{ width: 16, height: 16, cursor: "pointer" }}
+                  />
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>Actividades prioritarias de mecenazgo (45%)</div>
+                    <div style={{ fontSize: 10, color: T.inkFaint }}>En lugar del 30% general · Art. 25 NF 35/2021</div>
+                  </div>
+                </label>
+              </div>
+            )}
+            <NumInput
+              label="Inversión en empresas de nueva creación"
+              value={data.inversionNuevaCreacion}
+              onChange={v => set("inversionNuevaCreacion", v)}
+              hint="Participaciones en empresas de nueva o reciente creación"
+              tooltipText="Deducción del 10% de las cantidades invertidas en empresas de nueva o reciente creación, con un máximo de 6.000 € de deducción."
+              accent={accent} accentLight={accentLight}
+            />
+          </div>
         </div>
       )}
+
+      {/* ── Otros rendimientos del trabajo — collapsible independiente ── */}
+      <OtrosRdtosTrabajoSection data={data} set={set} accent={accent} accentLight={accentLight} hasOtrosRdtos={hasOtrosRdtos} />
 
       {/* ── Otras rentas (capital + ganancias) — collapsible independiente ── */}
       <OtrasRentasSection data={data} set={set} accent={accent} accentLight={accentLight} hasOtrasRentas={hasOtrasRentas} />
     </div>
+  );
+}
+
+function OtrosRdtosTrabajoSection({ data, set, accent, accentLight, hasOtrosRdtos }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setExpanded(e => !e)}
+        style={{
+          width: "100%", marginTop: 8, padding: "10px 14px",
+          background: hasOtrosRdtos ? accentLight : T.surfaceAlt,
+          border: `1px solid ${hasOtrosRdtos ? accent + "44" : T.borderSoft}`,
+          borderRadius: 8, cursor: "pointer", fontSize: 12,
+          color: hasOtrosRdtos ? accent : T.inkMid,
+          fontFamily: T.fontSans, fontWeight: hasOtrosRdtos ? 700 : 400,
+          textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center",
+          transition: "all .15s",
+        }}
+      >
+        <span>Otros rendimientos del trabajo{hasOtrosRdtos ? " \u2714" : ""}</span>
+        <span style={{ fontSize: 10, opacity: 0.6 }}>{expanded ? "\u25B4" : "\u25BE"}</span>
+      </button>
+
+      {!expanded && hasOtrosRdtos && (
+        <div style={{ marginTop: 4, display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {n(data.retribEspecie) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Especie</span>}
+          {n(data.stockOptions) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Stock Opts.</span>}
+          {n(data.rescatePension) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Rescate</span>}
+        </div>
+      )}
+
+      {expanded && (
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+            Retribuciones en especie, stock options y rescates
+          </div>
+          <NumInput
+            label="Retribución en especie (art. 16)"
+            value={data.retribEspecie}
+            onChange={v => set("retribEspecie", v)}
+            hint="Valoración fiscal neta (uso vehículo, seguro médico, etc.)"
+            tooltipText="Retribuciones no dinerarias del trabajo: uso de vehículo de empresa, seguro médico, vivienda, préstamos a tipo reducido, etc. Introduce la valoración fiscal neta según art. 16 NF 33/2013."
+            accent={accent} accentLight={accentLight}
+          />
+          <NumInput
+            label="Ganancias por stock options (art. 19)"
+            value={data.stockOptions}
+            onChange={v => set("stockOptions", v)}
+            hint="Diferencia entre valor de mercado y precio de ejercicio"
+            tooltipText="Ganancia obtenida al ejercitar opciones sobre acciones concedidas por la empresa. Diferencia entre el valor de mercado de las acciones en el momento de ejercicio y el precio pagado. Art. 19 NF 33/2013."
+            accent={accent} accentLight={accentLight}
+          />
+          {n(data.stockOptions) > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={data.stockOptionsReduccion}
+                  onChange={e => set("stockOptionsReduccion", e.target.checked)}
+                  style={{ width: 16, height: 16, cursor: "pointer" }}
+                />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>Reducción 40% por renta irregular (art. 19.2)</div>
+                  <div style={{ fontSize: 10, color: T.inkFaint }}>Periodo de generación superior a 2 años</div>
+                </div>
+              </label>
+            </div>
+          )}
+          <NumInput
+            label="Rescate planes pensiones / EPSV (art. 18)"
+            value={data.rescatePension}
+            onChange={v => set("rescatePension", v)}
+            hint="Importe bruto rescatado en forma de capital"
+            tooltipText="Prestaciones recibidas de planes de pensiones, EPSV, mutualidades, planes de previsión asegurados, etc. Introduce el importe bruto recibido en 2025. Art. 18 NF 33/2013."
+            accent={accent} accentLight={accentLight}
+          />
+          {n(data.rescatePension) > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={data.rescatePensionReduccion}
+                  onChange={e => set("rescatePensionReduccion", e.target.checked)}
+                  style={{ width: 16, height: 16, cursor: "pointer" }}
+                />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: T.ink }}>Reducción 40% aportaciones pre-2014</div>
+                  <div style={{ fontSize: 10, color: T.inkFaint }}>Para la parte correspondiente a aportaciones anteriores a 01/01/2014</div>
+                </div>
+              </label>
+            </div>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -959,7 +1356,10 @@ function WaterfallDesglose({ data, label, accent }) {
       {/* Desglose */}
       {open && (
         <div style={{ padding: "16px 18px", borderTop: `1px solid ${T.borderSoft}`, background: T.surface }}>
-          <WaterfallRow label="Retribución bruta" value={data.bruto ?? data.brutoA + data.brutoB} type="start" />
+          <WaterfallRow label="Retribución bruta salarial" value={data.brutoSalario ?? data.brutoSalarioA + data.brutoSalarioB} type="start" />
+          {(data.otrosRdtosTrabajo ?? data.otrosRdtosTotal ?? 0) > 0 && (
+            <WaterfallRow label="Otros rdtos. trabajo (especie + stock + rescate)" value={data.otrosRdtosTrabajo ?? data.otrosRdtosTotal} type="plus" note="Arts. 16, 18, 19 NF 33/2013 · Reducción 40% por irregularidad si aplica" />
+          )}
           <WaterfallRow label="Cotizaciones Seg. Social" value={data.ss ?? data.ssA + data.ssB} type="minus" note="Art. 22 NF 33/2013 · Orden PJC/178/2025 · tope base 58.914 €/año" />
           <WaterfallRow label="Bonificación rendimiento trabajo (art. 23)" value={data.bonif ?? data.bonA + data.bonB} type="minus" note={
             (data.dif ?? data.difA) <= 14800 ? "Tramo máximo (≤ 14.800 €): 8.000 €" :
@@ -1017,6 +1417,21 @@ function WaterfallDesglose({ data, label, accent }) {
           )}
           {(data.dedAlq ?? 0) > 0 && (
             <WaterfallRow label="Deducción alquiler vivienda (art. 86)" value={data.dedAlq} type="minus" />
+          )}
+          {(data.dedAlim ?? 0) > 0 && (
+            <WaterfallRow label="Deducción alimentos hijos (art. 80 NF 3/2025)" value={data.dedAlim} type="minus" note="15% de anualidades, máx. 30% deducción art. 79 por hijo" />
+          )}
+          {(data.dedDiscapFam ?? 0) > 0 && (
+            <WaterfallRow label="Deducción discapacidad familiares (art. 82)" value={data.dedDiscapFam} type="minus" />
+          )}
+          {(data.dedAsistPers ?? 0) > 0 && (
+            <WaterfallRow label="Deducción asistente personal (art. 81 bis)" value={data.dedAsistPers} type="minus" note="30% cantidades pagadas, máx. 900 €" />
+          )}
+          {(data.dedDon ?? 0) > 0 && (
+            <WaterfallRow label="Deducción donaciones (NF 35/2021)" value={data.dedDon} type="minus" note={data.donacionesPrioritarias ? "45% actividades prioritarias" : "30% general"} />
+          )}
+          {(data.dedInv ?? 0) > 0 && (
+            <WaterfallRow label="Deducción inversión nueva creación" value={data.dedInv} type="minus" note="10%, máximo 6.000 €" />
           )}
           <WaterfallRow label="CUOTA LÍQUIDA (IRPF a pagar)" value={data.cl} type="total" />
           <div style={{ height: 12 }} />
@@ -1132,7 +1547,8 @@ function TablaComparativa({ scenarios }) {
   const best = sorted[0].resultado;
 
   const rows = [
-    { label: "Bruto total",          key: "brutoTotal",   fmt: eur },
+    { label: "Bruto salarial",        key: "brutoTotal",   fmt: eur },
+    { label: "+ Otros rdtos. trabajo", key: "otrosRdtosTotal", fmt: v => v > 0 ? "+" + eur(v) : "—", color: T.teal },
     { label: "− Cotiz. SS",          key: "ssTotal",      fmt: v => "−" + eur(v) },
     { label: "− Bonif. art. 23",     key: "bonifTotal",   fmt: v => "−" + eur(v), color: T.teal },
     { label: "Rendimiento neto",     key: "rntTotal",     fmt: eur, bold: true },
@@ -1154,6 +1570,11 @@ function TablaComparativa({ scenarios }) {
     { label: "− Otras deducc. NF 3/2025", key: "dedOtras",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. vivienda (art. 87)",  key: "dedViv",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. alquiler (art. 86)",  key: "dedAlq",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. alimentos (art. 80)",    key: "dedAlim",     fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. discap. fam. (art. 82)", key: "dedDiscapFam", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. asistente (art. 81 bis)", key: "dedAsistPers", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. donaciones (NF 35/2021)", key: "dedDon",    fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. inversión nueva creación", key: "dedInv",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "CUOTA LÍQUIDA",             key: "cl",       fmt: eur, bold: true, highlight: true },
     { label: "Retenciones totales",  key: "retTotal",     fmt: eur },
     { label: "RESULTADO",            key: "resultado",    fmt: signedEur, bold: true, resultRow: true },
@@ -1343,6 +1764,21 @@ export default function IRPFAlava2025() {
   const aCapMob  = n(state.personA.capMob);
   const aRetCapMob = n(state.personA.retCapMob);
   const aGanPatr = n(state.personA.gananciasPatr);
+  // Otros rdtos. trabajo A
+  const aRetribEsp = n(state.personA.retribEspecie);
+  const aStockOpts = n(state.personA.stockOptions);
+  const aStockOptsRed = state.personA.stockOptionsReduccion;
+  const aRescPen = n(state.personA.rescatePension);
+  const aRescPenRed = state.personA.rescatePensionReduccion;
+  const aAlimentos = n(state.personA.anualidadesAlimentos);
+  const aNumHijosAlim = state.personA.numHijosAlimentos;
+  const aDiscFam = state.personA.discapFamiliar;
+  const aDiscFamGrado = state.personA.discapFamiliarGrado;
+  const aAsistPers = n(state.personA.asistPersonal);
+  const aVivPrim = state.personA.viviendaPrimerAnio;
+  const aDonac = n(state.personA.donaciones);
+  const aDonacPrior = state.personA.donacionesPrioritarias;
+  const aInvNueva = n(state.personA.inversionNuevaCreacion);
 
   const bB    = n(state.personB.bruto);
   const bR    = n(state.personB.ret);
@@ -1367,6 +1803,21 @@ export default function IRPFAlava2025() {
   const bCapMob  = n(state.personB.capMob);
   const bRetCapMob = n(state.personB.retCapMob);
   const bGanPatr = n(state.personB.gananciasPatr);
+  // Otros rdtos. trabajo B
+  const bRetribEsp = n(state.personB.retribEspecie);
+  const bStockOpts = n(state.personB.stockOptions);
+  const bStockOptsRed = state.personB.stockOptionsReduccion;
+  const bRescPen = n(state.personB.rescatePension);
+  const bRescPenRed = state.personB.rescatePensionReduccion;
+  const bAlimentos = n(state.personB.anualidadesAlimentos);
+  const bNumHijosAlim = state.personB.numHijosAlimentos;
+  const bDiscFam = state.personB.discapFamiliar;
+  const bDiscFamGrado = state.personB.discapFamiliarGrado;
+  const bAsistPers = n(state.personB.asistPersonal);
+  const bVivPrim = state.personB.viviendaPrimerAnio;
+  const bDonac = n(state.personB.donaciones);
+  const bDonacPrior = state.personB.donacionesPrioritarias;
+  const bInvNueva = n(state.personB.inversionNuevaCreacion);
 
   const hj      = state.hijos;
   const hjM6    = state.hijosM6;
@@ -1378,7 +1829,7 @@ export default function IRPFAlava2025() {
   const calc = useMemo(() => {
     if (!ready) return null;
     const dedHTotal = deducHijosTotal(hj, hjM6, hj6a15);
-    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt, viviendaCompra: aVivC, viviendaPerfil: aVivP, alquilerAnual: aAlq, alquilerPerfil: aAlqP, edad: aEdad, despoblacion: aDesp, ascendientes: aAsc, ingresosCap_inm: aCapInmI, gastosCap_inm: aCapInmG, esViviendaInq: aEsVivInq, capMob: aCapMob, retCapMob: aRetCapMob, gananciasPatr: aGanPatr };
+    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt, viviendaCompra: aVivC, viviendaPerfil: aVivP, alquilerAnual: aAlq, alquilerPerfil: aAlqP, edad: aEdad, despoblacion: aDesp, ascendientes: aAsc, ingresosCap_inm: aCapInmI, gastosCap_inm: aCapInmG, esViviendaInq: aEsVivInq, capMob: aCapMob, retCapMob: aRetCapMob, gananciasPatr: aGanPatr, retribEspecie: aRetribEsp, stockOptions: aStockOpts, stockOptionsReduccion: aStockOptsRed, rescatePension: aRescPen, rescatePensionReduccion: aRescPenRed, anualidadesAlimentos: aAlimentos, numHijosAlimentos: aNumHijosAlim, discapFamiliar: aDiscFam, discapFamiliarGrado: aDiscFamGrado, asistPersonal: aAsistPers, viviendaPrimerAnio: aVivPrim, donaciones: aDonac, donacionesPrioritarias: aDonacPrior, inversionNuevaCreacion: aInvNueva };
 
     // Persona A individual (siempre)
     const a_sh = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: 0, ...commonA });
@@ -1390,7 +1841,7 @@ export default function IRPFAlava2025() {
     }
 
     // Persona B individual + conjuntas (solo cuando hay pareja)
-    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt, viviendaCompra: bVivC, viviendaPerfil: bVivP, alquilerAnual: bAlq, alquilerPerfil: bAlqP, edad: bEdad, despoblacion: bDesp, ascendientes: bAsc, ingresosCap_inm: bCapInmI, gastosCap_inm: bCapInmG, esViviendaInq: bEsVivInq, capMob: bCapMob, retCapMob: bRetCapMob, gananciasPatr: bGanPatr };
+    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt, viviendaCompra: bVivC, viviendaPerfil: bVivP, alquilerAnual: bAlq, alquilerPerfil: bAlqP, edad: bEdad, despoblacion: bDesp, ascendientes: bAsc, ingresosCap_inm: bCapInmI, gastosCap_inm: bCapInmG, esViviendaInq: bEsVivInq, capMob: bCapMob, retCapMob: bRetCapMob, gananciasPatr: bGanPatr, retribEspecie: bRetribEsp, stockOptions: bStockOpts, stockOptionsReduccion: bStockOptsRed, rescatePension: bRescPen, rescatePensionReduccion: bRescPenRed, anualidadesAlimentos: bAlimentos, numHijosAlimentos: bNumHijosAlim, discapFamiliar: bDiscFam, discapFamiliarGrado: bDiscFamGrado, asistPersonal: bAsistPers, viviendaPrimerAnio: bVivPrim, donaciones: bDonac, donacionesPrioritarias: bDonacPrior, inversionNuevaCreacion: bInvNueva };
     const b_sh = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: 0, ...commonB });
     const b_ch = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: dedHTotal / 2, ...commonB });
 
@@ -1406,6 +1857,18 @@ export default function IRPFAlava2025() {
       edadB: bEdad, despoblacionB: bDesp, ascendientesB: bAsc,
       ingresosCap_inmB: bCapInmI, gastosCap_inmB: bCapInmG, esViviendaInqB: bEsVivInq,
       capMobB: bCapMob, retCapMobB: bRetCapMob, gananciasPatrB: bGanPatr,
+      retribEspecieA: aRetribEsp, stockOptionsA: aStockOpts, stockOptionsReduccionA: aStockOptsRed,
+      rescatePensionA: aRescPen, rescatePensionReduccionA: aRescPenRed,
+      anualidadesAlimentosA: aAlimentos, numHijosAlimentosA: aNumHijosAlim,
+      discapFamiliarA: aDiscFam, discapFamiliarGradoA: aDiscFamGrado,
+      asistPersonalA: aAsistPers, viviendaPrimerAnioA: aVivPrim,
+      donacionesA: aDonac, donacionesPrioritariasA: aDonacPrior, inversionNuevaCreacionA: aInvNueva,
+      retribEspecieB: bRetribEsp, stockOptionsB: bStockOpts, stockOptionsReduccionB: bStockOptsRed,
+      rescatePensionB: bRescPen, rescatePensionReduccionB: bRescPenRed,
+      anualidadesAlimentosB: bAlimentos, numHijosAlimentosB: bNumHijosAlim,
+      discapFamiliarB: bDiscFam, discapFamiliarGradoB: bDiscFamGrado,
+      asistPersonalB: bAsistPers, viviendaPrimerAnioB: bVivPrim,
+      donacionesB: bDonac, donacionesPrioritariasB: bDonacPrior, inversionNuevaCreacionB: bInvNueva,
     };
     const c_sh = calcConjunta({ ...conjParams, hijosTotal: 0 });
     const c_ch = calcConjunta({ ...conjParams, hijosTotal: dedHTotal });
@@ -1413,8 +1876,12 @@ export default function IRPFAlava2025() {
     return { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch, solo: false };
   }, [aB, aR, aRe, aTc, aRnl, aDisc, aViu, aCuid, aOt, aVivC, aVivP, aAlq, aAlqP, aEdad, aDesp, aAsc,
       aCapInmI, aCapInmG, aEsVivInq, aCapMob, aRetCapMob, aGanPatr,
+      aRetribEsp, aStockOpts, aStockOptsRed, aRescPen, aRescPenRed,
+      aAlimentos, aNumHijosAlim, aDiscFam, aDiscFamGrado, aAsistPers, aVivPrim, aDonac, aDonacPrior, aInvNueva,
       bB, bR, bRe, bTc, bRnl, bDisc, bViu, bCuid, bOt, bVivC, bVivP, bAlq, bAlqP, bEdad, bDesp, bAsc,
       bCapInmI, bCapInmG, bEsVivInq, bCapMob, bRetCapMob, bGanPatr,
+      bRetribEsp, bStockOpts, bStockOptsRed, bRescPen, bRescPenRed,
+      bAlimentos, bNumHijosAlim, bDiscFam, bDiscFamGrado, bAsistPers, bVivPrim, bDonac, bDonacPrior, bInvNueva,
       hj, hjM6, hj6a15, ready, hasPairData]);
 
   // ── Escenarios ────────────────────────────────────────────────────────────
@@ -1441,6 +1908,8 @@ export default function IRPFAlava2025() {
           dedH: 0, dedViud: a_sh.dedViud, dedEdad: a_sh.dedEdad, dedDiscap: a_sh.dedDiscap,
           dedCuid: a_sh.dedCuid, dedAsc: a_sh.dedAsc, dedOtras: a_sh.dedOtras,
           dedViv: a_sh.dedViv, dedAlq: a_sh.dedAlq,
+          dedAlim: a_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers,
+          dedDon: a_sh.dedDon, dedInv: a_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo,
           cl: a_sh.cl, retTotal: aR + aRetCapMob,
           warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
           _calcA: a_sh,
@@ -1459,6 +1928,8 @@ export default function IRPFAlava2025() {
           dedH: a_ch.dedH, dedViud: a_ch.dedViud, dedEdad: a_ch.dedEdad, dedDiscap: a_ch.dedDiscap,
           dedCuid: a_ch.dedCuid, dedAsc: a_ch.dedAsc, dedOtras: a_ch.dedOtras,
           dedViv: a_ch.dedViv, dedAlq: a_ch.dedAlq,
+          dedAlim: a_ch.dedAlim, dedDiscapFam: a_ch.dedDiscapFam, dedAsistPers: a_ch.dedAsistPers,
+          dedDon: a_ch.dedDon, dedInv: a_ch.dedInv, otrosRdtosTotal: a_ch.otrosRdtosTrabajo,
           cl: a_ch.cl, retTotal: aR + aRetCapMob,
           _calcA: a_ch,
         }] : []),
@@ -1483,6 +1954,8 @@ export default function IRPFAlava2025() {
         dedH: 0, dedViud: a_sh.dedViud + b_sh.dedViud, dedEdad: a_sh.dedEdad + b_sh.dedEdad, dedDiscap: a_sh.dedDiscap + b_sh.dedDiscap,
         dedCuid: a_sh.dedCuid + b_sh.dedCuid, dedAsc: a_sh.dedAsc + b_sh.dedAsc, dedOtras: a_sh.dedOtras + b_sh.dedOtras,
         dedViv: a_sh.dedViv + b_sh.dedViv, dedAlq: a_sh.dedAlq + b_sh.dedAlq,
+        dedAlim: a_sh.dedAlim + b_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam + b_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers + b_sh.dedAsistPers,
+        dedDon: a_sh.dedDon + b_sh.dedDon, dedInv: a_sh.dedInv + b_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo + b_sh.otrosRdtosTrabajo,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
         warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
         _calcA: a_sh, _calcB: b_sh,
@@ -1501,6 +1974,8 @@ export default function IRPFAlava2025() {
         dedH: a_ch.dedH + b_ch.dedH, dedViud: a_ch.dedViud + b_ch.dedViud, dedEdad: a_ch.dedEdad + b_ch.dedEdad, dedDiscap: a_ch.dedDiscap + b_ch.dedDiscap,
         dedCuid: a_ch.dedCuid + b_ch.dedCuid, dedAsc: a_ch.dedAsc + b_ch.dedAsc, dedOtras: a_ch.dedOtras + b_ch.dedOtras,
         dedViv: a_ch.dedViv + b_ch.dedViv, dedAlq: a_ch.dedAlq + b_ch.dedAlq,
+        dedAlim: a_ch.dedAlim + b_ch.dedAlim, dedDiscapFam: a_ch.dedDiscapFam + b_ch.dedDiscapFam, dedAsistPers: a_ch.dedAsistPers + b_ch.dedAsistPers,
+        dedDon: a_ch.dedDon + b_ch.dedDon, dedInv: a_ch.dedInv + b_ch.dedInv, otrosRdtosTotal: a_ch.otrosRdtosTrabajo + b_ch.otrosRdtosTrabajo,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcA: a_ch, _calcB: b_ch,
@@ -1519,6 +1994,8 @@ export default function IRPFAlava2025() {
         dedH: 0, dedViud: c_sh.dedViud, dedEdad: c_sh.dedEdad, dedDiscap: c_sh.dedDiscap,
         dedCuid: c_sh.dedCuid, dedAsc: c_sh.dedAsc, dedOtras: c_sh.dedOtras,
         dedViv: c_sh.dedViv, dedAlq: c_sh.dedAlq,
+        dedAlim: c_sh.dedAlim, dedDiscapFam: c_sh.dedDiscapFam, dedAsistPers: c_sh.dedAsistPers,
+        dedDon: c_sh.dedDon, dedInv: c_sh.dedInv, otrosRdtosTotal: c_sh.otrosRdtosTotal,
         cl: c_sh.cl, retTotal: c_sh.retTotal,
         warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
         _calcConj: c_sh,
@@ -1537,6 +2014,8 @@ export default function IRPFAlava2025() {
         dedH: c_ch.dedH, dedViud: c_ch.dedViud, dedEdad: c_ch.dedEdad, dedDiscap: c_ch.dedDiscap,
         dedCuid: c_ch.dedCuid, dedAsc: c_ch.dedAsc, dedOtras: c_ch.dedOtras,
         dedViv: c_ch.dedViv, dedAlq: c_ch.dedAlq,
+        dedAlim: c_ch.dedAlim, dedDiscapFam: c_ch.dedDiscapFam, dedAsistPers: c_ch.dedAsistPers,
+        dedDon: c_ch.dedDon, dedInv: c_ch.dedInv, otrosRdtosTotal: c_ch.otrosRdtosTotal,
         cl: c_ch.cl, retTotal: c_ch.retTotal,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcConj: c_ch,
@@ -1567,7 +2046,7 @@ export default function IRPFAlava2025() {
                 Calculadora IRPF Álava 2025
               </div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,.5)", marginTop: 3 }}>
-                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · Solo rendimientos del trabajo · <span style={{ color: "rgba(255,255,255,.35)" }}>Act. mar. 2026</span>
+                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · Rendimientos del trabajo, capital y patrimonio · <span style={{ color: "rgba(255,255,255,.35)" }}>Act. mar. 2026</span>
               </div>
             </div>
             {ready && optimo && (
@@ -1662,8 +2141,8 @@ export default function IRPFAlava2025() {
             <details style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "10px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
               <summary style={{ cursor: "pointer", fontWeight: 600, color: T.inkMid, fontSize: 11 }}>Qué cubre esta calculadora</summary>
               <div style={{ marginTop: 8 }}>
-                <strong style={{ color: T.inkMid }}>Contempla:</strong> rendimientos del trabajo, bonificación art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoración por despoblación (art. 77.2).
-                <br /><strong style={{ color: T.inkMid }}>No contempla:</strong> capital inmobiliario/mobiliario, actividades económicas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni año de adquisición sin límite para &lt;36 (art. 87.4ter).
+                <strong style={{ color: T.inkMid }}>Contempla:</strong> rendimientos del trabajo (salario, retribuciones en especie, stock options, rescates de pensiones/EPSV), bonificación art. 23 (incl. discapacidad), capital inmobiliario (arts. 30-34), capital mobiliario (arts. 35-38), ganancias patrimoniales (arts. 43-59), anualidades por alimentos a hijos (art. 80), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad/dependencia del contribuyente (art. 82, todos los grados incl. II y III), discapacidad de familiares convivientes (art. 82), asistentes personales (art. 81 bis), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87, incl. primer año sin límite art. 87.4ter) y alquiler (art. 86), donaciones (NF 35/2021), inversión en empresas de nueva creación, minoración por despoblación (art. 77.2).
+                <br /><strong style={{ color: T.inkMid }}>No contempla:</strong> actividades económicas (autónomos), imputación de rentas inmobiliarias (art. 41), rentas obtenidas en el extranjero (doble imposición internacional).
                 <br /><span style={{ color: T.inkMid }}>Si sus rentas incluyen conceptos no contemplados, su declaración definitiva puede diferir de esta estimación.</span>
               </div>
             </details>
@@ -1816,7 +2295,7 @@ export default function IRPFAlava2025() {
           Los resultados de esta calculadora tienen carácter meramente informativo y orientativo, basados en la normativa foral vigente.
           No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situación particular, consulte con un profesional o utilice Rentafácil (Hacienda Foral de Álava).
         </div>
-        <div style={{ marginTop: 6, fontSize: 9, color: T.inkFaint + "99" }}>Ejercicio fiscal 2025 · Solo rendimientos del trabajo · Actualizado a marzo 2026</div>
+        <div style={{ marginTop: 6, fontSize: 9, color: T.inkFaint + "99" }}>Ejercicio fiscal 2025 · Trabajo, capital y patrimonio · Actualizado a marzo 2026</div>
       </div>
 
       {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}
