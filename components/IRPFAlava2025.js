@@ -1350,9 +1350,9 @@ export default function IRPFAlava2025() {
           {/* ────── PANEL IZQUIERDO: INPUTS ────────────────────────────── */}
           <div className="sticky-panel" style={{ position: "sticky", top: 24, display: "flex", flexDirection: "column", gap: 16 }}>
 
-            {/* Aviso breve arriba */}
-            <div style={{ background: "#FEF3C7", border: "1px solid #FCD34D66", borderRadius: 10, padding: "10px 14px", fontSize: 11, color: "#92400E", lineHeight: 1.6 }}>
-              Herramienta orientativa para rendimientos del trabajo. Para la declaraci\u00f3n oficial usa <strong>Rentaf\u00e1cil</strong> (Hacienda Foral de \u00c1lava).
+            {/* Capa 1: Disclaimer breve antes de inputs */}
+            <div style={{ background: T.cobaltL, border: `1px solid ${T.cobalt}22`, borderRadius: 10, padding: "10px 14px", fontSize: 11, color: T.cobalt, lineHeight: 1.6 }}>
+              Estimaci\u00f3n del IRPF en \u00c1lava para el ejercicio 2025, conforme a la normativa foral vigente (NF 33/2013 y modificaciones). Los resultados son orientativos y no constituyen asesoramiento fiscal.
             </div>
 
             {/* Inputs side-by-side en mobile, stacked en desktop */}
@@ -1418,12 +1418,13 @@ export default function IRPFAlava2025() {
               ↺ Limpiar todos los datos
             </button>
 
-            {/* Detalle t\u00e9cnico */}
+            {/* Detalle t\u00e9cnico desplegable */}
             <details style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "10px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
-              <summary style={{ cursor: "pointer", fontWeight: 600, color: T.inkMid, fontSize: 11 }}>Alcance y limitaciones</summary>
+              <summary style={{ cursor: "pointer", fontWeight: 600, color: T.inkMid, fontSize: 11 }}>Qu\u00e9 cubre esta calculadora</summary>
               <div style={{ marginTop: 8 }}>
-                <strong style={{ color: T.inkMid }}>Incluye:</strong> rendimientos del trabajo, bonificaci\u00f3n art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporaci\u00f3n (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoraci\u00f3n por despoblaci\u00f3n (art. 77.2).
-                <br /><strong style={{ color: T.inkMid }}>No incluye:</strong> capital inmobiliario/mobiliario, actividades econ\u00f3micas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni a\u00f1o de adquisici\u00f3n sin l\u00edmite para &lt;36 (art. 87.4ter).
+                <strong style={{ color: T.inkMid }}>Contempla:</strong> rendimientos del trabajo, bonificaci\u00f3n art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporaci\u00f3n (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoraci\u00f3n por despoblaci\u00f3n (art. 77.2).
+                <br /><strong style={{ color: T.inkMid }}>No contempla:</strong> capital inmobiliario/mobiliario, actividades econ\u00f3micas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni a\u00f1o de adquisici\u00f3n sin l\u00edmite para &lt;36 (art. 87.4ter).
+                <br /><span style={{ color: T.inkMid }}>Si sus rentas incluyen conceptos no contemplados, su declaraci\u00f3n definitiva puede diferir de esta estimaci\u00f3n.</span>
               </div>
             </details>
           </div>
@@ -1557,17 +1558,25 @@ export default function IRPFAlava2025() {
                     </div>
                   )}
                 </div>
+
+                {/* ── Capa 2: Nota contextual junto a resultados ──────── */}
+                <div style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 10, padding: "12px 16px", fontSize: 11, color: T.inkMid, lineHeight: 1.6 }}>
+                  <strong>Resultado estimado</strong> conforme a la normativa foral vigente. Su declaraci\u00f3n definitiva puede variar en funci\u00f3n de su situaci\u00f3n particular. Para confirmar, utilice <strong>Rentaf\u00e1cil</strong> de la Hacienda Foral de \u00c1lava o consulte con un asesor fiscal.
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <div style={{ textAlign: "center", padding: "20px 24px 32px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}`, lineHeight: 1.7 }}>
-        NF 33/2013 (texto consolidado) \u00b7 NF 19/2024 \u00b7 NF 3/2025 \u00b7 DF 23/2025 \u00b7 Orden PJC/178/2025 \u00b7 Solo rendimientos del trabajo \u00b7 Ejercicio fiscal 2025
-        <br />Herramienta orientativa \u2014 para la declaraci\u00f3n oficial usa Rentaf\u00e1cil (Hacienda Foral de \u00c1lava) o consulta un asesor fiscal
-        <br /><span style={{ fontSize: 9, color: T.inkFaint + "99" }}>Actualizado a marzo 2026</span>
+      {/* ── FOOTER (Capa 3: aviso legal completo) ───────────────────────── */}
+      <div style={{ textAlign: "center", padding: "20px 24px 32px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}`, lineHeight: 1.8 }}>
+        <div>Normativa aplicada: NF 33/2013 (texto consolidado) \u00b7 NF 19/2024 \u00b7 NF 3/2025 \u00b7 DF 23/2025 \u00b7 Orden PJC/178/2025</div>
+        <div style={{ marginTop: 6 }}>
+          Los resultados de esta calculadora tienen car\u00e1cter meramente informativo y orientativo, basados en la normativa foral vigente.
+          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situaci\u00f3n particular, consulte con un profesional o utilice Rentaf\u00e1cil (Hacienda Foral de \u00c1lava).
+        </div>
+        <div style={{ marginTop: 6, fontSize: 9, color: T.inkFaint + "99" }}>Ejercicio fiscal 2025 \u00b7 Solo rendimientos del trabajo \u00b7 Actualizado a marzo 2026</div>
       </div>
 
       {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}
