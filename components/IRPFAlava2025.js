@@ -12,8 +12,13 @@ const SS_BASE_MAX    = 58914;   // Orden PJC/178/2025: base máx. cotización 4.
 const COMP_M6        = 424.60;  // Art. 79.2 NF 19/2024: suplemento descendiente <6 años
 const COMP_6A15      = 68.20;   // Art. 79.2 NF 19/2024: suplemento descendiente 6-15 años
 const MINORACION = 1583;
+const MINORACION_DESPOBLACION = 200; // Art. 77.2 NF 19/2024: municipios ≤500 hab.
 const RED_CONJUNTA = 4800;
 const SMI_2025 = 16576;
+const DEDUC_EDAD_65 = 385;       // Art. 83 NF 33/2013 (NF 26/2023): >65 años
+const DEDUC_EDAD_75 = 700;       // Art. 83 NF 33/2013 (NF 26/2023): >75 años
+const DEDUC_ASCENDIENTE = 423.72; // Art. 81 NF 19/2024: por ascendiente conviviente
+const DEDUC_DISCAP_CUOTA = { "33-65": 1025.64, "65+": 1464.54 }; // Art. 82 NF 19/2024
 
 const DEDUC_HIJOS = [734.80, 909.70, 1532.30, 1811.70, 2366.10];
 
@@ -74,20 +79,37 @@ function deducViudedad(bi) {
   return 0;
 }
 
-// Art. 87 NF 33/2013: deducción por adquisición de vivienda habitual
+// Art. 87 NF 33/2013 (mod. NF 3/2025): deducción por adquisición de vivienda habitual
 function deducViviendaCompra(cantidadAnual, perfil = "general") {
   if (cantidadAnual <= 0) return 0;
-  const pct = perfil === "joven" ? 0.23 : 0.18;
-  const max = perfil === "joven" ? 1955 : 1530;
+  // general: 18%/1.530€ | municipio <4.000 hab: 20%/1.836€ | joven <36 / fam.num: 25%/2.346€
+  const pct = perfil === "joven" ? 0.25 : perfil === "municipio" ? 0.20 : 0.18;
+  const max = perfil === "joven" ? 2346 : perfil === "municipio" ? 1836 : 1530;
   return Math.min(+(cantidadAnual * pct).toFixed(2), max);
 }
 
-// Art. 86 NF 33/2013: deducción por alquiler de vivienda habitual
+// Art. 86 NF 33/2013 (mod. NF 3/2025): deducción por alquiler de vivienda habitual
 function deducAlquiler(alquilerAnual, perfil = "general") {
   if (alquilerAnual <= 0) return 0;
-  const pct = perfil === "joven" ? 0.30 : perfil === "familia" ? 0.25 : 0.20;
-  const max = perfil === "joven" ? 2400 : perfil === "familia" ? 2000 : 1600;
+  // general: 20%/1.600€ | mejorado: 35%/2.800€ (<36, fam.num/monop, discap≥65%, depend., desp.)
+  const pct = perfil === "mejorado" ? 0.35 : 0.20;
+  const max = perfil === "mejorado" ? 2800 : 1600;
   return Math.min(+(alquilerAnual * pct).toFixed(2), max);
+}
+
+// Art. 83 NF 33/2013: deducción por edad (incompatible con Art. 82 bis viudedad)
+function deducEdad(edad, bi) {
+  if (!edad || edad === "menor65") return 0;
+  const base = edad === "75+" ? DEDUC_EDAD_75 : DEDUC_EDAD_65;
+  const coef = edad === "75+" ? 0.07 : 0.0385;
+  if (bi <= 20000) return base;
+  if (bi < 30000) return Math.max(0, +(base - coef * (bi - 20000)).toFixed(2));
+  return 0;
+}
+
+// Art. 82 NF 19/2024: deducción por discapacidad/dependencia del contribuyente (cuota)
+function deducDiscapCuota(discapacidad) {
+  return DEDUC_DISCAP_CUOTA[discapacidad] || 0;
 }
 
 // Cálculo individual de una persona
@@ -97,6 +119,7 @@ function calcPersona({
   viudedad = false, cuidado = "ninguno", otrasDeducNF3 = 0,
   viviendaCompra = 0, viviendaPerfil = "general",
   alquilerAnual = 0, alquilerPerfil = "general",
+  edad = "menor65", despoblacion = false, ascendientes = 0,
 }) {
   const ss       = calcSS(bruto, tipoContrato);
   const dif      = Math.max(0, bruto - ss);
@@ -105,18 +128,25 @@ function calcPersona({
   const bi       = Math.max(0, rnt - redExtra);
   const bl       = bi; // sin conjunta
   const ci       = cuotaEscala(bl);
-  const pm       = Math.max(0, ci - MINORACION);
+  const minTotal = MINORACION + (despoblacion ? MINORACION_DESPOBLACION : 0);
+  const pm       = Math.max(0, ci - minTotal);
   const dedH     = +(hijosShare).toFixed(2);
-  const dedViud  = viudedad ? deducViudedad(bi) : 0;
+  // Art. 82 bis y Art. 83 son incompatibles: se aplica la más beneficiosa
+  const dedViudRaw  = viudedad ? deducViudedad(bi) : 0;
+  const dedEdadRaw  = deducEdad(edad, bi);
+  const dedViud  = viudedad && dedViudRaw >= dedEdadRaw ? dedViudRaw : 0;
+  const dedEdad  = !viudedad || dedEdadRaw > dedViudRaw ? dedEdadRaw : 0;
+  const dedDiscap = deducDiscapCuota(discapacidad);
   const dedCuid  = cuidado === "profesional" ? 500 : cuidado === "empleado_hogar" ? 250 : 0;
   const dedOtras = +otrasDeducNF3;
   const dedViv   = deducViviendaCompra(viviendaCompra, viviendaPerfil);
   const dedAlq   = deducAlquiler(alquilerAnual, alquilerPerfil);
-  const cl       = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras - dedViv - dedAlq);
+  const dedAsc   = +(ascendientes * DEDUC_ASCENDIENTE).toFixed(2);
+  const cl       = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc);
   const resultado = +(ret - cl).toFixed(2);
   const teReal   = bruto > 0 ? cl / bruto : 0;
   const teRet    = bruto > 0 ? ret / bruto : 0;
-  return { bruto, ret, ss, dif, bonif, rnt, bi, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, dedViv, dedAlq, cl, resultado, teReal, teRet, redExtra };
+  return { bruto, ret, ss, dif, bonif, rnt, bi, bl, ci, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, cl, resultado, teReal, teRet, redExtra };
 }
 
 // Cálculo declaración conjunta
@@ -126,10 +156,12 @@ function calcConjunta({
   viudedadA = false, cuidadoA = "ninguno", otrasDeducNF3A = 0,
   viviendaCompraA = 0, viviendaPerfilA = "general",
   alquilerAnualA = 0, alquilerPerfilA = "general",
+  edadA = "menor65", despoblacionA = false, ascendientesA = 0,
   tipoContratoB = "indefinido", rentasNoLabB = 0, discapacidadB = "ninguna",
   viudedadB = false, cuidadoB = "ninguno", otrasDeducNF3B = 0,
   viviendaCompraB = 0, viviendaPerfilB = "general",
   alquilerAnualB = 0, alquilerPerfilB = "general",
+  edadB = "menor65", despoblacionB = false, ascendientesB = 0,
 }) {
   const ssA   = calcSS(brutoA, tipoContratoA);
   const ssB   = calcSS(brutoB, tipoContratoB);
@@ -142,24 +174,39 @@ function calcConjunta({
   const biSum = Math.max(0, rntA + rntB - redExtraA - redExtraB);
   const bl    = Math.max(0, biSum - RED_CONJUNTA);
   const ci    = cuotaEscala(bl);
-  const pm    = Math.max(0, ci - MINORACION);
+  // Minoración: 1 sola + despoblación si aplica a alguno
+  const minDesp = (despoblacionA || despoblacionB) ? MINORACION_DESPOBLACION : 0;
+  const minTotal = MINORACION + minDesp;
+  const pm    = Math.max(0, ci - minTotal);
   const dedH  = hijosTotal;
-  // Deducciones personales NF 3/2025: se calculan sobre BI individual aproximado
+  // Deducciones personales: se calculan sobre BI individual aproximado
   const biA      = Math.max(0, rntA - redExtraA);
   const biB      = Math.max(0, rntB - redExtraB);
-  const dedViud  = (viudedadA ? deducViudedad(biA) : 0) + (viudedadB ? deducViudedad(biB) : 0);
+  // Art. 82 bis (viudedad) y Art. 83 (edad) son incompatibles: se aplica la más beneficiosa por persona
+  const dedViudRawA = viudedadA ? deducViudedad(biA) : 0;
+  const dedEdadRawA = deducEdad(edadA, biA);
+  const dedViudA = viudedadA && dedViudRawA >= dedEdadRawA ? dedViudRawA : 0;
+  const dedEdadA = !viudedadA || dedEdadRawA > dedViudRawA ? dedEdadRawA : 0;
+  const dedViudRawB = viudedadB ? deducViudedad(biB) : 0;
+  const dedEdadRawB = deducEdad(edadB, biB);
+  const dedViudB = viudedadB && dedViudRawB >= dedEdadRawB ? dedViudRawB : 0;
+  const dedEdadB = !viudedadB || dedEdadRawB > dedViudRawB ? dedEdadRawB : 0;
+  const dedViud  = dedViudA + dedViudB;
+  const dedEdad  = dedEdadA + dedEdadB;
+  const dedDiscap = deducDiscapCuota(discapacidadA) + deducDiscapCuota(discapacidadB);
   const dedCuid  = (cuidadoA === "profesional" ? 500 : cuidadoA === "empleado_hogar" ? 250 : 0)
                  + (cuidadoB === "profesional" ? 500 : cuidadoB === "empleado_hogar" ? 250 : 0);
   const dedOtras = +otrasDeducNF3A + +otrasDeducNF3B;
   const dedViv   = deducViviendaCompra(viviendaCompraA, viviendaPerfilA) + deducViviendaCompra(viviendaCompraB, viviendaPerfilB);
   const dedAlq   = deducAlquiler(alquilerAnualA, alquilerPerfilA) + deducAlquiler(alquilerAnualB, alquilerPerfilB);
-  const cl    = Math.max(0, pm - dedH - dedViud - dedCuid - dedOtras - dedViv - dedAlq);
+  const dedAsc   = +((ascendientesA + ascendientesB) * DEDUC_ASCENDIENTE).toFixed(2);
+  const cl    = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc);
   const retTotal = retA + retB;
   const resultado = +(retTotal - cl).toFixed(2);
   const teReal = (brutoA + brutoB) > 0 ? cl / (brutoA + brutoB) : 0;
   return {
     brutoA, brutoB, ssA, ssB, difA, difB, bonA, bonB, rntA, rntB,
-    biSum, bl, ci, pm, dedH, dedViud, dedCuid, dedOtras, dedViv, dedAlq, cl, resultado, retTotal, teReal,
+    biSum, bl, ci, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, cl, resultado, retTotal, teReal,
     redExtraA, redExtraB,
   };
 }
@@ -174,6 +221,7 @@ const personInit = {
   viudedad: false, cuidado: "ninguno", otrasDeducNF3: "",
   viviendaCompra: "", viviendaPerfil: "general",
   alquilerAnual: "", alquilerPerfil: "general",
+  edad: "menor65", despoblacion: false, ascendientes: 0,
 };
 
 const initialState = {
@@ -411,7 +459,8 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
 
   const hasExtras = data.rentasNoLab || data.discapacidad !== "ninguna" || data.viudedad
     || data.cuidado !== "ninguno" || data.otrasDeducNF3
-    || data.viviendaCompra || data.alquilerAnual;
+    || data.viviendaCompra || data.alquilerAnual
+    || data.edad !== "menor65" || data.despoblacion || data.ascendientes > 0;
 
   return (
     <div style={{
@@ -493,15 +542,26 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             accent={accent} accentLight={accentLight}
           />
           <SmallSelector
-            lbl="Discapacidad reconocida (art. 23.3)"
+            lbl="Discapacidad reconocida (arts. 23.3 + 82)"
             value={data.discapacidad}
             onChange={v => set("discapacidad", v)}
             options={[
               { value: "ninguna", label: "Sin discapacidad" },
-              { value: "33-65",   label: "≥33% y <65% (+100%)" },
-              { value: "65+",     label: "≥65% / mov. reducida (+250%)" },
+              { value: "33-65",   label: "≥33% y <65%" },
+              { value: "65+",     label: "≥65% / mov. reducida" },
             ]}
-            tooltipText="Para trabajadores activos con discapacidad reconocida. Incrementa la bonificación del art. 23.1 en un 100% o 250% según grado. Art. 23.3 NF 33/2013."
+            tooltipText="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% o +250%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%) o 1.464,54 € (≥65%). Grados superiores (Grado II/III) consultar asesor."
+          />
+          <SmallSelector
+            lbl="Edad del contribuyente (art. 83)"
+            value={data.edad}
+            onChange={v => set("edad", v)}
+            options={[
+              { value: "menor65", label: "Menor de 65" },
+              { value: "65-74",   label: "65-74 (385 €)" },
+              { value: "75+",     label: "75+ (700 €)" },
+            ]}
+            tooltipText="Deducción por edad: 385 € (>65) o 700 € (>75), BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción viudedad: se aplica la más beneficiosa. Art. 83 NF 33/2013."
           />
           <SmallSelector
             lbl="Viudedad (art. 82 bis NF 3/2025)"
@@ -511,7 +571,33 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               { value: "no", label: "No aplica" },
               { value: "si", label: "Viudo/a (hasta 200 €)" },
             ]}
-            tooltipText="Deducción de 200 € para contribuyentes viudos con base imponible ≤ 20.000 €. Se reduce progresivamente hasta 0 € en BI = 30.000 €. Art. 82 bis NF 3/2025."
+            tooltipText="Deducción de 200 € para contribuyentes viudos con BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción por edad (art. 83): se aplica automáticamente la más beneficiosa."
+          />
+          {data.viudedad && data.edad !== "menor65" && (
+            <div style={{ fontSize: 10, color: T.gold, padding: "2px 0 8px", lineHeight: 1.5 }}>
+              Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica automáticamente la más beneficiosa.
+            </div>
+          )}
+          <SmallSelector
+            lbl="Municipio (art. 77.2 despoblación)"
+            value={data.despoblacion ? "si" : "no"}
+            onChange={v => set("despoblacion", v === "si")}
+            options={[
+              { value: "no", label: "Normal" },
+              { value: "si", label: "≤500 hab. (+200 €)" },
+            ]}
+            tooltipText="Minoración adicional de 200 € por residir en municipio con ≤ 500 habitantes. Art. 77.2 NF 19/2024."
+          />
+          <SmallSelector
+            lbl="Ascendientes convivientes (art. 81)"
+            value={String(data.ascendientes)}
+            onChange={v => set("ascendientes", parseInt(v) || 0)}
+            options={[
+              { value: "0", label: "Ninguno" },
+              { value: "1", label: "1 (423,72 €)" },
+              { value: "2", label: "2 (847,44 €)" },
+            ]}
+            tooltipText="423,72 € por ascendiente que conviva permanentemente con el contribuyente, con rentas ≤ SMI (16.576 €) y que no presente declaración propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
           />
           <SmallSelector
             lbl="Cuidado menores/dependientes (art. 81 ter)"
@@ -543,7 +629,7 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               value={data.viviendaCompra}
               onChange={v => set("viviendaCompra", v)}
               hint="Amortización + intereses anuales"
-              tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €/año). Joven <36 o familia numerosa: 23% (máx. 1.955 €/año). Art. 87 NF 33/2013."
+              tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €). Mun. <4.000 hab.: 20% (máx. 1.836 €). <36 años / fam. num.: 25% (máx. 2.346 €). Art. 87 NF 33/2013 (mod. NF 3/2025)."
               accent={accent} accentLight={accentLight}
             />
             <SmallSelector
@@ -551,17 +637,18 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               value={data.viviendaPerfil}
               onChange={v => set("viviendaPerfil", v)}
               options={[
-                { value: "general", label: "General (18%, máx 1.530 €)" },
-                { value: "joven",   label: "<36 / Fam. num. (23%, máx 1.955 €)" },
+                { value: "general",   label: "General (18%, 1.530 €)" },
+                { value: "municipio", label: "Mun. <4.000 (20%, 1.836 €)" },
+                { value: "joven",     label: "<36 / Fam.num (25%, 2.346 €)" },
               ]}
-              tooltipText="Menores de 36 años y familias numerosas tienen porcentajes y límites ampliados. Art. 87 NF 33/2013 (modif. NF 3/2025)."
+              tooltipText="General: 18%/1.530 €. Municipio <4.000 hab.: 20%/1.836 €. Menores de 36 años y familias numerosas: 25%/2.346 €. Art. 87 NF 33/2013 (mod. NF 3/2025)."
             />
             <NumInput
               label="Alquiler vivienda habitual (art. 86)"
               value={data.alquilerAnual}
               onChange={v => set("alquilerAnual", v)}
               hint="Importe total del alquiler pagado en el año"
-              tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €/año). <30 años: 30% (máx. 2.400 €). Fam. numerosa: 25% (máx. 2.000 €). Art. 86 NF 33/2013."
+              tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €). Mejorado: 35% (máx. 2.800 €). Art. 86 NF 33/2013 (mod. NF 3/2025)."
               accent={accent} accentLight={accentLight}
             />
             <SmallSelector
@@ -569,11 +656,10 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               value={data.alquilerPerfil}
               onChange={v => set("alquilerPerfil", v)}
               options={[
-                { value: "general", label: "General (20%, máx 1.600 €)" },
-                { value: "joven",   label: "<30 años (30%, máx 2.400 €)" },
-                { value: "familia", label: "Fam. num. (25%, máx 2.000 €)" },
+                { value: "general",  label: "General (20%, 1.600 €)" },
+                { value: "mejorado", label: "Mejorado (35%, 2.800 €)" },
               ]}
-              tooltipText="Perfil mejorado para menores de 30 años y familias numerosas. Art. 86 NF 33/2013."
+              tooltipText="Perfil mejorado (35%/2.800 €) para: menores de 36 años, familias numerosas o monoparentales, discapacidad ≥65%, dependencia, víctimas violencia de género, o municipios en riesgo de despoblación. Art. 86 NF 33/2013 (mod. NF 3/2025)."
             />
             {data.viviendaCompra && data.alquilerAnual && (
               <div style={{ fontSize: 10, color: T.red, padding: "4px 0" }}>
@@ -683,24 +769,33 @@ function WaterfallDesglose({ data, label, accent }) {
           <WaterfallRow label="Base liquidable general" value={data.bl ?? data.biSum - RED_CONJUNTA} type="total" />
           <WaterfallRow label="Cuota íntegra (escala art. 75)" value={data.ci} type="total"
             note={`Tipo marginal: ${pct(tipoMarginal(data.bl ?? data.biSum - RED_CONJUNTA))} · 8 tramos 23%–49%`} />
-          <WaterfallRow label="Minoración de cuota (art. 77 NF 19/2024)" value={MINORACION} type="minus" note="1.583 € por declaración (1 en conjunta, 2 en individual)" />
+          <WaterfallRow label="Minoración de cuota (art. 77)" value={data.minTotal ?? MINORACION} type="minus" note={`${eur(MINORACION)} general${(data.minTotal ?? MINORACION) > MINORACION ? ` + ${eur(MINORACION_DESPOBLACION)} despoblación (art. 77.2)` : ""} · ${data.redConj !== undefined ? "1 en conjunta" : "1 por declaración"}`} />
           {data.dedH > 0 && (
             <WaterfallRow label="Deducción descendientes (art. 79)" value={data.dedH} type="minus" note={data.bl !== undefined && data.redConj !== undefined ? "100% en conjunta" : "50% por progenitor"} />
           )}
           {(data.dedViud ?? 0) > 0 && (
             <WaterfallRow label="Deducción viudedad (art. 82 bis NF 3/2025)" value={data.dedViud} type="minus" />
           )}
+          {(data.dedEdad ?? 0) > 0 && (
+            <WaterfallRow label="Deducción por edad (art. 83)" value={data.dedEdad} type="minus" />
+          )}
+          {(data.dedDiscap ?? 0) > 0 && (
+            <WaterfallRow label="Deducción discapacidad contribuyente (art. 82)" value={data.dedDiscap} type="minus" />
+          )}
           {(data.dedCuid ?? 0) > 0 && (
             <WaterfallRow label="Deducción cuidado menores/dependientes (art. 81 ter NF 3/2025)" value={data.dedCuid} type="minus" />
+          )}
+          {(data.dedAsc ?? 0) > 0 && (
+            <WaterfallRow label="Deducción ascendientes (art. 81)" value={data.dedAsc} type="minus" />
           )}
           {(data.dedOtras ?? 0) > 0 && (
             <WaterfallRow label="Otras deducciones NF 3/2025 (arts. 83 bis/ter)" value={data.dedOtras} type="minus" />
           )}
           {(data.dedViv ?? 0) > 0 && (
-            <WaterfallRow label="Deducción vivienda habitual (art. 87 NF 33/2013)" value={data.dedViv} type="minus" />
+            <WaterfallRow label="Deducción vivienda habitual (art. 87)" value={data.dedViv} type="minus" />
           )}
           {(data.dedAlq ?? 0) > 0 && (
-            <WaterfallRow label="Deducción alquiler vivienda (art. 86 NF 33/2013)" value={data.dedAlq} type="minus" />
+            <WaterfallRow label="Deducción alquiler vivienda (art. 86)" value={data.dedAlq} type="minus" />
           )}
           <WaterfallRow label="CUOTA LÍQUIDA (IRPF a pagar)" value={data.cl} type="total" />
           <div style={{ height: 12 }} />
@@ -816,10 +911,13 @@ function TablaComparativa({ scenarios }) {
     { label: "Base liquidable",      key: "bl",           fmt: eur, bold: true },
     { label: "Cuota íntegra",        key: "ci",           fmt: eur },
     { label: "− Minoración(es)",     key: "minoracion",   fmt: v => "−" + eur(v), color: T.teal },
-    { label: "− Deducc. hijos",            key: "dedH",     fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
-    { label: "− Deducc. viudedad",        key: "dedViud",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
-    { label: "− Deducc. cuidado",         key: "dedCuid",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
-    { label: "− Otras deducc. NF 3/2025", key: "dedOtras", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. hijos",            key: "dedH",      fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. viudedad",        key: "dedViud",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. edad (art. 83)",  key: "dedEdad",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. discapac. (art. 82)", key: "dedDiscap", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. cuidado",         key: "dedCuid",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Deducc. ascend. (art. 81)", key: "dedAsc",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
+    { label: "− Otras deducc. NF 3/2025", key: "dedOtras",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. vivienda (art. 87)",  key: "dedViv",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. alquiler (art. 86)",  key: "dedAlq",  fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "CUOTA LÍQUIDA",             key: "cl",       fmt: eur, bold: true, highlight: true },
@@ -976,6 +1074,9 @@ export default function IRPFAlava2025() {
   const aVivP = state.personA.viviendaPerfil;
   const aAlq  = n(state.personA.alquilerAnual);
   const aAlqP = state.personA.alquilerPerfil;
+  const aEdad = state.personA.edad;
+  const aDesp = state.personA.despoblacion;
+  const aAsc  = state.personA.ascendientes;
 
   const bB    = n(state.personB.bruto);
   const bR    = n(state.personB.ret);
@@ -990,6 +1091,9 @@ export default function IRPFAlava2025() {
   const bVivP = state.personB.viviendaPerfil;
   const bAlq  = n(state.personB.alquilerAnual);
   const bAlqP = state.personB.alquilerPerfil;
+  const bEdad = state.personB.edad;
+  const bDesp = state.personB.despoblacion;
+  const bAsc  = state.personB.ascendientes;
 
   const hj      = state.hijos;
   const hjM6    = state.hijosM6;
@@ -1001,7 +1105,7 @@ export default function IRPFAlava2025() {
   const calc = useMemo(() => {
     if (!ready) return null;
     const dedHTotal = deducHijosTotal(hj, hjM6, hj6a15);
-    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt, viviendaCompra: aVivC, viviendaPerfil: aVivP, alquilerAnual: aAlq, alquilerPerfil: aAlqP };
+    const commonA = { tipoContrato: aTc, rentasNoLab: aRnl, discapacidad: aDisc, viudedad: aViu, cuidado: aCuid, otrasDeducNF3: aOt, viviendaCompra: aVivC, viviendaPerfil: aVivP, alquilerAnual: aAlq, alquilerPerfil: aAlqP, edad: aEdad, despoblacion: aDesp, ascendientes: aAsc };
 
     // Persona A individual (siempre)
     const a_sh = calcPersona({ bruto: aB, ret: aR, redExtra: aRe, hijosShare: 0, ...commonA });
@@ -1013,7 +1117,7 @@ export default function IRPFAlava2025() {
     }
 
     // Persona B individual + conjuntas (solo cuando hay pareja)
-    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt, viviendaCompra: bVivC, viviendaPerfil: bVivP, alquilerAnual: bAlq, alquilerPerfil: bAlqP };
+    const commonB = { tipoContrato: bTc, rentasNoLab: bRnl, discapacidad: bDisc, viudedad: bViu, cuidado: bCuid, otrasDeducNF3: bOt, viviendaCompra: bVivC, viviendaPerfil: bVivP, alquilerAnual: bAlq, alquilerPerfil: bAlqP, edad: bEdad, despoblacion: bDesp, ascendientes: bAsc };
     const b_sh = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: 0, ...commonB });
     const b_ch = calcPersona({ bruto: bB, ret: bR, redExtra: bRe, hijosShare: dedHTotal / 2, ...commonB });
 
@@ -1021,15 +1125,17 @@ export default function IRPFAlava2025() {
       brutoA: aB, retA: aR, redExtraA: aRe, brutoB: bB, retB: bR, redExtraB: bRe,
       tipoContratoA: aTc, rentasNoLabA: aRnl, discapacidadA: aDisc, viudedadA: aViu, cuidadoA: aCuid, otrasDeducNF3A: aOt,
       viviendaCompraA: aVivC, viviendaPerfilA: aVivP, alquilerAnualA: aAlq, alquilerPerfilA: aAlqP,
+      edadA: aEdad, despoblacionA: aDesp, ascendientesA: aAsc,
       tipoContratoB: bTc, rentasNoLabB: bRnl, discapacidadB: bDisc, viudedadB: bViu, cuidadoB: bCuid, otrasDeducNF3B: bOt,
       viviendaCompraB: bVivC, viviendaPerfilB: bVivP, alquilerAnualB: bAlq, alquilerPerfilB: bAlqP,
+      edadB: bEdad, despoblacionB: bDesp, ascendientesB: bAsc,
     };
     const c_sh = calcConjunta({ ...conjParams, hijosTotal: 0 });
     const c_ch = calcConjunta({ ...conjParams, hijosTotal: dedHTotal });
 
     return { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch, solo: false };
-  }, [aB, aR, aRe, aTc, aRnl, aDisc, aViu, aCuid, aOt, aVivC, aVivP, aAlq, aAlqP,
-      bB, bR, bRe, bTc, bRnl, bDisc, bViu, bCuid, bOt, bVivC, bVivP, bAlq, bAlqP,
+  }, [aB, aR, aRe, aTc, aRnl, aDisc, aViu, aCuid, aOt, aVivC, aVivP, aAlq, aAlqP, aEdad, aDesp, aAsc,
+      bB, bR, bRe, bTc, bRnl, bDisc, bViu, bCuid, bOt, bVivC, bVivP, bAlq, bAlqP, bEdad, bDesp, bAsc,
       hj, hjM6, hj6a15, ready, hasPairData]);
 
   // ── Escenarios ────────────────────────────────────────────────────────────
@@ -1050,9 +1156,9 @@ export default function IRPFAlava2025() {
           brutoTotal: aB, ssTotal: a_sh.ss,
           bonifTotal: a_sh.bonif, rntTotal: a_sh.rnt,
           redTotal: aRe, redConj: 0, bl: a_sh.bl,
-          ci: a_sh.ci, minoracion: MINORACION,
-          dedH: 0, dedViud: a_sh.dedViud,
-          dedCuid: a_sh.dedCuid, dedOtras: a_sh.dedOtras,
+          ci: a_sh.ci, minoracion: a_sh.minTotal,
+          dedH: 0, dedViud: a_sh.dedViud, dedEdad: a_sh.dedEdad, dedDiscap: a_sh.dedDiscap,
+          dedCuid: a_sh.dedCuid, dedAsc: a_sh.dedAsc, dedOtras: a_sh.dedOtras,
           dedViv: a_sh.dedViv, dedAlq: a_sh.dedAlq,
           cl: a_sh.cl, retTotal: aR,
           warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
@@ -1066,9 +1172,9 @@ export default function IRPFAlava2025() {
           brutoTotal: aB, ssTotal: a_ch.ss,
           bonifTotal: a_ch.bonif, rntTotal: a_ch.rnt,
           redTotal: aRe, redConj: 0, bl: a_ch.bl,
-          ci: a_ch.ci, minoracion: MINORACION,
-          dedH: a_ch.dedH, dedViud: a_ch.dedViud,
-          dedCuid: a_ch.dedCuid, dedOtras: a_ch.dedOtras,
+          ci: a_ch.ci, minoracion: a_ch.minTotal,
+          dedH: a_ch.dedH, dedViud: a_ch.dedViud, dedEdad: a_ch.dedEdad, dedDiscap: a_ch.dedDiscap,
+          dedCuid: a_ch.dedCuid, dedAsc: a_ch.dedAsc, dedOtras: a_ch.dedOtras,
           dedViv: a_ch.dedViv, dedAlq: a_ch.dedAlq,
           cl: a_ch.cl, retTotal: aR,
           _calcA: a_ch,
@@ -1088,9 +1194,9 @@ export default function IRPFAlava2025() {
         brutoTotal: aB + bB, ssTotal: a_sh.ss + b_sh.ss,
         bonifTotal: a_sh.bonif + b_sh.bonif, rntTotal: a_sh.rnt + b_sh.rnt,
         redTotal: aRe + bRe, redConj: 0, bl: a_sh.bl + b_sh.bl,
-        ci: a_sh.ci + b_sh.ci, minoracion: MINORACION * 2,
-        dedH: 0, dedViud: a_sh.dedViud + b_sh.dedViud,
-        dedCuid: a_sh.dedCuid + b_sh.dedCuid, dedOtras: a_sh.dedOtras + b_sh.dedOtras,
+        ci: a_sh.ci + b_sh.ci, minoracion: a_sh.minTotal + b_sh.minTotal,
+        dedH: 0, dedViud: a_sh.dedViud + b_sh.dedViud, dedEdad: a_sh.dedEdad + b_sh.dedEdad, dedDiscap: a_sh.dedDiscap + b_sh.dedDiscap,
+        dedCuid: a_sh.dedCuid + b_sh.dedCuid, dedAsc: a_sh.dedAsc + b_sh.dedAsc, dedOtras: a_sh.dedOtras + b_sh.dedOtras,
         dedViv: a_sh.dedViv + b_sh.dedViv, dedAlq: a_sh.dedAlq + b_sh.dedAlq,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + bR,
         warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
@@ -1104,9 +1210,9 @@ export default function IRPFAlava2025() {
         brutoTotal: aB + bB, ssTotal: a_ch.ss + b_ch.ss,
         bonifTotal: a_ch.bonif + b_ch.bonif, rntTotal: a_ch.rnt + b_ch.rnt,
         redTotal: aRe + bRe, redConj: 0, bl: a_ch.bl + b_ch.bl,
-        ci: a_ch.ci + b_ch.ci, minoracion: MINORACION * 2,
-        dedH: a_ch.dedH + b_ch.dedH, dedViud: a_ch.dedViud + b_ch.dedViud,
-        dedCuid: a_ch.dedCuid + b_ch.dedCuid, dedOtras: a_ch.dedOtras + b_ch.dedOtras,
+        ci: a_ch.ci + b_ch.ci, minoracion: a_ch.minTotal + b_ch.minTotal,
+        dedH: a_ch.dedH + b_ch.dedH, dedViud: a_ch.dedViud + b_ch.dedViud, dedEdad: a_ch.dedEdad + b_ch.dedEdad, dedDiscap: a_ch.dedDiscap + b_ch.dedDiscap,
+        dedCuid: a_ch.dedCuid + b_ch.dedCuid, dedAsc: a_ch.dedAsc + b_ch.dedAsc, dedOtras: a_ch.dedOtras + b_ch.dedOtras,
         dedViv: a_ch.dedViv + b_ch.dedViv, dedAlq: a_ch.dedAlq + b_ch.dedAlq,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + bR,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
@@ -1120,8 +1226,9 @@ export default function IRPFAlava2025() {
         brutoTotal: aB + bB, ssTotal: c_sh.ssA + c_sh.ssB,
         bonifTotal: c_sh.bonA + c_sh.bonB, rntTotal: c_sh.rntA + c_sh.rntB,
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_sh.bl,
-        ci: c_sh.ci, minoracion: MINORACION,
-        dedH: 0, dedViud: c_sh.dedViud, dedCuid: c_sh.dedCuid, dedOtras: c_sh.dedOtras,
+        ci: c_sh.ci, minoracion: c_sh.minTotal,
+        dedH: 0, dedViud: c_sh.dedViud, dedEdad: c_sh.dedEdad, dedDiscap: c_sh.dedDiscap,
+        dedCuid: c_sh.dedCuid, dedAsc: c_sh.dedAsc, dedOtras: c_sh.dedOtras,
         dedViv: c_sh.dedViv, dedAlq: c_sh.dedAlq,
         cl: c_sh.cl, retTotal: aR + bR,
         warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
@@ -1135,8 +1242,9 @@ export default function IRPFAlava2025() {
         brutoTotal: aB + bB, ssTotal: c_ch.ssA + c_ch.ssB,
         bonifTotal: c_ch.bonA + c_ch.bonB, rntTotal: c_ch.rntA + c_ch.rntB,
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_ch.bl,
-        ci: c_ch.ci, minoracion: MINORACION,
-        dedH: c_ch.dedH, dedViud: c_ch.dedViud, dedCuid: c_ch.dedCuid, dedOtras: c_ch.dedOtras,
+        ci: c_ch.ci, minoracion: c_ch.minTotal,
+        dedH: c_ch.dedH, dedViud: c_ch.dedViud, dedEdad: c_ch.dedEdad, dedDiscap: c_ch.dedDiscap,
+        dedCuid: c_ch.dedCuid, dedAsc: c_ch.dedAsc, dedOtras: c_ch.dedOtras,
         dedViv: c_ch.dedViv, dedAlq: c_ch.dedAlq,
         cl: c_ch.cl, retTotal: aR + bR,
         warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
@@ -1261,7 +1369,9 @@ export default function IRPFAlava2025() {
 
             {/* Aviso */}
             <div style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "12px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
-              ⚠️ Incluye: rendimientos del trabajo, discapacidad (art. 23.3), viudedad, cuidado de dependientes, deducciones NF 3/2025, vivienda habitual (art. 87) y alquiler (art. 86). No incluye: capital inmobiliario/mobiliario, actividades económicas, deducción por edad (art. 83), ascendientes (art. 81). Consulta Rentafácil (Hacienda Foral de Álava) o un asesor fiscal.
+              <strong style={{ color: T.inkMid }}>Incluye:</strong> rendimientos del trabajo, bonificación art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoración por despoblación (art. 77.2).
+              <br /><strong style={{ color: T.inkMid }}>No incluye:</strong> capital inmobiliario/mobiliario, actividades económicas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni año de adquisición sin límite para &lt;36 (art. 87.4ter).
+              <br /><strong style={{ color: T.red }}>Esta herramienta es orientativa.</strong> Para la declaración oficial, utiliza <strong>Rentafácil</strong> de la Hacienda Foral de Álava o consulta un asesor fiscal profesional.
             </div>
           </div>
 
@@ -1378,8 +1488,9 @@ export default function IRPFAlava2025() {
       </div>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <div style={{ textAlign: "center", padding: "20px 24px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}` }}>
-        NF 33/2013 (texto consolidado) · NF 19/2024 · NF 3/2025 · DF 23/2025 · Solo rendimientos del trabajo · Ejercicio fiscal 2025
+      <div style={{ textAlign: "center", padding: "20px 24px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}`, lineHeight: 1.7 }}>
+        NF 33/2013 (texto consolidado) · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025 · Solo rendimientos del trabajo · Ejercicio fiscal 2025
+        <br />Herramienta orientativa — para la declaración oficial usa Rentafácil (Hacienda Foral de Álava) o consulta un asesor fiscal
       </div>
     </div>
   );
