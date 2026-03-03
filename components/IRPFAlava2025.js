@@ -445,12 +445,13 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
       <div style={{ display: "flex", gap: 4 }}>
         {options.map(opt => (
           <button key={opt.value} onClick={() => onChange(opt.value)} style={{
-            flex: 1, padding: "7px 4px", fontSize: 10, fontWeight: 600,
+            flex: 1, padding: "10px 6px", fontSize: 11, fontWeight: 600,
             background: val === opt.value ? accent : T.surface,
             color: val === opt.value ? "#fff" : T.inkMid,
             border: `1.5px solid ${val === opt.value ? accent : T.border}`,
-            borderRadius: 6, cursor: "pointer", fontFamily: T.fontSans,
+            borderRadius: 8, cursor: "pointer", fontFamily: T.fontSans,
             transition: "all .15s", lineHeight: 1.3,
+            minHeight: 44,
           }}>{opt.label}</button>
         ))}
       </div>
@@ -513,33 +514,54 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
         tooltipText="Afecta al tipo de cotización SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 €/año."
       />
 
-      {/* Deducciones adicionales — colapsables */}
+      {/* Situación personal — colapsable */}
       <button
         onClick={() => setExpanded(e => !e)}
         style={{
-          width: "100%", marginTop: 4, padding: "8px 12px",
+          width: "100%", marginTop: 4, padding: "10px 14px",
           background: hasExtras ? accentLight : T.surfaceAlt,
           border: `1px solid ${hasExtras ? accent + "44" : T.borderSoft}`,
-          borderRadius: 8, cursor: "pointer", fontSize: 11,
+          borderRadius: 8, cursor: "pointer", fontSize: 12,
           color: hasExtras ? accent : T.inkMid,
           fontFamily: T.fontSans, fontWeight: hasExtras ? 700 : 400,
           textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center",
           transition: "all .15s",
         }}
       >
-        <span>Deducciones adicionales y vivienda{hasExtras ? " ✓" : ""}</span>
-        <span style={{ fontSize: 10, opacity: 0.6 }}>{expanded ? "▴" : "▾"}</span>
+        <span>Situaci\u00f3n personal y deducciones{hasExtras ? " \u2714" : ""}</span>
+        <span style={{ fontSize: 10, opacity: 0.6 }}>{expanded ? "\u25b4" : "\u25be"}</span>
       </button>
+
+      {/* Resumen compacto cuando est\u00e1 cerrado y hay datos */}
+      {!expanded && hasExtras && (
+        <div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
+          {data.edad !== "menor65" && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>{data.edad === "75+" ? "75+" : "65-74"}</span>}
+          {data.discapacidad !== "ninguna" && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Discap. {data.discapacidad}</span>}
+          {data.viudedad && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Viudedad</span>}
+          {data.despoblacion && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Desp.</span>}
+          {data.ascendientes > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>{data.ascendientes} asc.</span>}
+          {data.cuidado !== "ninguno" && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Cuidado</span>}
+          {n(data.viviendaCompra) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Hipoteca</span>}
+          {n(data.alquilerAnual) > 0 && <span style={{ fontSize: 9, background: accentLight, border: `1px solid ${accent}33`, borderRadius: 10, padding: "2px 8px", color: accent, fontWeight: 600 }}>Alquiler</span>}
+        </div>
+      )}
 
       {expanded && (
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
-          <NumInput
-            label="Otras rentas no laborales (art. 23.2)"
-            value={data.rentasNoLab}
-            onChange={v => set("rentasNoLab", v)}
-            hint="Si supera 7.500 €, la bonificación del trabajo queda fija en 3.000 €"
-            tooltipText="Rendimientos del capital inmobiliario/mobiliario, ganancias patrimoniales, etc. Si el total supera 7.500 €, la bonificación del art. 23 se limita a 3.000 € (art. 23.2 NF 33/2013)."
-            accent={accent} accentLight={accentLight}
+          {/* ── Secci\u00f3n: Situaci\u00f3n personal ────────── */}
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+            Situaci\u00f3n personal
+          </div>
+          <SmallSelector
+            lbl="Edad del contribuyente (art. 83)"
+            value={data.edad}
+            onChange={v => set("edad", v)}
+            options={[
+              { value: "menor65", label: "Menor de 65" },
+              { value: "65-74",   label: "65-74 (385 \u20ac)" },
+              { value: "75+",     label: "75+ (700 \u20ac)" },
+            ]}
+            tooltipText="Deducci\u00f3n por edad: 385 \u20ac (>65) o 700 \u20ac (>75), BI \u2264 20.000 \u20ac, fase-out hasta 30.000 \u20ac. Incompatible con deducci\u00f3n viudedad: se aplica la m\u00e1s beneficiosa. Art. 83 NF 33/2013."
           />
           <SmallSelector
             lbl="Discapacidad reconocida (arts. 23.3 + 82)"
@@ -547,21 +569,10 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             onChange={v => set("discapacidad", v)}
             options={[
               { value: "ninguna", label: "Sin discapacidad" },
-              { value: "33-65",   label: "≥33% y <65%" },
-              { value: "65+",     label: "≥65% / mov. reducida" },
+              { value: "33-65",   label: "\u226533% y <65%" },
+              { value: "65+",     label: "\u226565% / mov. reducida" },
             ]}
-            tooltipText="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% o +250%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%) o 1.464,54 € (≥65%). Grados superiores (Grado II/III) consultar asesor."
-          />
-          <SmallSelector
-            lbl="Edad del contribuyente (art. 83)"
-            value={data.edad}
-            onChange={v => set("edad", v)}
-            options={[
-              { value: "menor65", label: "Menor de 65" },
-              { value: "65-74",   label: "65-74 (385 €)" },
-              { value: "75+",     label: "75+ (700 €)" },
-            ]}
-            tooltipText="Deducción por edad: 385 € (>65) o 700 € (>75), BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción viudedad: se aplica la más beneficiosa. Art. 83 NF 33/2013."
+            tooltipText="Doble efecto: 1) Art. 23.3: incrementa bonificaci\u00f3n del trabajo (+100% o +250%). 2) Art. 82 NF 19/2024: deducci\u00f3n de cuota de 1.025,64 \u20ac (33-65%) o 1.464,54 \u20ac (\u226565%). Grados superiores (Grado II/III) consultar asesor."
           />
           <SmallSelector
             lbl="Viudedad (art. 82 bis NF 3/2025)"
@@ -569,24 +580,24 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             onChange={v => set("viudedad", v === "si")}
             options={[
               { value: "no", label: "No aplica" },
-              { value: "si", label: "Viudo/a (hasta 200 €)" },
+              { value: "si", label: "Viudo/a (hasta 200 \u20ac)" },
             ]}
-            tooltipText="Deducción de 200 € para contribuyentes viudos con BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción por edad (art. 83): se aplica automáticamente la más beneficiosa."
+            tooltipText="Deducci\u00f3n de 200 \u20ac para contribuyentes viudos con BI \u2264 20.000 \u20ac, fase-out hasta 30.000 \u20ac. Incompatible con deducci\u00f3n por edad (art. 83): se aplica autom\u00e1ticamente la m\u00e1s beneficiosa."
           />
           {data.viudedad && data.edad !== "menor65" && (
             <div style={{ fontSize: 10, color: T.gold, padding: "2px 0 8px", lineHeight: 1.5 }}>
-              Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica automáticamente la más beneficiosa.
+              Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica autom\u00e1ticamente la m\u00e1s beneficiosa.
             </div>
           )}
           <SmallSelector
-            lbl="Municipio (art. 77.2 despoblación)"
+            lbl="Municipio (art. 77.2 despoblaci\u00f3n)"
             value={data.despoblacion ? "si" : "no"}
             onChange={v => set("despoblacion", v === "si")}
             options={[
               { value: "no", label: "Normal" },
-              { value: "si", label: "≤500 hab. (+200 €)" },
+              { value: "si", label: "\u2264500 hab. (+200 \u20ac)" },
             ]}
-            tooltipText="Minoración adicional de 200 € por residir en municipio con ≤ 500 habitantes. Art. 77.2 NF 19/2024."
+            tooltipText="Minoraci\u00f3n adicional de 200 \u20ac por residir en municipio con \u2264 500 habitantes. Art. 77.2 NF 19/2024."
           />
           <SmallSelector
             lbl="Ascendientes convivientes (art. 81)"
@@ -594,10 +605,10 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             onChange={v => set("ascendientes", parseInt(v) || 0)}
             options={[
               { value: "0", label: "Ninguno" },
-              { value: "1", label: "1 (423,72 €)" },
-              { value: "2", label: "2 (847,44 €)" },
+              { value: "1", label: "1 (423,72 \u20ac)" },
+              { value: "2", label: "2 (847,44 \u20ac)" },
             ]}
-            tooltipText="423,72 € por ascendiente que conviva permanentemente con el contribuyente, con rentas ≤ SMI (16.576 €) y que no presente declaración propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
+            tooltipText="423,72 \u20ac por ascendiente que conviva permanentemente con el contribuyente, con rentas \u2264 SMI (16.576 \u20ac) y que no presente declaraci\u00f3n propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
           />
           <SmallSelector
             lbl="Cuidado menores/dependientes (art. 81 ter)"
@@ -605,31 +616,46 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
             onChange={v => set("cuidado", v)}
             options={[
               { value: "ninguno",        label: "No aplica" },
-              { value: "empleado_hogar", label: "Empleado hogar (250 €)" },
-              { value: "profesional",    label: "Profesional cert. (500 €)" },
+              { value: "empleado_hogar", label: "Empleado hogar (250 \u20ac)" },
+              { value: "profesional",    label: "Profesional cert. (500 \u20ac)" },
             ]}
-            tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 años o familiares dependientes/discapacitados. 250 € (general) o 500 € si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
-          />
-          <NumInput
-            label="Otras deducciones NF 3/2025 (arts. 83 bis/ter)"
-            value={data.otrasDeducNF3}
-            onChange={v => set("otrasDeducNF3", v)}
-            hint="Corresponsabilidad masculina (≤200 €) / Reincorporación femenina (≤1.500 €)"
-            tooltipText="Art. 83 bis: hasta 200 €/año para hombres que reducen su jornada para cuidar hijos <4 años. Art. 83 ter: hasta 1.500 €/año (2.250 € si parto/adopción múltiple) para mujeres que se reincorporan al trabajo."
-            accent={accent} accentLight={accentLight}
+            tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 a\u00f1os o familiares dependientes/discapacitados. 250 \u20ac (general) o 500 \u20ac si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
           />
 
-          {/* Vivienda habitual */}
-          <div style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${T.borderSoft}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 8 }}>
+          {/* ── Secci\u00f3n: Rentas y reducciones ────────── */}
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+              Rentas adicionales y otras deducciones
+            </div>
+            <NumInput
+              label="Otras rentas no laborales (art. 23.2)"
+              value={data.rentasNoLab}
+              onChange={v => set("rentasNoLab", v)}
+              hint="Si supera 7.500 \u20ac, la bonificaci\u00f3n del trabajo queda fija en 3.000 \u20ac"
+              tooltipText="Rendimientos del capital inmobiliario/mobiliario, ganancias patrimoniales, etc. Si el total supera 7.500 \u20ac, la bonificaci\u00f3n del art. 23 se limita a 3.000 \u20ac (art. 23.2 NF 33/2013)."
+              accent={accent} accentLight={accentLight}
+            />
+            <NumInput
+              label="Otras deducciones NF 3/2025 (arts. 83 bis/ter)"
+              value={data.otrasDeducNF3}
+              onChange={v => set("otrasDeducNF3", v)}
+              hint="Corresponsabilidad masculina (\u2264200 \u20ac) / Reincorporaci\u00f3n femenina (\u22641.500 \u20ac)"
+              tooltipText="Art. 83 bis: hasta 200 \u20ac/a\u00f1o para hombres que reducen su jornada para cuidar hijos <4 a\u00f1os. Art. 83 ter: hasta 1.500 \u20ac/a\u00f1o (2.250 \u20ac si parto/adopci\u00f3n m\u00faltiple) para mujeres que se reincorporan al trabajo."
+              accent={accent} accentLight={accentLight}
+            />
+          </div>
+
+          {/* ── Secci\u00f3n: Vivienda habitual ────────── */}
+          <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${T.borderSoft}` }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
               Vivienda habitual
             </div>
             <NumInput
               label="Pagos hipoteca anual (art. 87)"
               value={data.viviendaCompra}
               onChange={v => set("viviendaCompra", v)}
-              hint="Amortización + intereses anuales"
-              tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €). Mun. <4.000 hab.: 20% (máx. 1.836 €). <36 años / fam. num.: 25% (máx. 2.346 €). Art. 87 NF 33/2013 (mod. NF 3/2025)."
+              hint="Amortizaci\u00f3n + intereses anuales"
+              tooltipText="Deducci\u00f3n por adquisici\u00f3n de vivienda habitual. General: 18% (m\u00e1x. 1.530 \u20ac). Mun. <4.000 hab.: 20% (m\u00e1x. 1.836 \u20ac). <36 a\u00f1os / fam. num.: 25% (m\u00e1x. 2.346 \u20ac). Art. 87 NF 33/2013 (mod. NF 3/2025)."
               accent={accent} accentLight={accentLight}
             />
             <SmallSelector
@@ -637,18 +663,18 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               value={data.viviendaPerfil}
               onChange={v => set("viviendaPerfil", v)}
               options={[
-                { value: "general",   label: "General (18%, 1.530 €)" },
-                { value: "municipio", label: "Mun. <4.000 (20%, 1.836 €)" },
-                { value: "joven",     label: "<36 / Fam.num (25%, 2.346 €)" },
+                { value: "general",   label: "General (18%, 1.530 \u20ac)" },
+                { value: "municipio", label: "Mun. <4.000 (20%, 1.836 \u20ac)" },
+                { value: "joven",     label: "<36 / Fam.num (25%, 2.346 \u20ac)" },
               ]}
-              tooltipText="General: 18%/1.530 €. Municipio <4.000 hab.: 20%/1.836 €. Menores de 36 años y familias numerosas: 25%/2.346 €. Art. 87 NF 33/2013 (mod. NF 3/2025)."
+              tooltipText="General: 18%/1.530 \u20ac. Municipio <4.000 hab.: 20%/1.836 \u20ac. Menores de 36 a\u00f1os y familias numerosas: 25%/2.346 \u20ac. Art. 87 NF 33/2013 (mod. NF 3/2025)."
             />
             <NumInput
               label="Alquiler vivienda habitual (art. 86)"
               value={data.alquilerAnual}
               onChange={v => set("alquilerAnual", v)}
-              hint="Importe total del alquiler pagado en el año"
-              tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €). Mejorado: 35% (máx. 2.800 €). Art. 86 NF 33/2013 (mod. NF 3/2025)."
+              hint="Importe total del alquiler pagado en el a\u00f1o"
+              tooltipText="Deducci\u00f3n por alquiler de vivienda habitual. General: 20% (m\u00e1x. 1.600 \u20ac). Mejorado: 35% (m\u00e1x. 2.800 \u20ac). Art. 86 NF 33/2013 (mod. NF 3/2025)."
               accent={accent} accentLight={accentLight}
             />
             <SmallSelector
@@ -656,14 +682,14 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               value={data.alquilerPerfil}
               onChange={v => set("alquilerPerfil", v)}
               options={[
-                { value: "general",  label: "General (20%, 1.600 €)" },
-                { value: "mejorado", label: "Mejorado (35%, 2.800 €)" },
+                { value: "general",  label: "General (20%, 1.600 \u20ac)" },
+                { value: "mejorado", label: "Mejorado (35%, 2.800 \u20ac)" },
               ]}
-              tooltipText="Perfil mejorado (35%/2.800 €) para: menores de 36 años, familias numerosas o monoparentales, discapacidad ≥65%, dependencia, víctimas violencia de género, o municipios en riesgo de despoblación. Art. 86 NF 33/2013 (mod. NF 3/2025)."
+              tooltipText="Perfil mejorado (35%/2.800 \u20ac) para: menores de 36 a\u00f1os, familias numerosas o monoparentales, discapacidad \u226565%, dependencia, v\u00edctimas violencia de g\u00e9nero, o municipios en riesgo de despoblaci\u00f3n. Art. 86 NF 33/2013 (mod. NF 3/2025)."
             />
             {data.viviendaCompra && data.alquilerAnual && (
               <div style={{ fontSize: 10, color: T.red, padding: "4px 0" }}>
-                Normalmente no se aplican ambas deducciones simultáneamente (compra + alquiler)
+                Normalmente no se aplican ambas deducciones simult\u00e1neamente (compra + alquiler)
               </div>
             )}
           </div>
@@ -972,7 +998,7 @@ function TablaComparativa({ scenarios }) {
 // PANEL PEDAGÓGICO — "¿Por qué?"
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
+function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0, compact = false }) {
   if (!scenarios?.length) return null;
   const sorted = [...scenarios].sort((a, b) => b.resultado - a.resultado);
   const best = sorted[0];
@@ -980,14 +1006,22 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
 
   // Modo solo: sin escenarios conjuntos
   if (!hasConj) {
+    if (compact) {
+      return (
+        <div style={{ fontSize: 12, color: T.inkMid, lineHeight: 1.5 }}>
+          Solo declaraci\u00f3n individual.{hijos > 0 && ` Deducci\u00f3n hijos: ${eur(deducHijosTotal(hijos, hijosM6, hijos6a15))} al 100%.`}
+          {" "}A\u00f1ade pareja para comparar.
+        </div>
+      );
+    }
     return (
       <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 14, padding: 20 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 8 }}>
-          Declaración individual
+          Declaraci\u00f3n individual
         </div>
         <div style={{ fontSize: 12, color: T.inkMid, lineHeight: 1.6 }}>
-          Solo se muestra la declaración individual. Para comparar con la declaración conjunta, añade los datos de una segunda persona (Persona B).
-          {hijos > 0 && ` Con hijos, la deducción de ${eur(deducHijosTotal(hijos, hijosM6, hijos6a15))} se aplica al 100% como progenitor único declarante.`}
+          Solo se muestra la declaraci\u00f3n individual. Para comparar con la declaraci\u00f3n conjunta, a\u00f1ade los datos de una segunda persona (Persona B).
+          {hijos > 0 && ` Con hijos, la deducci\u00f3n de ${eur(deducHijosTotal(hijos, hijosM6, hijos6a15))} se aplica al 100% como progenitor \u00fanico declarante.`}
         </div>
       </div>
     );
@@ -996,40 +1030,58 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
   const drivers = [];
 
   // Analizar drivers de la diferencia
-  const isConj = best.id.startsWith("CONJ");
   const hasHijos = hijos > 0;
 
-  // ¿Cuánto pesa la penalización de la conjunta?
+  // \u00bfCu\u00e1nto pesa la penalizaci\u00f3n de la conjunta?
   const conjNoHijos = scenarios.find(s => s.id === "CONJ-NOHIJOS");
   const indNoHijos  = scenarios.find(s => s.id === "IND-NOHIJOS");
   if (conjNoHijos && indNoHijos) {
     const penalizacion = conjNoHijos.resultado - indNoHijos.resultado;
-    if (penalizacion < 0) drivers.push({ label: "Penalización por 1 sola minoración en conjunta", value: penalizacion, note: `La conjunta aplica 1.583 € de minoración; la individual aplica 2 × 1.583 = 3.166 €. Diferencia: −1.583 €. Pero la reducción de base de 4.800 € (art. 73) ahorra ${eur(4800 * tipoMarginal(conjNoHijos.bl))} al tipo ${pct(tipoMarginal(conjNoHijos.bl))}.` });
-    if (penalizacion >= 0) drivers.push({ label: "Ventaja neta de la declaración conjunta (sin hijos)", value: penalizacion, note: `La reducción de base de 4.800 € (art. 73 NF 3/2025) genera un ahorro de ${eur(4800 * tipoMarginal(conjNoHijos.bl))} que supera la pérdida de 1 minoración.` });
+    if (penalizacion < 0) drivers.push({ label: "Penalizaci\u00f3n por 1 sola minoraci\u00f3n en conjunta", value: penalizacion, note: `La conjunta aplica 1.583 \u20ac de minoraci\u00f3n; la individual aplica 2 \u00d7 1.583 = 3.166 \u20ac. Diferencia: \u22121.583 \u20ac. Pero la reducci\u00f3n de base de 4.800 \u20ac (art. 73) ahorra ${eur(4800 * tipoMarginal(conjNoHijos.bl))} al tipo ${pct(tipoMarginal(conjNoHijos.bl))}.` });
+    if (penalizacion >= 0) drivers.push({ label: "Ventaja neta de la declaraci\u00f3n conjunta (sin hijos)", value: penalizacion, note: `La reducci\u00f3n de base de 4.800 \u20ac (art. 73 NF 3/2025) genera un ahorro de ${eur(4800 * tipoMarginal(conjNoHijos.bl))} que supera la p\u00e9rdida de 1 minoraci\u00f3n.` });
   }
 
   if (hasHijos) {
     const dedTotal = deducHijosTotal(hijos, hijosM6, hijos6a15);
-    const dedConj  = dedTotal;          // 100%
-    const dedInd   = dedTotal / 2;      // 50% pero puede perderse si cuota cero
+    const dedConj  = dedTotal;
+    const dedInd   = dedTotal / 2;
     const perdida  = scenarios.find(s => s.id === "IND-HIJOS");
     if (perdida) {
       const dedEfectivaInd = (indNoHijos?.resultado !== undefined ? -(perdida.resultado - indNoHijos.resultado) : dedInd);
-      drivers.push({ label: "Ventaja de la deducción de hijos en conjunta vs. individual", value: dedConj - dedEfectivaInd, note: `Conjunta: ${eur(dedConj)} completos. Individual: solo ${eur(dedEfectivaInd)} efectivos (si la otra persona tiene cuota cero, su 50% se pierde). Diferencia: ${eur(dedConj - dedEfectivaInd)}.` });
+      drivers.push({ label: "Ventaja de la deducci\u00f3n de hijos en conjunta vs. individual", value: dedConj - dedEfectivaInd, note: `Conjunta: ${eur(dedConj)} completos. Individual: solo ${eur(dedEfectivaInd)} efectivos (si la otra persona tiene cuota cero, su 50% se pierde). Diferencia: ${eur(dedConj - dedEfectivaInd)}.` });
     }
   }
 
   if (!drivers.length) {
-    drivers.push({ label: "La diferencia entre opciones es pequeña", value: best.resultado - sorted[sorted.length - 1].resultado, note: "Con rentas similares o sin hijos, la ventaja de la conjunta depende principalmente del tipo marginal aplicable a la reducción de 4.800 €." });
+    drivers.push({ label: "La diferencia entre opciones es peque\u00f1a", value: best.resultado - sorted[sorted.length - 1].resultado, note: "Con rentas similares o sin hijos, la ventaja de la conjunta depende principalmente del tipo marginal aplicable a la reducci\u00f3n de 4.800 \u20ac." });
+  }
+
+  // Modo compacto: resumen inline para el banner
+  if (compact) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {drivers.slice(0, 2).map((d, i) => (
+          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <div style={{ fontSize: 12, color: T.inkMid, lineHeight: 1.4 }}>{d.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 700, fontFamily: T.fontMono, color: d.value >= 0 ? T.green : T.red, whiteSpace: "nowrap" }}>
+              {signedEur(d.value)}
+            </div>
+          </div>
+        ))}
+        <div style={{ fontSize: 11, color: T.inkFaint, lineHeight: 1.5, marginTop: 2 }}>
+          <strong style={{ color: T.inkMid }}>Regla general:</strong> La conjunta suele convenir cuando hay gran diferencia de rentas entre c\u00f3nyuges y/o hijos en com\u00fan.
+        </div>
+      </div>
+    );
   }
 
   return (
     <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 14, padding: 20 }}>
       <div style={{ fontSize: 13, fontWeight: 700, color: T.ink, marginBottom: 4 }}>
-        ¿Por qué <span style={{ color: T.green }}>{best.label}</span> es la mejor opción?
+        \u00bfPor qu\u00e9 <span style={{ color: T.green }}>{best.label}</span> es la mejor opci\u00f3n?
       </div>
       <div style={{ fontSize: 11, color: T.inkMid, marginBottom: 16, lineHeight: 1.5 }}>
-        Análisis de los factores que determinan la diferencia entre escenarios
+        An\u00e1lisis de los factores que determinan la diferencia entre escenarios
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {drivers.map((d, i) => (
@@ -1046,7 +1098,7 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
       </div>
       {/* Norma clave */}
       <div style={{ marginTop: 14, background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "10px 14px", fontSize: 11, color: T.inkFaint, lineHeight: 1.6 }}>
-        <strong style={{ color: T.inkMid }}>Regla general Álava:</strong> La conjunta suele convenir cuando la diferencia de rentas entre cónyuges es grande Y hay hijos en común (la deducción de hijos se aplica al 100% en lugar del 50%). La individual conviene cuando ambos tienen rentas similares y ambas cuotas absorben las deducciones.
+        <strong style={{ color: T.inkMid }}>Regla general \u00c1lava:</strong> La conjunta suele convenir cuando la diferencia de rentas entre c\u00f3nyuges es grande Y hay hijos en com\u00fan (la deducci\u00f3n de hijos se aplica al 100% en lugar del 50%). La individual conviene cuando ambos tienen rentas similares y ambas cuotas absorben las deducciones.
       </div>
     </div>
   );
@@ -1058,7 +1110,6 @@ function PorquePanel({ scenarios, hijos, hijosM6 = 0, hijos6a15 = 0 }) {
 
 export default function IRPFAlava2025() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [activeTab, setActiveTab] = useState("comparativa");
   const [showPersonB, setShowPersonB] = useState(false);
 
   const aB    = n(state.personA.bruto);
@@ -1258,12 +1309,7 @@ export default function IRPFAlava2025() {
   const peor   = scenarios[scenarios.length - 1];
   const diferencia = optimo && peor ? optimo.resultado - peor.resultado : 0;
 
-  const TABS = [
-    { id: "comparativa", label: "Comparativa" },
-    { id: "detalle",     label: "Desglose paso a paso" },
-    { id: "tabla",       label: "Tabla lado a lado" },
-    { id: "porque",      label: "¿Por qué?" },
-  ];
+  const [showTabla, setShowTabla] = useState(false);
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -1281,7 +1327,7 @@ export default function IRPFAlava2025() {
                 Calculadora IRPF Álava 2025
               </div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,.5)", marginTop: 3 }}>
-                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · Solo rendimientos del trabajo
+                Declaraci\u00f3n 2026 \u00b7 {hasPairData ? "Comparativa individual vs conjunta" : "Declaraci\u00f3n individual"} \u00b7 Solo rendimientos del trabajo \u00b7 <span style={{ color: "rgba(255,255,255,.35)" }}>Act. mar. 2026</span>
               </div>
             </div>
             {ready && optimo && (
@@ -1303,6 +1349,11 @@ export default function IRPFAlava2025() {
 
           {/* ────── PANEL IZQUIERDO: INPUTS ────────────────────────────── */}
           <div className="sticky-panel" style={{ position: "sticky", top: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+
+            {/* Aviso breve arriba */}
+            <div style={{ background: "#FEF3C7", border: "1px solid #FCD34D66", borderRadius: 10, padding: "10px 14px", fontSize: 11, color: "#92400E", lineHeight: 1.6 }}>
+              Herramienta orientativa para rendimientos del trabajo. Para la declaraci\u00f3n oficial usa <strong>Rentaf\u00e1cil</strong> (Hacienda Foral de \u00c1lava).
+            </div>
 
             {/* Inputs side-by-side en mobile, stacked en desktop */}
             <PersonaInputs
@@ -1367,12 +1418,14 @@ export default function IRPFAlava2025() {
               ↺ Limpiar todos los datos
             </button>
 
-            {/* Aviso */}
-            <div style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "12px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
-              <strong style={{ color: T.inkMid }}>Incluye:</strong> rendimientos del trabajo, bonificación art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoración por despoblación (art. 77.2).
-              <br /><strong style={{ color: T.inkMid }}>No incluye:</strong> capital inmobiliario/mobiliario, actividades económicas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni año de adquisición sin límite para &lt;36 (art. 87.4ter).
-              <br /><strong style={{ color: T.red }}>Esta herramienta es orientativa.</strong> Para la declaración oficial, utiliza <strong>Rentafácil</strong> de la Hacienda Foral de Álava o consulta un asesor fiscal profesional.
-            </div>
+            {/* Detalle t\u00e9cnico */}
+            <details style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "10px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
+              <summary style={{ cursor: "pointer", fontWeight: 600, color: T.inkMid, fontSize: 11 }}>Alcance y limitaciones</summary>
+              <div style={{ marginTop: 8 }}>
+                <strong style={{ color: T.inkMid }}>Incluye:</strong> rendimientos del trabajo, bonificaci\u00f3n art. 23 (incl. discapacidad), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad del contribuyente (art. 82, grados base), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporaci\u00f3n (arts. 83 bis/ter), vivienda habitual (art. 87) y alquiler (art. 86), minoraci\u00f3n por despoblaci\u00f3n (art. 77.2).
+                <br /><strong style={{ color: T.inkMid }}>No incluye:</strong> capital inmobiliario/mobiliario, actividades econ\u00f3micas, ganancias patrimoniales, anualidades por alimentos (art. 80), discapacidad grados II/III (art. 82), asistentes personales (art. 81 bis), discapacidad de familiares convivientes, ni a\u00f1o de adquisici\u00f3n sin l\u00edmite para &lt;36 (art. 87.4ter).
+              </div>
+            </details>
           </div>
 
           {/* ────── PANEL DERECHO: RESULTADOS ──────────────────────────── */}
@@ -1390,74 +1443,89 @@ export default function IRPFAlava2025() {
                 </div>
               </div>
             ) : (
-              <>
-                {/* ── Banner recomendación ─────────────────────────────── */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+
+                {/* ── 1. Banner recomendación con explicación ─────────── */}
                 {optimo && (
-                  <div style={{ background: `linear-gradient(135deg, ${T.greenL}, ${T.surface})`, border: `2px solid ${T.greenAcc}55`, borderRadius: 16, padding: "18px 22px", marginBottom: 22, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 10, fontWeight: 800, color: T.green, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 5 }}>★ Recomendación</div>
-                      <div style={{ fontSize: 17, fontWeight: 700, color: T.ink }}>{optimo.label}</div>
-                      <div style={{ fontSize: 12, color: T.inkMid, marginTop: 3 }}>{optimo.sublabel}</div>
+                  <div style={{ background: `linear-gradient(135deg, ${T.greenL}, ${T.surface})`, border: `2px solid ${T.greenAcc}55`, borderRadius: 16, padding: "22px 24px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14 }}>
+                      <div style={{ flex: 1, minWidth: 200 }}>
+                        <div style={{ fontSize: 10, fontWeight: 800, color: T.green, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 6 }}>Recomendaci\u00f3n</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: T.ink, lineHeight: 1.3 }}>
+                          {optimo.resultado >= 0
+                            ? `Hacienda te devuelve ${eur(Math.abs(optimo.resultado))}`
+                            : `Tendr\u00e1s que pagar ${eur(Math.abs(optimo.resultado))}`
+                          }
+                        </div>
+                        <div style={{ fontSize: 13, color: T.inkMid, marginTop: 6, lineHeight: 1.5 }}>
+                          Tu mejor opci\u00f3n es <strong style={{ color: T.ink }}>{optimo.label.toLowerCase()}</strong>.
+                          {diferencia > 0 && ` Ahorras ${eur(diferencia)} frente a la peor opci\u00f3n.`}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 34, fontWeight: 900, fontFamily: T.fontMono, color: optimo.resultado >= 0 ? T.green : T.red, letterSpacing: "-0.02em" }}>
+                          {signedEur(optimo.resultado)}
+                        </div>
+                        {diferencia > 0 && (
+                          <div style={{ fontSize: 11, color: T.green, marginTop: 4, fontWeight: 600 }}>
+                            +{eur(diferencia)} vs peor
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {diferencia > 0 && (
-                      <div style={{ background: T.greenL, border: `1px solid ${T.greenAcc}44`, borderRadius: 12, padding: "10px 16px", textAlign: "center" }}>
-                        <div style={{ fontSize: 10, color: T.green, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 2 }}>Ahorro vs. peor opción</div>
-                        <div style={{ fontSize: 26, fontWeight: 900, fontFamily: T.fontMono, color: T.green }}>+{eur(diferencia)}</div>
+                    {/* Mini ¿Por qué? inline */}
+                    {scenarios.length > 1 && (
+                      <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px solid ${T.greenAcc}33` }}>
+                        <PorquePanel scenarios={scenarios} hijos={hj} hijosM6={hjM6} hijos6a15={hj6a15} compact />
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* ── TABS ────────────────────────────────────────────── */}
-                <div style={{ display: "flex", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 10, padding: 4, marginBottom: 20, gap: 4 }}>
-                  {TABS.map(t => (
-                    <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ flex: 1, padding: "9px 4px", background: activeTab === t.id ? T.ink : "transparent", color: activeTab === t.id ? "#fff" : T.inkMid, border: "none", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: activeTab === t.id ? 700 : 400, fontFamily: T.fontSans, transition: "all .15s" }}>
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* ══ TAB: COMPARATIVA (CARDS) ═════════════════════════ */}
-                {activeTab === "comparativa" && (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 16 }}>
+                {/* ── 2. Escenarios comparativa ──────────────────────── */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+                    Comparativa de escenarios
+                  </div>
+                  <div className="scenario-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: 14 }}>
                     {scenarios.map((sc, i) => (
                       <ScenarioCard key={sc.id} sc={sc} rank={i} totalOpciones={scenarios.length} />
                     ))}
                   </div>
-                )}
+                </div>
 
-                {/* ══ TAB: DESGLOSE WATERFALL ══════════════════════════ */}
-                {activeTab === "detalle" && calc && (
+                {/* ── 3. Desglose paso a paso (siempre visible) ───────── */}
+                {calc && (
                   <div>
-                    <div style={{ fontSize: 12, color: T.inkFaint, marginBottom: 14 }}>
-                      Haz clic en cada escenario para ver el cálculo paso a paso completo.
+                    <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.inkFaint, marginBottom: 10 }}>
+                      Desglose paso a paso
                     </div>
 
                     {/* Individuales */}
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.cobalt, marginBottom: 8 }}>
-                      Declaración individual
+                      Declaraci\u00f3n individual
                     </div>
-                    <WaterfallDesglose data={{ ...calc.a_sh, bruto: aB, ret: aR, teRet: aR / aB }} label="Persona A — Individual sin hijos" accent={T.cobalt} />
-                    {hj > 0 && <WaterfallDesglose data={{ ...calc.a_ch, bruto: aB, ret: aR, teRet: aR / aB }} label={`Persona A — Individual con hijos (${calc.solo ? "100%" : "50%"} = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />}
+                    <WaterfallDesglose data={{ ...calc.a_sh, bruto: aB, ret: aR, teRet: aR / aB }} label="Persona A \u2014 Individual sin hijos" accent={T.cobalt} />
+                    {hj > 0 && <WaterfallDesglose data={{ ...calc.a_ch, bruto: aB, ret: aR, teRet: aR / aB }} label={`Persona A \u2014 Individual con hijos (${calc.solo ? "100%" : "50%"} = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />}
 
                     {!calc.solo && (
                       <>
-                        <WaterfallDesglose data={{ ...calc.b_sh, bruto: bB, ret: bR, teRet: bR / bB }} label="Persona B — Individual sin hijos" accent={T.teal} />
-                        {hj > 0 && <WaterfallDesglose data={{ ...calc.b_ch, bruto: bB, ret: bR, teRet: bR / bB }} label={`Persona B — Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />}
+                        <WaterfallDesglose data={{ ...calc.b_sh, bruto: bB, ret: bR, teRet: bR / bB }} label="Persona B \u2014 Individual sin hijos" accent={T.teal} />
+                        {hj > 0 && <WaterfallDesglose data={{ ...calc.b_ch, bruto: bB, ret: bR, teRet: bR / bB }} label={`Persona B \u2014 Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />}
 
                         {/* Conjuntas */}
                         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.gold, marginBottom: 8, marginTop: 20 }}>
-                          Declaración conjunta
+                          Declaraci\u00f3n conjunta
                         </div>
                         <WaterfallDesglose
                           data={{ ...calc.c_sh, bruto: aB + bB, ss: calc.c_sh.ssA + calc.c_sh.ssB, bonif: calc.c_sh.bonA + calc.c_sh.bonB, rnt: calc.c_sh.rntA + calc.c_sh.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_sh.teReal }}
-                          label="Conjunta sin hijos — ambos en una sola declaración"
+                          label="Conjunta sin hijos \u2014 ambos en una sola declaraci\u00f3n"
                           accent={T.gold}
                         />
                         {hj > 0 && (
                           <WaterfallDesglose
                             data={{ ...calc.c_ch, bruto: aB + bB, ss: calc.c_ch.ssA + calc.c_ch.ssB, bonif: calc.c_ch.bonA + calc.c_ch.bonB, rnt: calc.c_ch.rntA + calc.c_ch.rntB, redExtra: aRe + bRe, redConj: RED_CONJUNTA, ret: aR + bR, teRet: (aR + bR) / (aB + bB), teReal: calc.c_ch.teReal }}
-                            label={`Conjunta con hijos (100% = ${eur(calc.c_ch.dedH)}) — opción óptima si hijos`}
+                            label={`Conjunta con hijos (100% = ${eur(calc.c_ch.dedH)}) \u2014 opci\u00f3n \u00f3ptima si hijos`}
                             accent={T.gold}
                           />
                         )}
@@ -1466,32 +1534,56 @@ export default function IRPFAlava2025() {
                   </div>
                 )}
 
-                {/* ══ TAB: TABLA COMPARATIVA ═══════════════════════════ */}
-                {activeTab === "tabla" && (
-                  <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderRadius: 14, overflow: "hidden" }}>
-                    <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.borderSoft}` }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: T.ink }}>Todos los escenarios — comparativa de líneas</div>
-                      <div style={{ fontSize: 11, color: T.inkFaint, marginTop: 2 }}>Ordenados de mayor a menor resultado (mejor a peor)</div>
+                {/* ── 4. Tabla comparativa (colapsable) ──────────────── */}
+                <div>
+                  <button
+                    onClick={() => setShowTabla(t => !t)}
+                    style={{
+                      width: "100%", padding: "12px 18px",
+                      background: T.surface, border: `1.5px solid ${T.border}`,
+                      borderRadius: showTabla ? "14px 14px 0 0" : 14,
+                      cursor: "pointer", fontSize: 13, fontWeight: 700,
+                      color: T.ink, fontFamily: T.fontSans,
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      transition: "all .15s",
+                    }}
+                  >
+                    <span>Tabla comparativa lado a lado</span>
+                    <span style={{ fontSize: 11, color: T.inkFaint }}>{showTabla ? "Ocultar \u25b4" : "Mostrar \u25be"}</span>
+                  </button>
+                  {showTabla && (
+                    <div style={{ background: T.surface, border: `1.5px solid ${T.border}`, borderTop: "none", borderRadius: "0 0 14px 14px", overflow: "hidden" }}>
+                      <TablaComparativa scenarios={scenarios} />
                     </div>
-                    <TablaComparativa scenarios={scenarios} />
-                  </div>
-                )}
-
-                {/* ══ TAB: POR QUÉ ═════════════════════════════════════ */}
-                {activeTab === "porque" && (
-                  <PorquePanel scenarios={scenarios} hijos={hj} hijosM6={hjM6} hijos6a15={hj6a15} />
-                )}
-              </>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <div style={{ textAlign: "center", padding: "20px 24px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}`, lineHeight: 1.7 }}>
-        NF 33/2013 (texto consolidado) · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025 · Solo rendimientos del trabajo · Ejercicio fiscal 2025
-        <br />Herramienta orientativa — para la declaración oficial usa Rentafácil (Hacienda Foral de Álava) o consulta un asesor fiscal
+      <div style={{ textAlign: "center", padding: "20px 24px 32px", fontSize: 10, color: T.inkFaint, borderTop: `1px solid ${T.border}`, lineHeight: 1.7 }}>
+        NF 33/2013 (texto consolidado) \u00b7 NF 19/2024 \u00b7 NF 3/2025 \u00b7 DF 23/2025 \u00b7 Orden PJC/178/2025 \u00b7 Solo rendimientos del trabajo \u00b7 Ejercicio fiscal 2025
+        <br />Herramienta orientativa \u2014 para la declaraci\u00f3n oficial usa Rentaf\u00e1cil (Hacienda Foral de \u00c1lava) o consulta un asesor fiscal
+        <br /><span style={{ fontSize: 9, color: T.inkFaint + "99" }}>Actualizado a marzo 2026</span>
       </div>
+
+      {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}
+      {ready && optimo && (
+        <div className="mobile-sticky-result" style={{ background: T.ink, color: "#fff", display: "none" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,.5)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Mejor opci\u00f3n</div>
+              <div style={{ fontSize: 12, fontWeight: 700 }}>{optimo.label}</div>
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, fontFamily: T.fontMono, color: optimo.resultado >= 0 ? "#4ade80" : "#f87171" }}>
+              {signedEur(optimo.resultado)}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
