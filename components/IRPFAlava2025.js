@@ -13,6 +13,12 @@ const COMP_M6        = 424.60;  // Art. 79.2 NF 19/2024: suplemento descendiente
 const COMP_6A15      = 68.20;   // Art. 79.2 NF 19/2024: suplemento descendiente 6-15 años
 const MINORACION = 1583;
 const MINORACION_DESPOBLACION = 200; // Art. 77.2 NF 19/2024: municipios ≤500 hab.
+// Art. 77.3 NF 19/2024: minoración extraordinaria para BL ≤ 35.000 €
+function minoracionExtraordinaria(bl) {
+  if (bl <= 30000) return 200;
+  if (bl < 35000) return Math.max(0, +(200 - 0.04 * (bl - 30000)).toFixed(2));
+  return 0;
+}
 const RED_CONJUNTA = 4800;
 const SMI_2025 = 16576;
 const DEDUC_EDAD_65 = 385;       // Art. 83 NF 33/2013 (NF 26/2023): >65 años
@@ -238,7 +244,8 @@ function calcPersona({
   const ba       = Math.max(0, capMob + gananciasPatr);
   const ci_ahorro = cuotaEscalaAhorro(ba);
   const ci       = +(ci_gral + ci_ahorro).toFixed(2); // cuota íntegra total
-  const minTotal = MINORACION + (despoblacion ? MINORACION_DESPOBLACION : 0);
+  const minExtra = minoracionExtraordinaria(bl);
+  const minTotal = MINORACION + (despoblacion ? MINORACION_DESPOBLACION : 0) + minExtra;
   const pm       = Math.max(0, ci - minTotal);
   const dedH     = +(hijosShare).toFixed(2);
   // Para fase-out de deducciones personales: base imponible total (gral + ahorro)
@@ -265,7 +272,7 @@ function calcPersona({
   const ingresosTotal = brutoFiscal + rciNeto + Math.max(0, capMob) + Math.max(0, gananciasPatr);
   const teReal   = ingresosTotal > 0 ? cl / ingresosTotal : 0;
   const teRet    = brutoFiscal > 0 ? (ret + retCapMob) / ingresosTotal : 0;
-  return { bruto: brutoFiscal, brutoSalario: bruto, ret, ss, dif, bonif, rnt, rciNeto, bi, bl, ba, ci_gral, ci_ahorro, ci, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, dedAlim, dedDiscapFam, dedAsistPers, dedDon, dedInv, cl, resultado, teReal, teRet, redExtra, retCapMob, otrosRdtosTrabajo };
+  return { bruto: brutoFiscal, brutoSalario: bruto, ret, ss, dif, bonif, rnt, rciNeto, bi, bl, ba, ci_gral, ci_ahorro, ci, minExtra, minTotal, pm, dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc, dedAlim, dedDiscapFam, dedAsistPers, dedDon, dedInv, cl, resultado, teReal, teRet, redExtra, retCapMob, otrosRdtosTrabajo };
 }
 
 // Cálculo declaración conjunta
@@ -331,9 +338,10 @@ function calcConjunta({
   const ba    = Math.max(0, capMobA + capMobB + gananciasPatrA + gananciasPatrB);
   const ci_ahorro = cuotaEscalaAhorro(ba);
   const ci    = +(ci_gral + ci_ahorro).toFixed(2);
-  // Minoración: 1 sola + despoblación si aplica a alguno
+  // Minoración: 1 sola + despoblación si aplica a alguno + extraordinaria
   const minDesp = (despoblacionA || despoblacionB) ? MINORACION_DESPOBLACION : 0;
-  const minTotal = MINORACION + minDesp;
+  const minExtra = minoracionExtraordinaria(bl);
+  const minTotal = MINORACION + minDesp + minExtra;
   const pm    = Math.max(0, ci - minTotal);
   const dedH  = hijosTotal;
   // Deducciones personales: se calculan sobre BI individual aproximado (incluyendo capital inmobiliario)
@@ -363,7 +371,16 @@ function calcConjunta({
   const dedAlim      = deducAlimentos(anualidadesAlimentosA, numHijosAlimentosA) + deducAlimentos(anualidadesAlimentosB, numHijosAlimentosB);
   const dedDiscapFam = deducDiscapFamiliar(discapFamiliarA, discapFamiliarGradoA) + deducDiscapFamiliar(discapFamiliarB, discapFamiliarGradoB);
   const dedAsistPers = Math.min(Math.max(0, +asistPersonalA) * 0.30, 900) + Math.min(Math.max(0, +asistPersonalB) * 0.30, 900);
-  const dedDon       = deducDonaciones(donacionesA, bl, donacionesPrioritariasA) + deducDonaciones(donacionesB, bl, donacionesPrioritariasB);
+  // Donaciones conjunta: base total limitada al 30% de BL conjunto (no por persona)
+  const donBaseA = Math.max(0, donacionesA);
+  const donBaseB = Math.max(0, donacionesB);
+  const donBaseTotal = donBaseA + donBaseB;
+  const donBaseMax = bl * DONACIONES_BASE_MAX_PCT;
+  const donScale = donBaseTotal > donBaseMax && donBaseTotal > 0 ? donBaseMax / donBaseTotal : 1;
+  const dedDon = donBaseTotal > 0
+    ? +((donBaseA * donScale * (donacionesPrioritariasA ? DONACIONES_PRIORIT_PCT : DONACIONES_PCT))
+      + (donBaseB * donScale * (donacionesPrioritariasB ? DONACIONES_PRIORIT_PCT : DONACIONES_PCT))).toFixed(2)
+    : 0;
   const dedInv       = deducInversion(inversionNuevaCreacionA) + deducInversion(inversionNuevaCreacionB);
   const cl    = Math.max(0, pm - dedH - dedViud - dedEdad - dedDiscap - dedCuid - dedOtras - dedViv - dedAlq - dedAsc - dedAlim - dedDiscapFam - dedAsistPers - dedDon - dedInv);
   const retTotal = retA + retCapMobA + retB + retCapMobB;
@@ -374,7 +391,7 @@ function calcConjunta({
   return {
     brutoA: brutoFiscalA, brutoB: brutoFiscalB, brutoSalarioA: brutoA, brutoSalarioB: brutoB,
     ssA, ssB, difA, difB, bonA, bonB, rntA, rntB,
-    rciNetoA, rciNetoB, biSum, bl, ba, ci_gral, ci_ahorro, ci, minTotal, pm,
+    rciNetoA, rciNetoB, biSum, bl, ba, ci_gral, ci_ahorro, ci, minExtra, minTotal, pm,
     dedH, dedViud, dedEdad, dedDiscap, dedCuid, dedOtras, dedViv, dedAlq, dedAsc,
     dedAlim, dedDiscapFam, dedAsistPers, dedDon, dedInv,
     cl, resultado, retTotal, teReal, redExtraA, redExtraB, otrosRdtosTotal,
@@ -932,11 +949,11 @@ function PersonaInputs({ label, letter, accent, accentLight, data, dispatch, act
               accent={accent} accentLight={accentLight}
             />
             <NumInput
-              label="Otras deducciones NF 3/2025 (arts. 83 bis/ter)"
+              label="Otras deducciones no individualizadas"
               value={data.otrasDeducNF3}
               onChange={v => set("otrasDeducNF3", v)}
-              hint="Corresponsabilidad masculina (≤200 €) / Reincorporación femenina (≤1.500 €)"
-              tooltipText="Art. 83 bis: hasta 200 €/año para hombres que reducen su jornada para cuidar hijos <4 años. Art. 83 ter: hasta 1.500 €/año (2.250 € si parto/adopción múltiple) para mujeres que se reincorporan al trabajo."
+              hint="Corresponsabilidad (≤200 €), reincorporación (≤1.500 €), rehabilitación (18%, máx 3.000 €), eficiencia energética (15%), recarga VE (15%)"
+              tooltipText="Introduce la suma de las deducciones que no tienen campo propio: Art. 83 bis: hasta 200 €/año (corresponsabilidad masculina). Art. 83 ter: hasta 1.500 €/año (reincorporación femenina). Art. 87 bis: 18% rehabilitación vivienda protegida, máx 3.000 €. Art. 87 ter/quater: 15% mejoras eficiencia energética. Art. 87 quinquies: 15% puntos de recarga VE. Calcula el importe de cada deducción e introduce aquí la suma total."
               accent={accent} accentLight={accentLight}
             />
             <NumInput
@@ -1390,7 +1407,12 @@ function WaterfallDesglose({ data, label, accent }) {
             <WaterfallRow label="Cuota íntegra (escala art. 75)" value={data.ci} type="total"
               note={`Tipo marginal: ${pct(tipoMarginal(data.bl ?? data.biSum - RED_CONJUNTA))} · 8 tramos 23%–49%`} />
           )}
-          <WaterfallRow label="Minoración de cuota (art. 77)" value={data.minTotal ?? MINORACION} type="minus" note={`${eur(MINORACION)} general${(data.minTotal ?? MINORACION) > MINORACION ? ` + ${eur(MINORACION_DESPOBLACION)} despoblación (art. 77.2)` : ""} · ${data.redConj !== undefined ? "1 en conjunta" : "1 por declaración"}`} />
+          <WaterfallRow label="Minoración de cuota (art. 77)" value={data.minTotal ?? MINORACION} type="minus" note={[
+            `${eur(MINORACION)} general`,
+            (data.minTotal ?? MINORACION) > MINORACION + (data.minExtra ?? 0) ? ` + ${eur(MINORACION_DESPOBLACION)} despoblación` : "",
+            (data.minExtra ?? 0) > 0 ? ` + ${eur(data.minExtra)} extraordinaria (art. 77.3)` : "",
+            ` · ${data.redConj !== undefined ? "1 en conjunta" : "1 por declaración"}`,
+          ].join("")} />
           {data.dedH > 0 && (
             <WaterfallRow label="Deducción descendientes (art. 79)" value={data.dedH} type="minus" note={data.bl !== undefined && data.redConj !== undefined ? "100% en conjunta" : "50% por progenitor"} />
           )}
@@ -1561,6 +1583,7 @@ function TablaComparativa({ scenarios }) {
     { label: "+ Cuota íntegra ahorro", key: "ci_ahorro",  fmt: v => v > 0 ? "+" + eur(v) : "—", color: T.teal },
     { label: "Cuota íntegra total",  key: "ci",           fmt: eur, bold: true },
     { label: "− Minoración(es)",     key: "minoracion",   fmt: v => "−" + eur(v), color: T.teal },
+    { label: "  (de ella, extraordinaria 77.3)", key: "minExtra", fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.inkFaint },
     { label: "− Deducc. hijos",            key: "dedH",      fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. viudedad",        key: "dedViud",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
     { label: "− Deducc. edad (art. 83)",  key: "dedEdad",   fmt: v => v > 0 ? "−" + eur(v) : "—", color: T.teal },
@@ -1904,7 +1927,7 @@ export default function IRPFAlava2025() {
           rciTotal: a_sh.rciNeto,
           redTotal: aRe, redConj: 0, bl: a_sh.bl,
           ba: a_sh.ba, ci_gral: a_sh.ci_gral, ci_ahorro: a_sh.ci_ahorro,
-          ci: a_sh.ci, minoracion: a_sh.minTotal,
+          ci: a_sh.ci, minoracion: a_sh.minTotal, minExtra: a_sh.minExtra,
           dedH: 0, dedViud: a_sh.dedViud, dedEdad: a_sh.dedEdad, dedDiscap: a_sh.dedDiscap,
           dedCuid: a_sh.dedCuid, dedAsc: a_sh.dedAsc, dedOtras: a_sh.dedOtras,
           dedViv: a_sh.dedViv, dedAlq: a_sh.dedAlq,
@@ -1924,7 +1947,7 @@ export default function IRPFAlava2025() {
           rciTotal: a_ch.rciNeto,
           redTotal: aRe, redConj: 0, bl: a_ch.bl,
           ba: a_ch.ba, ci_gral: a_ch.ci_gral, ci_ahorro: a_ch.ci_ahorro,
-          ci: a_ch.ci, minoracion: a_ch.minTotal,
+          ci: a_ch.ci, minoracion: a_ch.minTotal, minExtra: a_ch.minExtra,
           dedH: a_ch.dedH, dedViud: a_ch.dedViud, dedEdad: a_ch.dedEdad, dedDiscap: a_ch.dedDiscap,
           dedCuid: a_ch.dedCuid, dedAsc: a_ch.dedAsc, dedOtras: a_ch.dedOtras,
           dedViv: a_ch.dedViv, dedAlq: a_ch.dedAlq,
@@ -1950,7 +1973,7 @@ export default function IRPFAlava2025() {
         rciTotal: a_sh.rciNeto + b_sh.rciNeto,
         redTotal: aRe + bRe, redConj: 0, bl: a_sh.bl + b_sh.bl,
         ba: a_sh.ba + b_sh.ba, ci_gral: a_sh.ci_gral + b_sh.ci_gral, ci_ahorro: a_sh.ci_ahorro + b_sh.ci_ahorro,
-        ci: a_sh.ci + b_sh.ci, minoracion: a_sh.minTotal + b_sh.minTotal,
+        ci: a_sh.ci + b_sh.ci, minoracion: a_sh.minTotal + b_sh.minTotal, minExtra: a_sh.minExtra + b_sh.minExtra,
         dedH: 0, dedViud: a_sh.dedViud + b_sh.dedViud, dedEdad: a_sh.dedEdad + b_sh.dedEdad, dedDiscap: a_sh.dedDiscap + b_sh.dedDiscap,
         dedCuid: a_sh.dedCuid + b_sh.dedCuid, dedAsc: a_sh.dedAsc + b_sh.dedAsc, dedOtras: a_sh.dedOtras + b_sh.dedOtras,
         dedViv: a_sh.dedViv + b_sh.dedViv, dedAlq: a_sh.dedAlq + b_sh.dedAlq,
@@ -1970,7 +1993,7 @@ export default function IRPFAlava2025() {
         rciTotal: a_ch.rciNeto + b_ch.rciNeto,
         redTotal: aRe + bRe, redConj: 0, bl: a_ch.bl + b_ch.bl,
         ba: a_ch.ba + b_ch.ba, ci_gral: a_ch.ci_gral + b_ch.ci_gral, ci_ahorro: a_ch.ci_ahorro + b_ch.ci_ahorro,
-        ci: a_ch.ci + b_ch.ci, minoracion: a_ch.minTotal + b_ch.minTotal,
+        ci: a_ch.ci + b_ch.ci, minoracion: a_ch.minTotal + b_ch.minTotal, minExtra: a_ch.minExtra + b_ch.minExtra,
         dedH: a_ch.dedH + b_ch.dedH, dedViud: a_ch.dedViud + b_ch.dedViud, dedEdad: a_ch.dedEdad + b_ch.dedEdad, dedDiscap: a_ch.dedDiscap + b_ch.dedDiscap,
         dedCuid: a_ch.dedCuid + b_ch.dedCuid, dedAsc: a_ch.dedAsc + b_ch.dedAsc, dedOtras: a_ch.dedOtras + b_ch.dedOtras,
         dedViv: a_ch.dedViv + b_ch.dedViv, dedAlq: a_ch.dedAlq + b_ch.dedAlq,
@@ -1990,7 +2013,7 @@ export default function IRPFAlava2025() {
         rciTotal: c_sh.rciNetoA + c_sh.rciNetoB,
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_sh.bl,
         ba: c_sh.ba, ci_gral: c_sh.ci_gral, ci_ahorro: c_sh.ci_ahorro,
-        ci: c_sh.ci, minoracion: c_sh.minTotal,
+        ci: c_sh.ci, minoracion: c_sh.minTotal, minExtra: c_sh.minExtra,
         dedH: 0, dedViud: c_sh.dedViud, dedEdad: c_sh.dedEdad, dedDiscap: c_sh.dedDiscap,
         dedCuid: c_sh.dedCuid, dedAsc: c_sh.dedAsc, dedOtras: c_sh.dedOtras,
         dedViv: c_sh.dedViv, dedAlq: c_sh.dedAlq,
@@ -2010,7 +2033,7 @@ export default function IRPFAlava2025() {
         rciTotal: c_ch.rciNetoA + c_ch.rciNetoB,
         redTotal: aRe + bRe, redConj: RED_CONJUNTA, bl: c_ch.bl,
         ba: c_ch.ba, ci_gral: c_ch.ci_gral, ci_ahorro: c_ch.ci_ahorro,
-        ci: c_ch.ci, minoracion: c_ch.minTotal,
+        ci: c_ch.ci, minoracion: c_ch.minTotal, minExtra: c_ch.minExtra,
         dedH: c_ch.dedH, dedViud: c_ch.dedViud, dedEdad: c_ch.dedEdad, dedDiscap: c_ch.dedDiscap,
         dedCuid: c_ch.dedCuid, dedAsc: c_ch.dedAsc, dedOtras: c_ch.dedOtras,
         dedViv: c_ch.dedViv, dedAlq: c_ch.dedAlq,
@@ -2141,8 +2164,8 @@ export default function IRPFAlava2025() {
             <details style={{ background: T.surfaceAlt, border: `1px solid ${T.borderSoft}`, borderRadius: 8, padding: "10px 14px", fontSize: 10, color: T.inkFaint, lineHeight: 1.7 }}>
               <summary style={{ cursor: "pointer", fontWeight: 600, color: T.inkMid, fontSize: 11 }}>Qué cubre esta calculadora</summary>
               <div style={{ marginTop: 8 }}>
-                <strong style={{ color: T.inkMid }}>Contempla:</strong> rendimientos del trabajo (salario, retribuciones en especie, stock options, rescates de pensiones/EPSV), bonificación art. 23 (incl. discapacidad), capital inmobiliario (arts. 30-34), capital mobiliario (arts. 35-38), ganancias patrimoniales (arts. 43-59), anualidades por alimentos a hijos (art. 80), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad/dependencia del contribuyente (art. 82, todos los grados incl. II y III), discapacidad de familiares convivientes (art. 82), asistentes personales (art. 81 bis), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87, incl. primer año sin límite art. 87.4ter) y alquiler (art. 86), donaciones (NF 35/2021), inversión en empresas de nueva creación, minoración por despoblación (art. 77.2).
-                <br /><strong style={{ color: T.inkMid }}>No contempla:</strong> actividades económicas (autónomos), imputación de rentas inmobiliarias (art. 41), rentas obtenidas en el extranjero (doble imposición internacional).
+                <strong style={{ color: T.inkMid }}>Contempla:</strong> rendimientos del trabajo (salario, retribuciones en especie, stock options, rescates de pensiones/EPSV), bonificación art. 23 (incl. discapacidad), capital inmobiliario (arts. 30-34), capital mobiliario (arts. 35-38), ganancias patrimoniales (arts. 43-59), anualidades por alimentos a hijos (art. 80), deducciones por descendientes (art. 79), edad (art. 83), viudedad (art. 82 bis), discapacidad/dependencia del contribuyente (art. 82, todos los grados incl. II y III), discapacidad de familiares convivientes (art. 82), asistentes personales (art. 81 bis), ascendientes (art. 81), cuidado de dependientes (art. 81 ter), corresponsabilidad/reincorporación (arts. 83 bis/ter), vivienda habitual (art. 87, incl. primer año sin límite art. 87.4ter) y alquiler (art. 86), donaciones (NF 35/2021), inversión en empresas de nueva creación, minoración por despoblación (art. 77.2), minoración extraordinaria (art. 77.3 NF 19/2024).
+                <br /><strong style={{ color: T.inkMid }}>No contempla:</strong> actividades económicas (autónomos), imputación de rentas inmobiliarias (art. 41), rentas obtenidas en el extranjero (doble imposición internacional), rehabilitación de vivienda protegida (art. 87 bis), mejoras de eficiencia energética (art. 87 ter/quater) ni puntos de recarga VE (art. 87 quinquies). Para estas últimas, utilice el campo "Otras deducciones" introduciendo directamente el importe de la deducción calculada.
                 <br /><span style={{ color: T.inkMid }}>Si sus rentas incluyen conceptos no contemplados, su declaración definitiva puede diferir de esta estimación.</span>
               </div>
             </details>
