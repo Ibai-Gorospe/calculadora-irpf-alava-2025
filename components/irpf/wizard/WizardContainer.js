@@ -203,8 +203,8 @@ export default function WizardContainer() {
       const { a_sh, a_ch } = calc;
       const list = [
         {
-          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00b7 Sin hijos",
-          sublabel: "Declaraci\u00f3n individual, sin deducci\u00f3n de descendientes",
+          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
+          sublabel: "Declaración individual, sin deducción de descendientes",
           accentColor: T.cobalt,
           resultado: a_sh.resultado,
           brutoTotal: aB, ssTotal: a_sh.ss,
@@ -219,12 +219,12 @@ export default function WizardContainer() {
           dedAlim: a_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers,
           dedDon: a_sh.dedDon, dedInv: a_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo,
           cl: a_sh.cl, retTotal: aR + aRetCapMob,
-          warning: hasH ? `No aprovechas la deducci\u00f3n de hijos de ${dedHTxt}` : null,
+          warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
           _calcA: a_sh,
         },
         ...(hasH ? [{
-          id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00b7 Con hijos",
-          sublabel: "Declaraci\u00f3n individual, 100% deducci\u00f3n de descendientes",
+          id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
+          sublabel: "Declaración individual, 100% deducción de descendientes",
           accentColor: T.cobalt,
           resultado: a_ch.resultado,
           brutoTotal: aB, ssTotal: a_ch.ss,
@@ -248,8 +248,8 @@ export default function WizardContainer() {
     const { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch } = calc;
     const list = [
       {
-        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00b7 Sin hijos",
-        sublabel: "Dos declaraciones separadas, sin deducci\u00f3n de descendientes",
+        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
+        sublabel: "Dos declaraciones separadas, sin deducción de descendientes",
         accentColor: T.cobalt,
         resultado:  +(a_sh.resultado + b_sh.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_sh.ss + b_sh.ss,
@@ -264,12 +264,12 @@ export default function WizardContainer() {
         dedAlim: a_sh.dedAlim + b_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam + b_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers + b_sh.dedAsistPers,
         dedDon: a_sh.dedDon + b_sh.dedDon, dedInv: a_sh.dedInv + b_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo + b_sh.otrosRdtosTrabajo,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: hasH ? `No aprovechas la deducci\u00f3n de hijos de ${dedHTxt}` : null,
+        warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
         _calcA: a_sh, _calcB: b_sh,
       },
       ...(hasH ? [{
-        id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00b7 Con hijos",
-        sublabel: "Dos declaraciones, 50% de deducci\u00f3n de descendientes cada uno",
+        id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
+        sublabel: "Dos declaraciones, 50% de deducción de descendientes cada uno",
         accentColor: T.cobalt,
         resultado:  +(a_ch.resultado + b_ch.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_ch.ss + b_ch.ss,
@@ -284,12 +284,12 @@ export default function WizardContainer() {
         dedAlim: a_ch.dedAlim + b_ch.dedAlim, dedDiscapFam: a_ch.dedDiscapFam + b_ch.dedDiscapFam, dedAsistPers: a_ch.dedAsistPers + b_ch.dedAsistPers,
         dedDon: a_ch.dedDon + b_ch.dedDon, dedInv: a_ch.dedInv + b_ch.dedInv, otrosRdtosTotal: a_ch.otrosRdtosTrabajo + b_ch.otrosRdtosTrabajo,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: "El hijo NO debe presentar declaraci\u00f3n voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcA: a_ch, _calcB: b_ch,
       }] : []),
       {
-        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta \u00b7 Sin hijos",
-        sublabel: "Una declaraci\u00f3n \u00b7 \u22124.800 \u20ac reducci\u00f3n base (art. 73 NF 3/2025)",
+        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta · Sin hijos",
+        sublabel: "Una declaración · −4.800 € reducción base (art. 73 NF 3/2025)",
         accentColor: T.gold,
         resultado:  c_sh.resultado,
         brutoTotal: aB + bB, ssTotal: c_sh.ssA + c_sh.ssB,
@@ -304,12 +304,12 @@ export default function WizardContainer() {
         dedAlim: c_sh.dedAlim, dedDiscapFam: c_sh.dedDiscapFam, dedAsistPers: c_sh.dedAsistPers,
         dedDon: c_sh.dedDon, dedInv: c_sh.dedInv, otrosRdtosTotal: c_sh.otrosRdtosTotal,
         cl: c_sh.cl, retTotal: c_sh.retTotal,
-        warning: hasH ? `Deducci\u00f3n de hijos no aplicada: te pierdes ${dedHTxt}` : null,
+        warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
         _calcConj: c_sh,
       },
       ...(hasH ? [{
-        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta \u00b7 Con hijos",
-        sublabel: "Una declaraci\u00f3n \u00b7 \u22124.800 \u20ac base \u00b7 deducci\u00f3n hijos 100%",
+        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta · Con hijos",
+        sublabel: "Una declaración · −4.800 € base · deducción hijos 100%",
         accentColor: T.gold,
         resultado:  c_ch.resultado,
         brutoTotal: aB + bB, ssTotal: c_ch.ssA + c_ch.ssB,
@@ -324,7 +324,7 @@ export default function WizardContainer() {
         dedAlim: c_ch.dedAlim, dedDiscapFam: c_ch.dedDiscapFam, dedAsistPers: c_ch.dedAsistPers,
         dedDon: c_ch.dedDon, dedInv: c_ch.dedInv, otrosRdtosTotal: c_ch.otrosRdtosTotal,
         cl: c_ch.cl, retTotal: c_ch.retTotal,
-        warning: "El hijo NO debe presentar declaraci\u00f3n voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcConj: c_ch,
       }] : []),
     ];
@@ -355,18 +355,18 @@ export default function WizardContainer() {
           <div className="flex items-center justify-between py-5 flex-wrap gap-3">
             <div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-white/40 mb-1">
-                Hacienda Foral de \u00c1lava \u00b7 NF 33/2013 \u00b7 NF 3/2025 \u00b7 DF 23/2025
+                Hacienda Foral de Álava · NF 33/2013 · NF 3/2025 · DF 23/2025
               </div>
               <h1 className="text-2xl font-extrabold tracking-tight text-white">
-                Calculadora IRPF \u00c1lava 2025
+                Calculadora IRPF Álava 2025
               </h1>
               <div className="text-xs text-white/50 mt-1">
-                Declaraci\u00f3n 2026 \u00b7 {hasPairData ? "Comparativa individual vs conjunta" : "Declaraci\u00f3n individual"} \u00b7 <span className="text-white/30">Act. mar. 2026</span>
+                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · <span className="text-white/30">Act. mar. 2026</span>
               </div>
             </div>
             {ready && optimo && currentStep < 5 && (
               <div className="bg-white/[0.08] border border-white/[0.12] rounded-xl px-5 py-3 text-right">
-                <div className="text-[10px] text-white/50 mb-1">Mejor opci\u00f3n</div>
+                <div className="text-[10px] text-white/50 mb-1">Mejor opción</div>
                 <div className="text-sm font-bold text-white">{optimo.label}</div>
                 <div className="text-xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? "#4ade80" : "#f87171" }}>
                   {signedEur(optimo.resultado)}
@@ -388,7 +388,7 @@ export default function WizardContainer() {
       {restored && (
         <div className="bg-cobalt-light border-b border-cobalt/20">
           <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-            <span className="text-xs text-cobalt">Datos restaurados de tu sesi\u00f3n anterior</span>
+            <span className="text-xs text-cobalt">Datos restaurados de tu sesión anterior</span>
             <button onClick={dismissRestored} className="text-xs text-cobalt/60 hover:text-cobalt underline">Cerrar</button>
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function WizardContainer() {
               <div className="flex items-center justify-between mt-8 gap-4">
                 {currentStep > 0 ? (
                   <button onClick={goPrev} className="px-6 py-3 rounded-xl border border-border text-ink-mid font-semibold text-sm hover:bg-surface-alt transition-colors">
-                    \u2190 Anterior
+                    ← Anterior
                   </button>
                 ) : <div />}
                 <div className="flex items-center gap-3">
@@ -420,7 +420,7 @@ export default function WizardContainer() {
                     </button>
                   )}
                   <button onClick={goNext} className="px-8 py-3 rounded-xl bg-cobalt text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-sm">
-                    {currentStep === 4 ? "Ver resultados \u2192" : "Siguiente \u2192"}
+                    {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
                   </button>
                 </div>
               </div>
@@ -428,7 +428,7 @@ export default function WizardContainer() {
               {/* Reset button */}
               <div className="mt-6 text-center">
                 <button onClick={handleReset} className="text-xs text-ink-faint hover:text-ink-mid transition-colors">
-                  \u21ba Limpiar todos los datos
+                  ↺ Limpiar todos los datos
                 </button>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function WizardContainer() {
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-ink text-white px-4 py-3 shadow-[0_-4px_20px_rgba(0,0,0,.12)]">
           <div className="max-w-6xl mx-auto flex justify-between items-center">
             <div>
-              <div className="text-[9px] text-white/50 tracking-widest uppercase">Mejor opci\u00f3n</div>
+              <div className="text-[9px] text-white/50 tracking-widest uppercase">Mejor opción</div>
               <div className="text-xs font-bold">{optimo.label}</div>
             </div>
             <div className="text-xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? "#4ade80" : "#f87171" }}>
@@ -471,12 +471,12 @@ export default function WizardContainer() {
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
       <footer className="text-center px-6 py-6 text-[10px] text-ink-faint border-t border-border leading-relaxed">
-        <div>Normativa aplicada: NF 33/2013 (texto consolidado) \u00b7 NF 19/2024 \u00b7 NF 3/2025 \u00b7 DF 23/2025 \u00b7 Orden PJC/178/2025</div>
+        <div>Normativa aplicada: NF 33/2013 (texto consolidado) · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025</div>
         <div className="mt-1.5">
-          Los resultados de esta calculadora tienen car\u00e1cter meramente informativo y orientativo.
-          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situaci\u00f3n particular, consulte con un profesional o utilice Rentaf\u00e1cil (Hacienda Foral de \u00c1lava).
+          Los resultados de esta calculadora tienen carácter meramente informativo y orientativo.
+          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situación particular, consulte con un profesional o utilice Rentafácil (Hacienda Foral de Álava).
         </div>
-        <div className="mt-1.5 opacity-60">Ejercicio fiscal 2025 \u00b7 Trabajo, capital y patrimonio \u00b7 Actualizado a marzo 2026</div>
+        <div className="mt-1.5 opacity-60">Ejercicio fiscal 2025 · Trabajo, capital y patrimonio · Actualizado a marzo 2026</div>
       </footer>
     </div>
   );

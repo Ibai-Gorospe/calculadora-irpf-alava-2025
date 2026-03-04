@@ -6,7 +6,7 @@ import { T } from "../ui/tokens.js";
 /* ─────────────────────────────────────────────────────────────────────────────
    signedEur — format a signed euro amount
    ───────────────────────────────────────────────────────────────────────────── */
-const sign = (x) => x >= 0 ? "+" : "\u2212";
+const sign = (x) => x >= 0 ? "+" : "−";
 const signedEur = (x) => sign(x) + eur(Math.abs(x));
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
             className="text-[9px] font-extrabold tracking-[0.15em] uppercase"
             style={{ color: T.green }}
           >
-            Mejor opci\u00f3n
+            Mejor opción
           </div>
           <div className="text-sm font-bold" style={{ color: T.ink }}>
             {optimo.label}
@@ -62,7 +62,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
           className="text-[9px] font-extrabold tracking-[0.15em] uppercase px-2.5 py-1 rounded-full"
           style={{ background: T.greenAcc, color: "#fff" }}
         >
-          &#x2605; \u00d3PTIMO
+          &#x2605; ÓPTIMO
         </span>
       </div>
 
@@ -73,7 +73,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
           style={{ background: resultBg, border: `1px solid ${resultColor}33` }}
         >
           <div className="text-[11px] mb-1" style={{ color: T.inkFaint }}>
-            {optimo.resultado >= 0 ? "Hacienda te devuelve \u2191" : "A pagar a Hacienda \u2193"}
+            {optimo.resultado >= 0 ? "Hacienda te devuelve ↑" : "A pagar a Hacienda ↓"}
           </div>
           <div
             className="text-[34px] font-black font-mono tracking-tight"
@@ -110,7 +110,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
               className="text-[9px] font-bold tracking-widest uppercase mb-1"
               style={{ color: T.inkFaint }}
             >
-              Cuota l\u00edquida
+              Cuota líquida
             </div>
             <div
               className="text-base font-bold font-mono"

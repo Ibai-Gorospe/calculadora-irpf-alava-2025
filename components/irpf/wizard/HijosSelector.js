@@ -41,7 +41,7 @@ function AgeCounter({ label, val, onChange, max, tooltipText }) {
               border: `1.5px solid ${val === i ? T.goldAcc : T.border}`,
             }}
           >
-            {i === 0 ? "\u2014" : i}
+            {i === 0 ? "—" : i}
           </button>
         ))}
       </div>
@@ -73,8 +73,8 @@ export default function HijosSelector({
         className="text-[11px] font-bold tracking-widest uppercase mb-2 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
-        Hijos en com\u00fan
-        <Tooltip text="Descendientes convivientes con rentas \u2264 SMI (16.576 \u20ac/a\u00f1o) y edad < 30 a\u00f1os. Art. 79 NF 33/2013.">
+        Hijos en común
+        <Tooltip text="Descendientes convivientes con rentas ≤ SMI (16.576 €/año) y edad < 30 años. Art. 79 NF 33/2013.">
           <span />
         </Tooltip>
       </div>
@@ -92,7 +92,7 @@ export default function HijosSelector({
               border: `1.5px solid ${value === i ? T.goldAcc : T.border}`,
             }}
           >
-            {i === 0 ? "\u2014" : i}
+            {i === 0 ? "—" : i}
           </button>
         ))}
       </div>
@@ -101,18 +101,18 @@ export default function HijosSelector({
       {value > 0 && (
         <>
           <AgeCounter
-            label="De ellos, menores de 6 a\u00f1os"
+            label="De ellos, menores de 6 años"
             val={hijosM6}
             onChange={v => onChangeM6(v)}
             max={value}
-            tooltipText={`+${eur(COMP_M6)} por cada hijo menor de 6 a\u00f1os. Art. 79.2 NF 19/2024.`}
+            tooltipText={`+${eur(COMP_M6)} por cada hijo menor de 6 años. Art. 79.2 NF 19/2024.`}
           />
           <AgeCounter
-            label="De 6 a 15 a\u00f1os"
+            label="De 6 a 15 años"
             val={hijos6a15}
             onChange={v => onChangej6a15(v)}
             max={value - hijosM6}
-            tooltipText={`+${eur(COMP_6A15)} por cada hijo de 6 a 15 a\u00f1os. Art. 79.2 NF 19/2024.`}
+            tooltipText={`+${eur(COMP_6A15)} por cada hijo de 6 a 15 años. Art. 79.2 NF 19/2024.`}
           />
 
           {/* Info box */}
@@ -125,7 +125,7 @@ export default function HijosSelector({
             }}
           >
             <div className="font-bold">
-              Deducci\u00f3n base: {eur(dedBase)}
+              Deducción base: {eur(dedBase)}
               {compExtra > 0 ? ` + ${eur(compExtra)} (suplemento edad)` : ""}
             </div>
             <div className="font-bold">Total: {eur(dedTotal)}</div>

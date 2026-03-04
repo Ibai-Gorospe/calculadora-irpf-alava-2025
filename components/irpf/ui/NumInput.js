@@ -49,7 +49,7 @@ export function NumInput({
         id={id}
         type="text"
         inputMode="decimal"
-        placeholder="0,00 \u20AC"
+        placeholder="0,00 €"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
