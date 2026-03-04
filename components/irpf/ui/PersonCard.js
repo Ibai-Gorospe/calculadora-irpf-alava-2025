@@ -5,33 +5,26 @@ import { T } from "./tokens";
 /**
  * PersonCard — shared card wrapper for Person A / Person B sections.
  *
- * Used across all wizard steps to provide a consistent card layout
- * with colored top border, avatar circle, and generous padding.
- *
- * @param {string}    letter      - "A", "B", or "H" (for Hijos)
- * @param {string}    label       - Card title (e.g. "Persona A")
- * @param {string}    subtitle    - Smaller text below title
- * @param {string}    accent      - Dynamic accent color (hex)
- * @param {string}    accentLight - Lighter accent variant for avatar bg
- * @param {ReactNode} children    - Card content
+ * Clean design with left accent border, generous padding,
+ * and consistent layout across all wizard steps.
  */
 export function PersonCard({ letter, label, subtitle, accent, accentLight, children }) {
   return (
     <div
-      className="bg-white rounded-2xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
+      className="bg-white rounded-2xl shadow-sm border border-border overflow-hidden"
     >
-      <div className="p-6">
+      {/* Accent left border via inner wrapper */}
+      <div className="border-l-4 p-7" style={{ borderLeftColor: accent }}>
         {/* Header with avatar */}
-        <div className="flex items-center gap-3.5 mb-6">
+        <div className="flex items-center gap-3 mb-7">
           <div
-            className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-extrabold font-mono shrink-0"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold font-mono shrink-0"
+            style={{ background: accentLight, color: accent }}
           >
             {letter}
           </div>
           <div>
-            <div className="text-base font-bold" style={{ color: T.ink }}>{label}</div>
+            <div className="text-base font-semibold" style={{ color: T.ink }}>{label}</div>
             {subtitle && (
               <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
                 {subtitle}

@@ -15,7 +15,6 @@ import StepVivienda from "./StepVivienda.js";
 import StepOtrasRentas from "./StepOtrasRentas.js";
 import StepDeducciones from "./StepDeducciones.js";
 import StepResultado from "./StepResultado.js";
-import LiveResultPanel from "./LiveResultPanel.js";
 
 export default function WizardContainer() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -347,28 +346,28 @@ export default function WizardContainer() {
   const isOptionalStep = currentStep >= 2 && currentStep <= 4;
 
   // ── Render ────────────────────────────────────────────────────────────────
+  const contentWidth = showPersonB ? "max-w-5xl" : "max-w-2xl";
+
   return (
     <div className="min-h-screen bg-bg font-serif text-ink">
       {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="bg-ink text-white px-6 lg:px-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between py-6 flex-wrap gap-4">
-            <div>
-              <div className="text-[11px] tracking-[0.2em] uppercase text-white/40 mb-1.5">
-                Hacienda Foral de Álava · NF 33/2013 · NF 3/2025 · DF 23/2025
-              </div>
-              <h1 className="text-2xl lg:text-3xl font-extrabold tracking-tight text-white">
+      <header className="bg-white border-b border-border px-6 lg:px-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between py-5 gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl font-bold tracking-tight" style={{ color: T.ink }}>
                 Calculadora IRPF Álava 2025
               </h1>
-              <div className="text-sm text-white/50 mt-1.5">
-                Declaración 2026 · {hasPairData ? "Comparativa individual vs conjunta" : "Declaración individual"} · <span className="text-white/30">Act. mar. 2026</span>
+              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                Ejercicio 2025 · NF 33/2013 · NF 3/2025 · DF 23/2025
               </div>
             </div>
             {ready && optimo && currentStep < 5 && (
-              <div className="bg-white/[0.08] border border-white/[0.12] rounded-xl px-6 py-4 text-right">
-                <div className="text-[11px] text-white/50 mb-1">Mejor opción</div>
-                <div className="text-sm font-bold text-white">{optimo.label}</div>
-                <div className="text-2xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? "#4ade80" : "#f87171" }}>
+              <div className="text-right shrink-0">
+                <div className="text-[11px] font-medium" style={{ color: T.inkFaint }}>
+                  {optimo.label}
+                </div>
+                <div className="text-xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}>
                   {signedEur(optimo.resultado)}
                 </div>
               </div>
@@ -378,8 +377,8 @@ export default function WizardContainer() {
       </header>
 
       {/* ── PROGRESS BAR ───────────────────────────────────────────────────── */}
-      <div className="bg-surface border-b border-border">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5">
+      <div className="bg-white border-b border-border">
+        <div className="max-w-5xl mx-auto px-6 lg:px-10">
           <ProgressBar currentStep={currentStep} onStepClick={goToStep} maxVisited={maxVisited} />
         </div>
       </div>
@@ -387,7 +386,7 @@ export default function WizardContainer() {
       {/* ── RESTORED BANNER ──────────────────────────────────────────────── */}
       {restored && (
         <div className="bg-cobalt-light border-b border-cobalt/20">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
+          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
             <span className="text-sm text-cobalt">Datos restaurados de tu sesión anterior</span>
             <button onClick={dismissRestored} className="text-sm text-cobalt/60 hover:text-cobalt underline cursor-pointer">Cerrar</button>
           </div>
@@ -396,47 +395,38 @@ export default function WizardContainer() {
 
       {/* ── BODY ───────────────────────────────────────────────────────────── */}
       {currentStep < 5 ? (
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
-            {/* Step content */}
-            <div className="order-2 lg:order-1">
-              {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
-              {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-              {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-              {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-              {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-10`}>
+          {/* Step content */}
+          {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
+          {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+          {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+          {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+          {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
 
-              {/* Navigation buttons */}
-              <div className="flex items-center justify-between mt-10 gap-4">
-                {currentStep > 0 ? (
-                  <button onClick={goPrev} className="px-7 py-3.5 rounded-xl border border-border text-ink-mid font-semibold text-sm hover:bg-surface-alt transition-colors cursor-pointer">
-                    ← Anterior
-                  </button>
-                ) : <div />}
-                <div className="flex items-center gap-3">
-                  {isOptionalStep && (
-                    <button onClick={goNext} className="px-6 py-3.5 rounded-xl text-ink-faint text-sm hover:text-ink-mid transition-colors cursor-pointer">
-                      Saltar
-                    </button>
-                  )}
-                  <button onClick={goNext} className="px-10 py-3.5 rounded-xl bg-cobalt text-white font-bold text-sm hover:opacity-90 transition-opacity shadow-sm cursor-pointer">
-                    {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
-                  </button>
-                </div>
-              </div>
-
-              {/* Reset button */}
-              <div className="mt-8 text-center">
-                <button onClick={handleReset} className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer">
-                  ↺ Limpiar todos los datos
+          {/* Navigation buttons */}
+          <div className="flex items-center justify-between mt-12 gap-4">
+            {currentStep > 0 ? (
+              <button onClick={goPrev} className="px-7 py-3.5 rounded-xl border border-border text-ink-mid font-semibold text-sm hover:bg-surface-alt transition-colors cursor-pointer">
+                \u2190 Anterior
+              </button>
+            ) : <div />}
+            <div className="flex items-center gap-3">
+              {isOptionalStep && (
+                <button onClick={goNext} className="px-6 py-3.5 rounded-xl text-ink-faint text-sm hover:text-ink-mid transition-colors cursor-pointer">
+                  Saltar
                 </button>
-              </div>
+              )}
+              <button onClick={goNext} className="px-10 py-4 rounded-xl bg-cobalt text-white font-bold text-[15px] hover:opacity-90 transition-opacity shadow-sm cursor-pointer">
+                {currentStep === 4 ? "Ver resultados \u2192" : "Siguiente \u2192"}
+              </button>
             </div>
+          </div>
 
-            {/* Live result sidebar */}
-            <div className="order-1 lg:order-2 lg:sticky lg:top-6 hidden lg:block">
-              <LiveResultPanel optimo={optimo} scenarios={scenarios} ready={ready} />
-            </div>
+          {/* Reset button */}
+          <div className="mt-8 text-center">
+            <button onClick={handleReset} className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer">
+              \u21BA Limpiar todos los datos
+            </button>
           </div>
         </div>
       ) : (
@@ -457,7 +447,7 @@ export default function WizardContainer() {
       {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}
       {ready && optimo && currentStep < 5 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-ink text-white px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,.12)]">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex justify-between items-center">
             <div>
               <div className="text-[10px] text-white/50 tracking-widest uppercase">Mejor opción</div>
               <div className="text-sm font-bold">{optimo.label}</div>
@@ -471,7 +461,7 @@ export default function WizardContainer() {
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
       <footer className="text-center px-6 lg:px-10 py-8 text-[11px] text-ink-faint border-t border-border leading-relaxed">
-        <div>Normativa aplicada: NF 33/2013 (texto consolidado) · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025</div>
+        <div>Normativa aplicada: NF 33/2013 · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025</div>
         <div className="mt-2">
           Los resultados de esta calculadora tienen carácter meramente informativo y orientativo.
           No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situación particular, consulte con un profesional o utilice Rentafácil (Hacienda Foral de Álava).

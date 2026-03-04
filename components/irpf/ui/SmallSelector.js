@@ -5,9 +5,6 @@ import { T } from "./tokens";
 
 /**
  * SmallSelector — horizontal button group for picking one option.
- *
- * The selected button gets the dynamic accent background with white text;
- * unselected buttons get a neutral look.
  */
 export function SmallSelector({
   lbl,
@@ -18,11 +15,11 @@ export function SmallSelector({
   accent = T.cobalt,
 }) {
   return (
-    <div className="flex flex-col gap-2 mb-5">
+    <div className="flex flex-col gap-2 mb-6">
       {/* Label row */}
       {lbl && (
         <div className="flex items-center gap-1">
-          <span className="text-xs font-bold uppercase tracking-wide text-ink-mid">
+          <span className="text-[13px] font-semibold text-ink-mid">
             {lbl}
           </span>
           {tooltipText && <Tooltip text={tooltipText} />}
@@ -39,7 +36,7 @@ export function SmallSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={`
-                rounded-lg px-4 py-2.5 text-[13px] font-semibold
+                rounded-xl px-5 py-3 text-sm font-semibold
                 transition-all duration-150 cursor-pointer
                 outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                 ${
@@ -50,7 +47,7 @@ export function SmallSelector({
               `}
               style={
                 selected
-                  ? { backgroundColor: accent, boxShadow: `0 1px 3px ${accent}40` }
+                  ? { backgroundColor: accent, boxShadow: `0 2px 8px ${accent}30` }
                   : undefined
               }
             >

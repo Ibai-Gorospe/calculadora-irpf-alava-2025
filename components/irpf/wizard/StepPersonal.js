@@ -24,7 +24,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   const Btn = ({ opt }) => (
     <button
       onClick={() => onChange(opt.value)}
-      className="py-3 px-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[48px]"
+      className="py-3.5 px-3 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 leading-tight min-h-[52px]"
       style={{
         background: value === opt.value ? accent : T.surface,
         color: value === opt.value ? "#fff" : T.inkMid,
@@ -37,20 +37,20 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   );
 
   return (
-    <div className="mb-5">
+    <div className="mb-6">
       <div
-        className="text-xs font-bold tracking-wider uppercase mb-2 flex items-center gap-1"
+        className="text-[13px] font-semibold mb-2.5 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         Discapacidad / dependencia (arts. 23.3 + 82)
-        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III).">
+        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% \u226533%, +250% \u226565%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 \u20AC (33-65%), 1.464,54 \u20AC (\u226565%/Grado I), 1.756,75 \u20AC (Grado II) o 2.191,03 \u20AC (Grado III).">
           <span />
         </Tooltip>
       </div>
-      <div className="grid grid-cols-3 gap-1.5 mb-1.5">
+      <div className="grid grid-cols-3 gap-2 mb-2">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-2">
         {row2.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
     </div>
@@ -69,22 +69,22 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
   ];
 
   return (
-    <div className="mb-5">
+    <div className="mb-6">
       <div
-        className="text-xs font-bold tracking-wider uppercase mb-2 flex items-center gap-1"
+        className="text-[13px] font-semibold mb-2.5 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         Grado discapacidad del/los familiar/es
-        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'.">
+        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y a\u00F1ade manualmente la diferencia en 'Otras deducciones'.">
           <span />
         </Tooltip>
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-2">
         {opts.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className="py-3 px-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[48px]"
+            className="py-3.5 px-3 text-[13px] font-semibold rounded-xl cursor-pointer transition-all duration-150 leading-tight min-h-[52px]"
             style={{
               background: value === opt.value ? accent : T.surface,
               color: value === opt.value ? "#fff" : T.inkMid,
