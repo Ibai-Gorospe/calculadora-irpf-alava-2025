@@ -346,32 +346,32 @@ export default function WizardContainer() {
   }, []);
 
   const isOptionalStep = currentStep >= 2 && currentStep <= 4;
-  const contentWidth = showPersonB ? "max-w-5xl" : "max-w-2xl";
+  const contentWidth = showPersonB ? "max-w-6xl" : "max-w-3xl";
 
   return (
     <div className="min-h-screen bg-bg font-sans text-ink">
       {/* Gradient accent line */}
-      <div className="h-1 bg-gradient-to-r from-cobalt via-teal to-positive" />
+      <div className="h-1.5 bg-gradient-to-r from-cobalt via-teal to-gold" />
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4 gap-4">
+      <header className="bg-white/90 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+          <div className="flex items-center justify-between py-6 gap-6">
             <div className="min-w-0">
-              <h1 className="text-lg font-bold tracking-tight text-ink">
+              <h1 className="text-2xl font-bold tracking-tight text-ink">
                 Calculadora IRPF Alava 2025
               </h1>
-              <div className="text-[11px] mt-0.5 text-ink-faint">
+              <div className="text-xs mt-1 text-ink-faint">
                 Ejercicio 2025 &middot; NF 33/2013 &middot; NF 3/2025 &middot; DF 23/2025
               </div>
             </div>
             {ready && optimo && currentStep < 5 && (
-              <div className="text-right shrink-0">
-                <div className="text-[11px] font-medium text-ink-faint">
+              <div className="text-right shrink-0 hidden lg:block">
+                <div className="text-xs font-medium text-ink-faint">
                   {optimo.label}
                 </div>
                 <div
-                  className="text-xl font-bold font-mono tracking-tight"
+                  className="text-2xl font-bold font-mono tracking-tight"
                   style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}
                 >
                   {signedEur(optimo.resultado)}
@@ -383,8 +383,8 @@ export default function WizardContainer() {
       </header>
 
       {/* Progress Bar */}
-      <div className="bg-white border-b border-border/50">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
+      <div className="bg-white border-b border-border/40">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10">
           <ProgressBar currentStep={currentStep} onStepClick={goToStep} maxVisited={maxVisited} />
         </div>
       </div>
@@ -392,7 +392,7 @@ export default function WizardContainer() {
       {/* Restored Banner */}
       {restored && (
         <div className="bg-cobalt-light border-b border-cobalt/20">
-          <div className="max-w-5xl mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
+          <div className="max-w-6xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
             <span className="text-sm text-cobalt font-medium">Datos restaurados de tu sesion anterior</span>
             <button onClick={dismissRestored} className="text-sm text-cobalt/60 hover:text-cobalt underline cursor-pointer">Cerrar</button>
           </div>
@@ -401,7 +401,7 @@ export default function WizardContainer() {
 
       {/* Body */}
       {currentStep < 5 ? (
-        <div className={`${contentWidth} mx-auto px-6 lg:px-8 py-10 pb-28 lg:pb-10`}>
+        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-16 pb-32 lg:pb-16`}>
           {/* Step content */}
           <div className="animate-[slideUp_300ms_ease-out]">
             {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
@@ -412,21 +412,21 @@ export default function WizardContainer() {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex items-center justify-between mt-12 gap-4">
+          <div className="flex items-center justify-between mt-16 gap-6">
             {currentStep > 0 ? (
               <button
                 onClick={goPrev}
-                className="px-6 py-3 rounded-xl border border-border text-ink-mid font-medium text-sm
+                className="px-8 py-4 rounded-2xl border-2 border-border text-ink-mid font-medium text-base
                            hover:bg-surface-alt hover:border-ink-faint/40 transition-all duration-200 cursor-pointer"
               >
                 &larr; Anterior
               </button>
             ) : <div />}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {isOptionalStep && (
                 <button
                   onClick={goNext}
-                  className="px-5 py-3 rounded-xl text-ink-faint text-sm font-medium
+                  className="px-6 py-4 rounded-2xl text-ink-faint text-base font-medium
                              hover:text-ink-mid hover:bg-surface-alt transition-all duration-200 cursor-pointer"
                 >
                   Saltar
@@ -434,9 +434,9 @@ export default function WizardContainer() {
               )}
               <button
                 onClick={goNext}
-                className="px-8 py-3.5 rounded-xl bg-cobalt text-white font-semibold text-sm
+                className="px-10 py-[18px] rounded-2xl bg-cobalt text-white font-semibold text-base min-h-[52px]
                            hover:bg-cobalt/90 transition-all duration-200 cursor-pointer
-                           shadow-lg shadow-cobalt/20"
+                           shadow-lg shadow-cobalt/25"
               >
                 {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
               </button>
@@ -444,17 +444,17 @@ export default function WizardContainer() {
           </div>
 
           {/* Reset button */}
-          <div className="mt-8 text-center">
+          <div className="mt-10 text-center">
             <button
               onClick={handleReset}
-              className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer"
+              className="text-[13px] text-ink-faint hover:text-ink-mid transition-colors cursor-pointer"
             >
               Limpiar todos los datos
             </button>
           </div>
         </div>
       ) : (
-        <div className="max-w-5xl mx-auto px-6 lg:px-8 py-10">
+        <div className="max-w-6xl mx-auto px-6 lg:px-10 py-16">
           <StepResultado
             calc={calc}
             scenarios={scenarios}
@@ -474,11 +474,11 @@ export default function WizardContainer() {
       {ready && optimo && currentStep < 5 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden
                         bg-white/90 backdrop-blur-xl border-t border-border
-                        px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,.08)]">
+                        px-6 py-5 shadow-[0_-4px_20px_rgba(0,0,0,.08)]">
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-[10px] text-ink-faint tracking-widest uppercase font-medium">Mejor opcion</div>
-              <div className="text-sm font-bold text-ink">{optimo.label}</div>
+              <div className="text-[11px] text-ink-faint tracking-widest uppercase font-medium">Mejor opcion</div>
+              <div className="text-base font-bold text-ink">{optimo.label}</div>
             </div>
             <div
               className="text-2xl font-bold font-mono"
@@ -491,9 +491,9 @@ export default function WizardContainer() {
       )}
 
       {/* Footer */}
-      <footer className="text-center px-6 lg:px-8 py-8 text-[11px] text-ink-faint border-t border-border/50 leading-relaxed">
+      <footer className="text-center px-6 lg:px-10 py-12 text-xs text-ink-faint border-t border-border/40 leading-relaxed">
         <div>Normativa aplicada: NF 33/2013 &middot; NF 19/2024 &middot; NF 3/2025 &middot; DF 23/2025 &middot; Orden PJC/178/2025</div>
-        <div className="mt-2 max-w-2xl mx-auto">
+        <div className="mt-2 max-w-3xl mx-auto">
           Los resultados de esta calculadora tienen caracter meramente informativo y orientativo.
           No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situacion particular, consulte con un profesional o utilice Rentafacil (Hacienda Foral de Alava).
         </div>

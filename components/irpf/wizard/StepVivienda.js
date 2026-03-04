@@ -36,19 +36,19 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
       />
 
       {data.viviendaPerfil === "joven" && n(data.viviendaCompra) > 0 && (
-        <div className="mb-5">
+        <div className="mb-8">
           <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={data.viviendaPrimerAnio}
               onChange={e => set("viviendaPrimerAnio", e.target.checked)}
-              className="w-5 h-5 cursor-pointer rounded accent-current"
+              className="w-6 h-6 cursor-pointer rounded accent-current"
             />
             <div>
-              <div className="text-sm font-medium" style={{ color: T.ink }}>
+              <div className="text-[15px] font-medium" style={{ color: T.ink }}>
                 Primer año de adquisición (art. 87.4ter)
               </div>
-              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+              <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
                 Sin límite máximo en la deducción para menores de 36 años
               </div>
             </div>
@@ -90,8 +90,8 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
 
 export default function StepVivienda({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-6">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+    <div className="space-y-10">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

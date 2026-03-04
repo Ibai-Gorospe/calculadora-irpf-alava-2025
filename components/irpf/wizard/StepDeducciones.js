@@ -12,8 +12,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
   return (
     <>
       {/* Rentas y reducciones */}
-      <div className="mb-5">
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+      <div className="mb-8">
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Rentas adicionales y otras deducciones
         </div>
 
@@ -39,7 +39,7 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* Anualidades por alimentos */}
-      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
+      <div className="mb-8 pt-8 border-t" style={{ borderColor: T.border }}>
         <NumInput
           label="Anualidades por alimentos a hijos (art. 80)"
           value={data.anualidadesAlimentos}
@@ -68,8 +68,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* Incentivos fiscales */}
-      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+      <div className="mb-8 pt-8 border-t" style={{ borderColor: T.border }}>
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Incentivos fiscales
         </div>
 
@@ -83,19 +83,19 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           accentLight={accentLight}
         />
         {n(data.donaciones) > 0 && (
-          <div className="mb-5">
+          <div className="mb-8">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={data.donacionesPrioritarias}
                 onChange={e => set("donacionesPrioritarias", e.target.checked)}
-                className="w-5 h-5 cursor-pointer rounded accent-current"
+                className="w-6 h-6 cursor-pointer rounded accent-current"
               />
               <div>
-                <div className="text-sm font-medium" style={{ color: T.ink }}>
+                <div className="text-[15px] font-medium" style={{ color: T.ink }}>
                   Actividades prioritarias de mecenazgo (45%)
                 </div>
-                <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
                   En lugar del 30% general &middot; Art. 25 NF 35/2021
                 </div>
               </div>
@@ -119,8 +119,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
 
 export default function StepDeducciones({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-6">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+    <div className="space-y-10">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

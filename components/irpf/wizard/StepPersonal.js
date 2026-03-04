@@ -21,7 +21,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   const Btn = ({ opt }) => (
     <button
       onClick={() => onChange(opt.value)}
-      className="py-3 px-3 text-[13px] font-medium rounded-xl cursor-pointer
+      className="py-4 px-4 text-[14px] font-medium rounded-xl cursor-pointer
                  transition-all duration-200 leading-tight min-h-[48px]"
       style={{
         background: value === opt.value ? accent : T.surface,
@@ -35,15 +35,15 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   );
 
   return (
-    <div className="mb-5">
-      <div className="text-[13px] font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+    <div className="mb-8">
+      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Discapacidad / dependencia (arts. 23.3 + 82)
         <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III)." />
       </div>
-      <div className="grid grid-cols-3 gap-2 mb-2">
+      <div className="grid grid-cols-3 gap-3 mb-2">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         {row2.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
     </div>
@@ -59,17 +59,17 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
   ];
 
   return (
-    <div className="mb-5">
-      <div className="text-[13px] font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+    <div className="mb-8">
+      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Grado discapacidad del/los familiar/es
         <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'." />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         {opts.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className="py-3 px-3 text-[13px] font-medium rounded-xl cursor-pointer
+            className="py-4 px-4 text-[14px] font-medium rounded-xl cursor-pointer
                        transition-all duration-200 leading-tight min-h-[48px]"
             style={{
               background: value === opt.value ? accent : T.surface,
@@ -209,7 +209,7 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
 
 export default function StepPersonal({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <PersonCard
         letter="H"
         label="Descendientes"
@@ -228,7 +228,7 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
         />
       </PersonCard>
 
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

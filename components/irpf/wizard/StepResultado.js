@@ -10,15 +10,15 @@ function RecommendationBanner({ optimo, diferencia }) {
 
   return (
     <div
-      className="rounded-2xl p-6 md:p-7"
+      className="rounded-3xl p-8 md:p-10"
       style={{
         background: `linear-gradient(135deg, ${T.greenL}, ${T.surface}, ${T.greenL})`,
         border: `2px solid ${T.greenAcc}33`,
       }}
     >
-      <div className="flex flex-wrap justify-between items-start gap-4">
+      <div className="flex flex-wrap justify-between items-start gap-5">
         <div className="flex-1 min-w-[200px]">
-          <div className="text-[10px] font-bold tracking-[0.15em] uppercase mb-2" style={{ color: T.green }}>
+          <div className="text-[11px] font-bold tracking-[0.15em] uppercase mb-2" style={{ color: T.green }}>
             Recomendación
           </div>
           <div className="text-xl font-bold leading-tight text-ink">
@@ -27,7 +27,7 @@ function RecommendationBanner({ optimo, diferencia }) {
               : `Tendrás que pagar ${eur(Math.abs(optimo.resultado))}`
             }
           </div>
-          <div className="text-[13px] mt-2 leading-relaxed text-ink-mid">
+          <div className="text-sm mt-2 leading-relaxed text-ink-mid">
             Tu mejor opción es{" "}
             <strong className="text-ink">{optimo.label.toLowerCase()}</strong>.
             {diferencia > 0 && ` Ahorras ${eur(diferencia)} frente a la peor opción.`}
@@ -60,7 +60,7 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
 
   return (
     <div
-      className="relative rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      className="relative rounded-3xl p-6 md:p-7 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
       style={{
         background: isOptimo ? `linear-gradient(135deg, ${T.greenL}, ${T.surface})` : T.surface,
         border: `2px solid ${isOptimo ? T.greenAcc + "44" : isPeor && totalOpciones > 2 ? T.redAcc + "33" : T.border}`,
@@ -68,9 +68,9 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
       }}
     >
       {/* Badge */}
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-4">
         <span
-          className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-lg"
+          className="text-[11px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-lg"
           style={{
             color: sc.accentColor,
             background: sc.accentColor + "12",
@@ -152,7 +152,7 @@ function WaterfallRow({ label, value, type, note, isLast }) {
   return (
     <div className={isLast ? "" : "pb-2 mb-1"}>
       <div className="flex items-center gap-2.5">
-        <div className="w-5 text-center text-[13px] flex-shrink-0">
+        <div className="w-5 text-center text-sm flex-shrink-0">
           {type === "minus" ? <span style={{ color: T.redAcc }}>&minus;</span>
            : type === "plus" ? <span style={{ color: T.greenAcc }}>+</span>
            : type === "result" ? <span className="font-bold" style={{ color: c.text }}>=</span>
@@ -160,10 +160,10 @@ function WaterfallRow({ label, value, type, note, isLast }) {
         </div>
         <div className="flex-1 text-xs" style={{ color: type === "total" || type === "result" ? T.ink : T.inkMid, fontWeight: type === "total" || type === "result" ? 700 : 400 }}>
           {label}
-          {note && <div className="text-[10px] mt-0.5" style={{ color: T.inkFaint }}>{note}</div>}
+          {note && <div className="text-[11px] mt-0.5" style={{ color: T.inkFaint }}>{note}</div>}
         </div>
         <div
-          className="text-[13px] font-mono min-w-[100px] text-right"
+          className="text-sm font-mono min-w-[100px] text-right"
           style={{ fontWeight: type === "total" || type === "result" ? 700 : 500, color: c.text }}
         >
           {type === "minus" ? "−" + eur(absVal) : type === "plus" ? "+" + eur(absVal) : eur(value)}
@@ -188,7 +188,7 @@ function WaterfallDesglose({ data, label, accent }) {
     <div className="rounded-xl overflow-hidden mb-2" style={{ border: `1.5px solid ${T.border}` }}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full bg-white border-none cursor-pointer px-4 py-3.5 flex justify-between items-center gap-3 transition-colors duration-200"
+        className="w-full bg-white border-none cursor-pointer px-5 py-4 flex justify-between items-center gap-3 transition-colors duration-200"
         style={{ background: open ? T.surfaceAlt : T.surface }}
       >
         <div className="text-left">
@@ -216,7 +216,7 @@ function WaterfallDesglose({ data, label, accent }) {
       </button>
 
       {open && (
-        <div className="p-4 border-t bg-white" style={{ borderColor: T.border }}>
+        <div className="p-5 border-t bg-white" style={{ borderColor: T.border }}>
           <WaterfallRow label="Retribución bruta" value={data.bruto ?? ((data.brutoA ?? 0) + (data.brutoB ?? 0))} type="start" />
           {(data.otrosRdtosTrabajo ?? data.otrosRdtosTotal ?? 0) > 0 && (
             <WaterfallRow label="Otros rdtos. trabajo" value={data.otrosRdtosTrabajo ?? data.otrosRdtosTotal} type="plus" note="Arts. 16, 18, 19 NF 33/2013" />
@@ -311,7 +311,7 @@ function TablaComparativa({ scenarios }) {
         <thead>
           <tr style={{ background: T.surfaceAlt }}>
             <th
-              className="text-left px-3.5 py-2.5 text-[10px] font-bold tracking-wider uppercase min-w-[140px] text-ink-faint"
+              className="text-left px-4 py-3 text-[11px] font-bold tracking-wider uppercase min-w-[140px] text-ink-faint"
               style={{ borderBottom: `1px solid ${T.border}` }}
             >
               Concepto
@@ -319,10 +319,10 @@ function TablaComparativa({ scenarios }) {
             {sorted.map((sc, i) => (
               <th
                 key={sc.id}
-                className="text-right px-3.5 py-2.5 min-w-[130px]"
+                className="text-right px-4 py-3 min-w-[130px]"
                 style={{ borderBottom: `1px solid ${T.border}`, background: i === 0 ? T.greenL : "transparent" }}
               >
-                <div className="text-[10px] font-bold tracking-wider uppercase" style={{ color: sc.accentColor }}>{sc.modalidad}</div>
+                <div className="text-[11px] font-bold tracking-wider uppercase" style={{ color: sc.accentColor }}>{sc.modalidad}</div>
                 <div className="text-[11px] font-semibold text-ink">{sc.label}</div>
                 {i === 0 && <div className="text-[9px] font-bold mt-0.5" style={{ color: T.greenAcc }}>★ ÓPTIMO</div>}
               </th>
@@ -385,7 +385,7 @@ export default function StepResultado({
 
   if (!optimo || !scenarios?.length) {
     return (
-      <div className="bg-white rounded-2xl border border-border/60 p-12 text-center shadow-sm">
+      <div className="bg-white rounded-3xl border border-border/60 p-12 text-center shadow-sm">
         <div className="text-4xl mb-4 opacity-15">&harr;</div>
         <div className="text-base font-semibold mb-2 text-ink-mid">
           No hay datos suficientes para calcular
@@ -398,11 +398,11 @@ export default function StepResultado({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       {/* "Modificar datos" button */}
       <button
         onClick={onEditData}
-        className="self-start px-4 py-2 rounded-xl text-xs font-medium cursor-pointer
+        className="self-start px-5 py-3 rounded-xl text-[13px] font-medium cursor-pointer
                    transition-all duration-200 hover:bg-surface-alt"
         style={{
           background: T.surface,
@@ -418,10 +418,10 @@ export default function StepResultado({
 
       {/* 2. Scenario Cards Grid */}
       <div>
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3 text-ink-faint">
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4 text-ink-faint">
           Comparativa de escenarios
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {scenarios.map((sc, i) => (
             <ScenarioCard key={sc.id} sc={sc} rank={i} totalOpciones={scenarios.length} />
           ))}
@@ -431,11 +431,11 @@ export default function StepResultado({
       {/* 3. Waterfall breakdowns */}
       {calc && (
         <div>
-          <div className="text-[11px] font-bold tracking-widest uppercase mb-3 text-ink-faint">
+          <div className="text-[12px] font-bold tracking-widest uppercase mb-4 text-ink-faint">
             Desglose paso a paso
           </div>
 
-          <div className="text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: T.cobalt }}>
+          <div className="text-[12px] font-bold tracking-widest uppercase mb-2" style={{ color: T.cobalt }}>
             Declaración individual
           </div>
           {calc.a_sh && <WaterfallDesglose data={calc.a_sh} label="Persona A — Individual sin hijos" accent={T.cobalt} />}
@@ -450,7 +450,7 @@ export default function StepResultado({
                 <WaterfallDesglose data={calc.b_ch} label={`Persona B — Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />
               )}
 
-              <div className="text-[11px] font-bold tracking-widest uppercase mb-2 mt-5" style={{ color: T.gold }}>
+              <div className="text-[12px] font-bold tracking-widest uppercase mb-2 mt-6" style={{ color: T.gold }}>
                 Declaración conjunta
               </div>
               {calc.c_sh && (
@@ -468,7 +468,7 @@ export default function StepResultado({
       <div>
         <button
           onClick={() => setShowTabla(t => !t)}
-          className="w-full px-5 py-3.5 bg-white cursor-pointer text-[13px] font-bold
+          className="w-full px-5 py-3.5 bg-white cursor-pointer text-sm font-bold
                      flex justify-between items-center transition-all duration-200 hover:bg-surface-alt"
           style={{
             border: `1.5px solid ${T.border}`,
@@ -493,7 +493,7 @@ export default function StepResultado({
 
       {/* 5. Disclaimer */}
       <div
-        className="rounded-xl p-4 text-[11px] leading-relaxed"
+        className="rounded-xl p-5 text-xs leading-relaxed"
         style={{ background: T.surfaceAlt, border: `1px solid ${T.border}`, color: T.inkMid }}
       >
         <strong>Resultado estimado</strong> conforme a la normativa foral vigente.

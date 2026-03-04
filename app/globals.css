@@ -3,32 +3,32 @@
 
 @import "tailwindcss";
 
-/* Design system tokens — cool modern palette */
+/* Design system tokens — warm professional palette */
 @theme {
-  --color-bg: #F8FAFC;
+  --color-bg: #F5F3EF;
   --color-surface: #FFFFFF;
-  --color-surface-alt: #F1F5F9;
-  --color-border: #E2E8F0;
-  --color-border-soft: #F1F5F9;
+  --color-surface-alt: #F0EDE8;
+  --color-border: #DDD8D0;
+  --color-border-soft: #EBE7E0;
 
-  --color-ink: #0F172A;
-  --color-ink-mid: #475569;
-  --color-ink-faint: #94A3B8;
+  --color-ink: #1A1A2E;
+  --color-ink-mid: #555566;
+  --color-ink-faint: #9A9AAB;
 
-  --color-cobalt: #4F46E5;
-  --color-cobalt-light: #EEF2FF;
-  --color-teal: #0891B2;
-  --color-teal-light: #ECFEFF;
-  --color-gold: #D97706;
-  --color-gold-light: #FFFBEB;
-  --color-gold-accent: #F59E0B;
+  --color-cobalt: #1B3A5C;
+  --color-cobalt-light: #EFF4F9;
+  --color-teal: #2E7D6F;
+  --color-teal-light: #EDF5F3;
+  --color-gold: #C4841D;
+  --color-gold-light: #FDF6EC;
+  --color-gold-accent: #E09B3D;
 
-  --color-positive: #059669;
-  --color-positive-light: #ECFDF5;
-  --color-positive-accent: #10B981;
-  --color-negative: #DC2626;
-  --color-negative-light: #FEF2F2;
-  --color-negative-accent: #EF4444;
+  --color-positive: #1A7A56;
+  --color-positive-light: #EEF7F2;
+  --color-positive-accent: #2EA06B;
+  --color-negative: #C93535;
+  --color-negative-light: #FDF1F1;
+  --color-negative-accent: #E05252;
 
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -76,10 +76,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #C5C0B8;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #9A9AAB;
 }

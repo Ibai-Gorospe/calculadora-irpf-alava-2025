@@ -26,8 +26,8 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               disabled={!isReachable}
               onClick={() => isReachable && onStepClick(step.key)}
               className={`
-                flex items-center gap-2.5 px-4 py-3.5 rounded-xl
-                text-[13px] font-medium whitespace-nowrap
+                flex items-center gap-3 px-5 py-4 rounded-2xl
+                text-sm font-medium whitespace-nowrap
                 transition-all duration-200
                 outline-none focus-visible:ring-2 focus-visible:ring-cobalt/30
                 ${isReachable ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
@@ -43,8 +43,8 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               {/* Numbered badge */}
               <span
                 className={`
-                  w-7 h-7 rounded-full flex items-center justify-center
-                  text-xs font-bold shrink-0 transition-all duration-200
+                  w-8 h-8 rounded-full flex items-center justify-center
+                  text-sm font-bold shrink-0 transition-all duration-200
                   ${isCurrent
                     ? "bg-cobalt text-white shadow-sm"
                     : isCompleted
@@ -85,8 +85,8 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               disabled={!isReachable}
               onClick={() => isReachable && onStepClick(step.key)}
               className={`
-                flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold
-                rounded-xl whitespace-nowrap transition-all duration-200
+                flex items-center gap-2 px-3.5 py-3 text-[13px] font-semibold
+                rounded-2xl whitespace-nowrap transition-all duration-200
                 outline-none focus-visible:ring-2 focus-visible:ring-cobalt/30
                 ${isReachable ? "cursor-pointer" : "cursor-not-allowed opacity-50"}
                 ${isCurrent
@@ -100,7 +100,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               aria-label={step.label}
             >
               <span className={`
-                w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold
+                w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold
                 ${isCurrent
                   ? "bg-white/20"
                   : isCompleted

@@ -17,12 +17,12 @@ export function NumInput({
   const id = useId();
 
   return (
-    <div className="flex flex-col gap-1.5 mb-5">
+    <div className="flex flex-col gap-2.5 mb-8">
       {/* Label row */}
       <div className="flex items-center gap-1.5">
         <label
           htmlFor={id}
-          className="text-[13px] font-medium transition-colors duration-200"
+          className="text-[15px] font-medium transition-colors duration-200"
           style={{ color: focused ? accent : T.inkMid }}
         >
           {label}
@@ -40,8 +40,8 @@ export function NumInput({
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full rounded-xl px-4 py-3
-                   font-mono text-[15px] text-ink
+        className="w-full rounded-2xl px-5 py-4 min-h-[56px]
+                   font-mono text-base text-ink
                    outline-none transition-all duration-200
                    placeholder:text-ink-faint/40"
         style={{
@@ -53,7 +53,7 @@ export function NumInput({
 
       {/* Hint */}
       {hint && (
-        <p className="text-xs leading-snug text-ink-faint">{hint}</p>
+        <p className="text-[13px] leading-snug text-ink-faint">{hint}</p>
       )}
     </div>
   );

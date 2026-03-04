@@ -64,8 +64,8 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
 
 export default function StepBasico({ state, dispatch, showPersonB, setShowPersonB }) {
   return (
-    <div className="space-y-6">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+    <div className="space-y-10">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"
@@ -102,7 +102,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
                 dispatch({ type: "RESET_B" });
                 setShowPersonB(false);
               }}
-              className="mt-4 w-full py-3 rounded-xl text-sm font-medium cursor-pointer
+              className="mt-6 w-full py-4 rounded-2xl text-sm font-medium cursor-pointer
                          transition-all duration-200 hover:opacity-80"
               style={{
                 background: T.redL,
@@ -119,7 +119,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
       {!showPersonB && (
         <button
           onClick={() => setShowPersonB(true)}
-          className="w-full py-4 rounded-xl text-sm font-medium cursor-pointer
+          className="w-full py-5 rounded-2xl text-base font-medium cursor-pointer
                      transition-all duration-200 hover:bg-teal-light/50 group"
           style={{
             background: "transparent",

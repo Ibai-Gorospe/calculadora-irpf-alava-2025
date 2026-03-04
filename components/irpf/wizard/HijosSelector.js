@@ -13,17 +13,17 @@ function deducHijosTotal(num, hijosM6 = 0, hijos6a15 = 0) {
 
 function AgeCounter({ label, val, onChange, max, tooltipText }) {
   return (
-    <div className="mt-5">
-      <div className="text-[13px] font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+    <div className="mt-6">
+      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         {label}
         {tooltipText && <Tooltip text={tooltipText} />}
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         {Array.from({ length: max + 1 }, (_, i) => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-3 text-sm font-bold rounded-xl cursor-pointer font-mono transition-all duration-200"
+            className="flex-1 py-3.5 text-base font-bold rounded-2xl cursor-pointer font-mono transition-all duration-200"
             style={{
               background: val === i ? T.gold : T.surface,
               color: val === i ? "#fff" : T.inkMid,
@@ -54,17 +54,17 @@ export default function HijosSelector({
 
   return (
     <div>
-      <div className="text-[13px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+      <div className="text-[15px] font-medium mb-4 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Hijos en común
         <Tooltip text="Descendientes convivientes con rentas ≤ SMI (16.576 €/año) y edad < 30 años. Art. 79 NF 33/2013." />
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         {[0, 1, 2, 3, 4].map(i => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-3.5 text-base font-bold rounded-xl cursor-pointer font-mono transition-all duration-200"
+            className="flex-1 py-4 text-lg font-bold rounded-2xl min-h-[52px] cursor-pointer font-mono transition-all duration-200"
             style={{
               background: value === i ? T.gold : T.surface,
               color: value === i ? "#fff" : T.inkMid,
@@ -95,7 +95,7 @@ export default function HijosSelector({
           />
 
           <div
-            className="mt-5 rounded-xl p-5 text-[13px] leading-relaxed"
+            className="mt-6 rounded-2xl p-6 text-sm leading-relaxed"
             style={{
               background: T.goldL,
               border: `1.5px solid ${T.goldAcc}33`,

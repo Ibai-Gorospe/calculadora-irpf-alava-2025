@@ -10,23 +10,23 @@ function ToggleSection({ label, defaultOpen = false, hasData = false, children }
   const [open, setOpen] = useState(defaultOpen || hasData);
 
   return (
-    <div className="mt-4">
-      <label className="flex items-center gap-3 cursor-pointer select-none mb-4 group">
+    <div className="mt-6">
+      <label className="flex items-center gap-3 cursor-pointer select-none mb-5 group">
         <input
           type="checkbox"
           checked={open}
           onChange={e => setOpen(e.target.checked)}
-          className="w-5 h-5 cursor-pointer rounded accent-current"
+          className="w-6 h-6 cursor-pointer rounded accent-current"
         />
         <span
-          className="text-sm font-medium transition-colors duration-200"
+          className="text-[15px] font-medium transition-colors duration-200"
           style={{ color: open ? T.ink : T.inkMid }}
         >
           {label}
         </span>
       </label>
       {open && (
-        <div className="pl-3 border-l-2 ml-2.5 pb-1" style={{ borderColor: T.border }}>
+        <div className="pl-4 border-l-2 ml-3 pb-1" style={{ borderColor: T.border }}>
           {children}
         </div>
       )}
@@ -41,8 +41,8 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
   return (
     <>
       {/* Capital Inmobiliario */}
-      <div className="mb-5">
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+      <div className="mb-8">
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Capital inmobiliario &middot; Arts. 30-34 NF 33/2013
         </div>
         <NumInput
@@ -63,19 +63,19 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
           accent={accent}
           accentLight={accentLight}
         />
-        <div className="mb-5">
+        <div className="mb-8">
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={data.esViviendaInq}
               onChange={e => set("esViviendaInq", e.target.checked)}
-              className="w-5 h-5 cursor-pointer rounded accent-current"
+              className="w-6 h-6 cursor-pointer rounded accent-current"
             />
             <div>
-              <div className="text-sm font-medium" style={{ color: T.ink }}>
+              <div className="text-[15px] font-medium" style={{ color: T.ink }}>
                 El inquilino lo usa como su vivienda habitual
               </div>
-              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+              <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
                 Reducción del 60% sobre el rendimiento neto positivo &middot; Art. 34 NF 33/2013
               </div>
             </div>
@@ -84,8 +84,8 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* Capital Mobiliario */}
-      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+      <div className="mb-8 pt-8 border-t" style={{ borderColor: T.border }}>
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Capital mobiliario (base del ahorro) &middot; Arts. 35-38 NF 33/2013
         </div>
         <NumInput
@@ -109,8 +109,8 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* Ganancias Patrimoniales */}
-      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
-        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+      <div className="mb-8 pt-8 border-t" style={{ borderColor: T.border }}>
+        <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Ganancias/pérdidas patrimoniales (base del ahorro) &middot; Arts. 43-59 NF 33/2013
         </div>
         <NumInput
@@ -125,9 +125,9 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* Otros rendimientos del trabajo */}
-      <div className="pt-5 border-t" style={{ borderColor: T.border }}>
+      <div className="pt-8 border-t" style={{ borderColor: T.border }}>
         <ToggleSection label="Tengo otros rendimientos del trabajo" hasData={hasOtrosRdtos}>
-          <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
+          <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
             Retribuciones en especie, stock options y rescates
           </div>
 
@@ -151,19 +151,19 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
             accentLight={accentLight}
           />
           {n(data.stockOptions) > 0 && (
-            <div className="mb-5">
+            <div className="mb-8">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={data.stockOptionsReduccion}
                   onChange={e => set("stockOptionsReduccion", e.target.checked)}
-                  className="w-5 h-5 cursor-pointer rounded accent-current"
+                  className="w-6 h-6 cursor-pointer rounded accent-current"
                 />
                 <div>
-                  <div className="text-sm font-medium" style={{ color: T.ink }}>
+                  <div className="text-[15px] font-medium" style={{ color: T.ink }}>
                     Reducción 40% por renta irregular (art. 19.2)
                   </div>
-                  <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                  <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
                     Periodo de generación superior a 2 años
                   </div>
                 </div>
@@ -181,19 +181,19 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
             accentLight={accentLight}
           />
           {n(data.rescatePension) > 0 && (
-            <div className="mb-5">
+            <div className="mb-8">
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={data.rescatePensionReduccion}
                   onChange={e => set("rescatePensionReduccion", e.target.checked)}
-                  className="w-5 h-5 cursor-pointer rounded accent-current"
+                  className="w-6 h-6 cursor-pointer rounded accent-current"
                 />
                 <div>
-                  <div className="text-sm font-medium" style={{ color: T.ink }}>
+                  <div className="text-[15px] font-medium" style={{ color: T.ink }}>
                     Reducción 40% aportaciones pre-2014
                   </div>
-                  <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                  <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
                     Para la parte correspondiente a aportaciones anteriores a 01/01/2014
                   </div>
                 </div>
@@ -208,8 +208,8 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
 
 export default function StepOtrasRentas({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-6">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+    <div className="space-y-10">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

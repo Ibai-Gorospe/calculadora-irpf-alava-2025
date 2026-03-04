@@ -12,11 +12,11 @@ export function SmallSelector({
   accent = T.cobalt,
 }) {
   return (
-    <div className="flex flex-col gap-2 mb-5">
+    <div className="flex flex-col gap-3 mb-8">
       {/* Label row */}
       {lbl && (
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] font-medium text-ink-mid">
+          <span className="text-[15px] font-medium text-ink-mid">
             {lbl}
           </span>
           {tooltipText && <Tooltip text={tooltipText} />}
@@ -24,7 +24,7 @@ export function SmallSelector({
       )}
 
       {/* Button group */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {options.map((opt) => {
           const selected = opt.value === value;
           return (
@@ -33,7 +33,7 @@ export function SmallSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={`
-                rounded-xl px-4 py-2.5 text-sm font-medium
+                rounded-2xl px-5 py-3.5 text-[15px] font-medium min-h-[48px]
                 transition-all duration-200 cursor-pointer
                 outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                 ${

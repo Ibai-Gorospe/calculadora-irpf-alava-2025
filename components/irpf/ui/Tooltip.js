@@ -44,8 +44,8 @@ export function Tooltip({ text, children }) {
           aria-label="Mas informacion"
           onClick={() => setOpen(!open)}
           className={`
-            ml-1 inline-flex h-5 w-5 items-center justify-center
-            rounded-full text-[11px] font-semibold
+            ml-1 inline-flex h-6 w-6 items-center justify-center
+            rounded-full text-xs font-semibold
             leading-none cursor-pointer transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-cobalt/20
             ${open
@@ -78,7 +78,7 @@ export function Tooltip({ text, children }) {
           />
 
           {/* Content */}
-          <span className="block relative p-4">
+          <span className="block relative p-5">
             {/* Close button */}
             <button
               onClick={() => setOpen(false)}
@@ -96,13 +96,13 @@ export function Tooltip({ text, children }) {
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-cobalt/10 text-cobalt text-[10px] font-bold shrink-0">
                 i
               </span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-ink-faint">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
                 Info
               </span>
             </span>
 
             {/* Text body */}
-            <span className="block text-[13px] leading-[1.7] text-ink-mid pr-3">
+            <span className="block text-sm leading-[1.7] text-ink-mid pr-3">
               {text}
             </span>
           </span>
