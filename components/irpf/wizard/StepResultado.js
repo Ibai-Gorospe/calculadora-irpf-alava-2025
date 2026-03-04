@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { eur, pct } from "../engine/helpers.js";
+import { eur, pct, signedEur } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   Helpers
-   ───────────────────────────────────────────────────────────────────────────── */
-const sign = (x) => x >= 0 ? "+" : "−";
-const signedEur = (x) => sign(x) + eur(Math.abs(x));
 
 /* ─────────────────────────────────────────────────────────────────────────────
    RecommendationBanner — main result banner
@@ -364,7 +358,7 @@ function TablaComparativa({ scenarios }) {
         <tbody>
           {rows.map(row => (
             <tr key={row.key + row.label} style={{ borderBottom: `1px solid ${T.borderSoft}`, background: row.highlight ? T.surfaceAlt : "transparent" }}>
-              <td className="px-3.5 py-2 text-[11px]" style={{ color: row.bold ? T.ink : T.inkMid, fontWeight: row.bold ? 700 : 400, fontFamily: T.fontSans }}>
+              <td className="px-3.5 py-2 text-[11px]" style={{ color: row.bold ? T.ink : T.inkMid, fontWeight: row.bold ? 700 : 400, fontFamily: T.fontSerif }}>
                 {row.label}
               </td>
               {sorted.map((sc, i) => {
@@ -524,7 +518,7 @@ export default function StepResultado({
             border: `1.5px solid ${T.border}`,
             borderRadius: showTabla ? "14px 14px 0 0" : 14,
             color: T.ink,
-            fontFamily: T.fontSans,
+            fontFamily: T.fontSerif,
           }}
         >
           <span>Tabla comparativa lado a lado</span>
@@ -551,16 +545,6 @@ export default function StepResultado({
         Su declaración definitiva puede variar en función de su situación particular.
         Para confirmar, utilice <strong>Rentafácil</strong> de la Hacienda Foral de Álava
         o consulte con un asesor fiscal.
-      </div>
-
-      {/* Footer */}
-      <div className="text-center text-[10px] leading-loose pt-3 border-t" style={{ color: T.inkFaint, borderColor: T.border }}>
-        <div>Normativa aplicada: NF 33/2013 (texto consolidado) &middot; NF 19/2024 &middot; NF 3/2025 &middot; DF 23/2025 &middot; Orden PJC/178/2025</div>
-        <div className="mt-1.5">
-          Los resultados de esta calculadora tienen carácter meramente informativo y orientativo,
-          basados en la normativa foral vigente. No constituyen asesoramiento fiscal y no tienen efectos vinculantes.
-        </div>
-        <div className="mt-1.5 text-[9px] opacity-60">Ejercicio fiscal 2025 &middot; Trabajo, capital y patrimonio</div>
       </div>
     </div>
   );

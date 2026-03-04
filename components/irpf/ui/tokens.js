@@ -23,5 +23,5 @@ export const T = {
   redL:       "#FBEAEA",
   redAcc:     "#D94040",
   fontMono:   "'Courier Prime', 'Courier New', monospace",
-  fontSans:   "'Literata', Georgia, serif",
+  fontSerif:  "'Literata', Georgia, serif",
 };

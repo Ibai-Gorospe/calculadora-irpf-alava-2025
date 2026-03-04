@@ -29,7 +29,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
         background: value === opt.value ? accent : T.surface,
         color: value === opt.value ? "#fff" : T.inkMid,
         border: `1.5px solid ${value === opt.value ? accent : T.border}`,
-        fontFamily: T.fontSans,
+        fontFamily: T.fontSerif,
       }}
     >
       {opt.label}
@@ -43,9 +43,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
         style={{ color: T.inkMid }}
       >
         Discapacidad / dependencia (arts. 23.3 + 82)
-        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% \u226533%, +250% \u226565%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 \u20AC (33-65%), 1.464,54 \u20AC (\u226565%/Grado I), 1.756,75 \u20AC (Grado II) o 2.191,03 \u20AC (Grado III).">
-          <span />
-        </Tooltip>
+        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III)." />
       </div>
       <div className="grid grid-cols-3 gap-2 mb-2">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
@@ -75,9 +73,7 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
         style={{ color: T.inkMid }}
       >
         Grado discapacidad del/los familiar/es
-        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y a\u00F1ade manualmente la diferencia en 'Otras deducciones'.">
-          <span />
-        </Tooltip>
+        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'." />
       </div>
       <div className="grid grid-cols-2 gap-2">
         {opts.map(opt => (
@@ -89,7 +85,7 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
               background: value === opt.value ? accent : T.surface,
               color: value === opt.value ? "#fff" : T.inkMid,
               border: `1.5px solid ${value === opt.value ? accent : T.border}`,
-              fontFamily: T.fontSans,
+              fontFamily: T.fontSerif,
             }}
           >
             {opt.label}

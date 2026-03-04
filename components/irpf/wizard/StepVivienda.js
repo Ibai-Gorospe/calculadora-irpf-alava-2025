@@ -88,7 +88,7 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
       />
 
       {/* Warning: both mortgage and rent */}
-      {data.viviendaCompra && data.alquilerAnual && (
+      {n(data.viviendaCompra) > 0 && n(data.alquilerAnual) > 0 && (
         <div className="text-xs py-1" style={{ color: T.red }}>
           Normalmente no se aplican ambas deducciones simultáneamente (compra + alquiler)
         </div>

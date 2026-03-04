@@ -1,10 +1,7 @@
 "use client";
 
-import { eur, pct } from "../engine/helpers.js";
+import { eur, pct, signedEur } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
-
-const sign = (x) => x >= 0 ? "+" : "−";
-const signedEur = (x) => sign(x) + eur(Math.abs(x));
 
 export default function LiveResultPanel({ optimo, scenarios, ready }) {
   /* ── Placeholder when not enough data ────────────────────────────────── */

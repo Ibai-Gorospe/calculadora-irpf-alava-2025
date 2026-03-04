@@ -39,10 +39,11 @@ export default function WizardContainer() {
   // Dismiss restored banner
   const dismissRestored = useCallback(() => setRestored(false), []);
 
-  // Step navigation
+  // Step navigation — scroll to top on every change
   const goToStep = useCallback((step) => {
     setCurrentStep(step);
     setMaxVisited(prev => Math.max(prev, step));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const goNext = useCallback(() => {
@@ -52,6 +53,7 @@ export default function WizardContainer() {
 
   const goPrev = useCallback(() => {
     setCurrentStep(prev => Math.max(prev - 1, 0));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   // ── Extract values ──────────────────────────────────────────────────────────
@@ -395,7 +397,7 @@ export default function WizardContainer() {
 
       {/* ── BODY ───────────────────────────────────────────────────────────── */}
       {currentStep < 5 ? (
-        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-10`}>
+        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-10 pb-28 lg:pb-10`}>
           {/* Step content */}
           {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
           {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
@@ -407,7 +409,7 @@ export default function WizardContainer() {
           <div className="flex items-center justify-between mt-12 gap-4">
             {currentStep > 0 ? (
               <button onClick={goPrev} className="px-7 py-3.5 rounded-xl border border-border text-ink-mid font-semibold text-sm hover:bg-surface-alt transition-colors cursor-pointer">
-                \u2190 Anterior
+                ← Anterior
               </button>
             ) : <div />}
             <div className="flex items-center gap-3">
@@ -417,7 +419,7 @@ export default function WizardContainer() {
                 </button>
               )}
               <button onClick={goNext} className="px-10 py-4 rounded-xl bg-cobalt text-white font-bold text-[15px] hover:opacity-90 transition-opacity shadow-sm cursor-pointer">
-                {currentStep === 4 ? "Ver resultados \u2192" : "Siguiente \u2192"}
+                {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
               </button>
             </div>
           </div>
@@ -425,23 +427,25 @@ export default function WizardContainer() {
           {/* Reset button */}
           <div className="mt-8 text-center">
             <button onClick={handleReset} className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer">
-              \u21BA Limpiar todos los datos
+              ↻ Limpiar todos los datos
             </button>
           </div>
         </div>
       ) : (
-        <StepResultado
-          calc={calc}
-          scenarios={scenarios}
-          optimo={optimo}
-          diferencia={diferencia}
-          hijos={hj}
-          hijosM6={hjM6}
-          hijos6a15={hj6a15}
-          onEditData={() => setCurrentStep(0)}
-          state={state}
-          showPersonB={showPersonB}
-        />
+        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-10">
+          <StepResultado
+            calc={calc}
+            scenarios={scenarios}
+            optimo={optimo}
+            diferencia={diferencia}
+            hijos={hj}
+            hijosM6={hjM6}
+            hijos6a15={hj6a15}
+            onEditData={() => goToStep(0)}
+            state={state}
+            showPersonB={showPersonB}
+          />
+        </div>
       )}
 
       {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}

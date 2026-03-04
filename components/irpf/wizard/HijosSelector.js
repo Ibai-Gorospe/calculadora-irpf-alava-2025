@@ -21,7 +21,7 @@ function AgeCounter({ label, val, onChange, max, tooltipText }) {
         style={{ color: T.inkMid }}
       >
         {label}
-        {tooltipText && <Tooltip text={tooltipText}><span /></Tooltip>}
+        {tooltipText && <Tooltip text={tooltipText} />}
       </div>
       <div className="flex gap-2">
         {Array.from({ length: max + 1 }, (_, i) => (
@@ -64,9 +64,7 @@ export default function HijosSelector({
         style={{ color: T.inkMid }}
       >
         Hijos en común
-        <Tooltip text="Descendientes convivientes con rentas \u2264 SMI (16.576 \u20AC/a\u00F1o) y edad < 30 a\u00F1os. Art. 79 NF 33/2013.">
-          <span />
-        </Tooltip>
+        <Tooltip text="Descendientes convivientes con rentas ≤ SMI (16.576 €/año) y edad < 30 años. Art. 79 NF 33/2013." />
       </div>
 
       {/* Count buttons 0-4 */}
