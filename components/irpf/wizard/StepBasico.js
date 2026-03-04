@@ -4,38 +4,8 @@ import { n, eur } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
 import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
+import { PersonCard } from "../ui/PersonCard.js";
 import { PENSION_LIMIT_TOTAL } from "../engine/constants.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonCard — shared card wrapper for Person A / Person B
-   ───────────────────────────────────────────────────────────────────────────── */
-function PersonCard({ letter, label, accent, accentLight, children }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="p-5">
-        {/* Header with avatar */}
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-extrabold font-mono"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
-          >
-            {letter}
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>{label}</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Rendimientos del trabajo &middot; Art. 15 NF 33/2013
-            </div>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PersonBasicoFields — fields for one person
@@ -74,7 +44,7 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
       />
 
       {n(data.redExtra) > PENSION_LIMIT_TOTAL && (
-        <div className="text-[10px] leading-relaxed pb-2" style={{ color: T.red }}>
+        <div className="text-xs leading-relaxed pb-2" style={{ color: T.red }}>
           Las reducciones de base superan el límite de {eur(PENSION_LIMIT_TOTAL)} (5.000 € individual + 8.000 € empresarial).
         </div>
       )}
@@ -97,17 +67,16 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
 
 /* ─────────────────────────────────────────────────────────────────────────────
    StepBasico — Step 1: "Lo básico"
-   Salary, withholdings, contract type for Person A (and B if applicable)
    ───────────────────────────────────────────────────────────────────────────── */
 export default function StepBasico({ state, dispatch, showPersonB, setShowPersonB }) {
   return (
     <div className="space-y-6">
-      {/* Two-column layout when both persons are visible */}
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
         {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
+          subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -125,6 +94,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
           <PersonCard
             letter="B"
             label="Persona B"
+            subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
             accent={T.teal}
             accentLight={T.tealL}
           >
@@ -141,7 +111,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
                 dispatch({ type: "RESET_B" });
                 setShowPersonB(false);
               }}
-              className="mt-4 w-full py-2.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
+              className="mt-4 w-full py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
               style={{
                 background: T.redL,
                 border: `1px solid ${T.redAcc}44`,
@@ -158,7 +128,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
       {!showPersonB && (
         <button
           onClick={() => setShowPersonB(true)}
-          className="w-full py-3.5 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
+          className="w-full py-4 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
           style={{
             background: "transparent",
             border: `2px dashed ${T.teal}55`,

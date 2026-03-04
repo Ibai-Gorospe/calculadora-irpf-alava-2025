@@ -4,37 +4,8 @@ import { T } from "../ui/tokens.js";
 import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
 import { Tooltip } from "../ui/Tooltip.js";
+import { PersonCard } from "../ui/PersonCard.js";
 import HijosSelector from "./HijosSelector.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonCard — shared card wrapper
-   ───────────────────────────────────────────────────────────────────────────── */
-function PersonCard({ letter, label, accent, accentLight, children }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-extrabold font-mono"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
-          >
-            {letter}
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>{label}</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Situación personal y familiar
-            </div>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────────────────────
    DiscapacidadSelector — 5 options in 3+2 grid
@@ -53,7 +24,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   const Btn = ({ opt }) => (
     <button
       onClick={() => onChange(opt.value)}
-      className="py-2.5 px-1.5 text-[11px] font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[44px]"
+      className="py-3 px-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[48px]"
       style={{
         background: value === opt.value ? accent : T.surface,
         color: value === opt.value ? "#fff" : T.inkMid,
@@ -66,9 +37,9 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   );
 
   return (
-    <div className="mb-3">
+    <div className="mb-5">
       <div
-        className="text-[11px] font-bold tracking-wider uppercase mb-1.5 flex items-center gap-1"
+        className="text-xs font-bold tracking-wider uppercase mb-2 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         Discapacidad / dependencia (arts. 23.3 + 82)
@@ -76,10 +47,10 @@ function DiscapacidadSelector({ value, onChange, accent }) {
           <span />
         </Tooltip>
       </div>
-      <div className="grid grid-cols-3 gap-1 mb-1">
+      <div className="grid grid-cols-3 gap-1.5 mb-1.5">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1.5">
         {row2.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
     </div>
@@ -98,9 +69,9 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
   ];
 
   return (
-    <div className="mb-3">
+    <div className="mb-5">
       <div
-        className="text-[11px] font-bold tracking-wider uppercase mb-1.5 flex items-center gap-1"
+        className="text-xs font-bold tracking-wider uppercase mb-2 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         Grado discapacidad del/los familiar/es
@@ -108,12 +79,12 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
           <span />
         </Tooltip>
       </div>
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1.5">
         {opts.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className="py-2.5 px-1.5 text-[11px] font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[44px]"
+            className="py-3 px-2 text-xs font-semibold rounded-lg cursor-pointer transition-all duration-150 leading-tight min-h-[48px]"
             style={{
               background: value === opt.value ? accent : T.surface,
               color: value === opt.value ? "#fff" : T.inkMid,
@@ -175,7 +146,7 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
 
       {/* Warning: viudedad + edad */}
       {data.viudedad && data.edad !== "menor65" && (
-        <div className="text-[10px] leading-relaxed pb-2" style={{ color: T.gold }}>
+        <div className="text-xs leading-relaxed pb-2" style={{ color: T.gold }}>
           Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica automáticamente la más beneficiosa.
         </div>
       )}
@@ -265,30 +236,18 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    StepPersonal — Step 2: "Situación personal"
-   Children, age, disability, etc.
    ───────────────────────────────────────────────────────────────────────────── */
 export default function StepPersonal({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">
       {/* Hijos selector (shared between persons) */}
-      <div
-        className="bg-white rounded-xl shadow-sm p-5 border border-border"
-        style={{ borderTop: `3px solid ${T.gold}` }}
+      <PersonCard
+        letter="H"
+        label="Descendientes"
+        subtitle="Hijos en común · Art. 79 NF 33/2013"
+        accent={T.gold}
+        accentLight={T.goldL}
       >
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-lg"
-            style={{ background: T.goldL, border: `2px solid ${T.goldAcc}30`, color: T.gold }}
-          >
-            <span className="font-bold font-mono text-[15px]">H</span>
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>Descendientes</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Hijos en común &middot; Art. 79 NF 33/2013
-            </div>
-          </div>
-        </div>
         <HijosSelector
           value={state.hijos}
           onChange={v => dispatch({ type: "SET_HIJOS", value: v })}
@@ -298,14 +257,14 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
           onChangej6a15={v => dispatch({ type: "SET_HIJOS_6A15", value: v })}
           soloMode={!showPersonB}
         />
-      </div>
+      </PersonCard>
 
       {/* Person cards side by side */}
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-        {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
+          subtitle="Situación personal y familiar"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -318,11 +277,11 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
           />
         </PersonCard>
 
-        {/* Person B */}
         {showPersonB && (
           <PersonCard
             letter="B"
             label="Persona B"
+            subtitle="Situación personal y familiar"
             accent={T.teal}
             accentLight={T.tealL}
           >

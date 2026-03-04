@@ -4,36 +4,7 @@ import { n } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
 import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonCard — shared card wrapper
-   ───────────────────────────────────────────────────────────────────────────── */
-function PersonCard({ letter, label, accent, accentLight, children }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-extrabold font-mono"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
-          >
-            {letter}
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>{label}</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Deducciones e incentivos fiscales
-            </div>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
+import { PersonCard } from "../ui/PersonCard.js";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PersonDeduccionesFields — fields for one person
@@ -44,15 +15,14 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
   return (
     <>
       {/* ── Rentas y reducciones ─────────────────────────────────────────── */}
-      <div className="mb-4">
+      <div className="mb-5">
         <div
-          className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+          className="text-[11px] font-bold tracking-widest uppercase mb-3"
           style={{ color: T.inkFaint }}
         >
           Rentas adicionales y otras deducciones
         </div>
 
-        {/* Otras rentas no laborales */}
         <NumInput
           label="Otras rentas no laborales adicionales (art. 23.2)"
           value={data.rentasNoLab}
@@ -63,7 +33,6 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           accentLight={accentLight}
         />
 
-        {/* Otras deducciones */}
         <NumInput
           label="Otras deducciones no individualizadas"
           value={data.otrasDeducNF3}
@@ -76,7 +45,7 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* ── Anualidades por alimentos ────────────────────────────────────── */}
-      <div className="mb-4 pt-3 border-t" style={{ borderColor: T.borderSoft }}>
+      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
         <NumInput
           label="Anualidades por alimentos a hijos (art. 80)"
           value={data.anualidadesAlimentos}
@@ -105,15 +74,14 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* ── Incentivos fiscales ──────────────────────────────────────────── */}
-      <div className="mb-4 pt-3 border-t" style={{ borderColor: T.borderSoft }}>
+      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
         <div
-          className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+          className="text-[11px] font-bold tracking-widest uppercase mb-3"
           style={{ color: T.inkFaint }}
         >
           Incentivos fiscales
         </div>
 
-        {/* Donaciones */}
         <NumInput
           label="Donaciones a entidades cualificadas (NF 35/2021)"
           value={data.donaciones}
@@ -124,27 +92,26 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           accentLight={accentLight}
         />
         {n(data.donaciones) > 0 && (
-          <div className="mb-3.5">
-            <label className="flex items-center gap-2.5 cursor-pointer">
+          <div className="mb-5">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={data.donacionesPrioritarias}
                 onChange={e => set("donacionesPrioritarias", e.target.checked)}
-                className="w-4 h-4 cursor-pointer accent-current"
+                className="w-4.5 h-4.5 cursor-pointer accent-current"
               />
               <div>
-                <div className="text-xs font-semibold" style={{ color: T.ink }}>
+                <div className="text-sm font-semibold" style={{ color: T.ink }}>
                   Actividades prioritarias de mecenazgo (45%)
                 </div>
-                <div className="text-[10px]" style={{ color: T.inkFaint }}>
-                  En lugar del 30% general &middot; Art. 25 NF 35/2021
+                <div className="text-xs" style={{ color: T.inkFaint }}>
+                  En lugar del 30% general · Art. 25 NF 35/2021
                 </div>
               </div>
             </label>
           </div>
         )}
 
-        {/* Inversión nueva creación */}
         <NumInput
           label="Inversión en empresas de nueva creación"
           value={data.inversionNuevaCreacion}
@@ -161,16 +128,15 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
 
 /* ─────────────────────────────────────────────────────────────────────────────
    StepDeducciones — Step 5: "Deducciones" (optional)
-   Donations, investments, child support, other
    ───────────────────────────────────────────────────────────────────────────── */
 export default function StepDeducciones({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-        {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
+          subtitle="Deducciones e incentivos fiscales"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -183,11 +149,11 @@ export default function StepDeducciones({ state, dispatch, showPersonB }) {
           />
         </PersonCard>
 
-        {/* Person B */}
         {showPersonB && (
           <PersonCard
             letter="B"
             label="Persona B"
+            subtitle="Deducciones e incentivos fiscales"
             accent={T.teal}
             accentLight={T.tealL}
           >

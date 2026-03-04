@@ -4,36 +4,7 @@ import { n } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
 import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonCard — shared card wrapper
-   ───────────────────────────────────────────────────────────────────────────── */
-function PersonCard({ letter, label, accent, accentLight, children }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-extrabold font-mono"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
-          >
-            {letter}
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>{label}</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Vivienda habitual
-            </div>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
+import { PersonCard } from "../ui/PersonCard.js";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PersonViviendaFields — fields for one person
@@ -69,21 +40,21 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
         accentLight={accentLight}
       />
 
-      {/* Primer año checkbox — only if perfil=joven and viviendaCompra > 0 */}
+      {/* Primer año checkbox */}
       {data.viviendaPerfil === "joven" && n(data.viviendaCompra) > 0 && (
-        <div className="mb-3.5">
-          <label className="flex items-center gap-2.5 cursor-pointer">
+        <div className="mb-5">
+          <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={data.viviendaPrimerAnio}
               onChange={e => set("viviendaPrimerAnio", e.target.checked)}
-              className="w-4 h-4 cursor-pointer accent-current"
+              className="w-4.5 h-4.5 cursor-pointer accent-current"
             />
             <div>
-              <div className="text-xs font-semibold" style={{ color: T.ink }}>
+              <div className="text-sm font-semibold" style={{ color: T.ink }}>
                 Primer año de adquisición (art. 87.4ter)
               </div>
-              <div className="text-[10px]" style={{ color: T.inkFaint }}>
+              <div className="text-xs" style={{ color: T.inkFaint }}>
                 Sin límite máximo en la deducción para menores de 36 años
               </div>
             </div>
@@ -118,7 +89,7 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
 
       {/* Warning: both mortgage and rent */}
       {data.viviendaCompra && data.alquilerAnual && (
-        <div className="text-[10px] py-1" style={{ color: T.red }}>
+        <div className="text-xs py-1" style={{ color: T.red }}>
           Normalmente no se aplican ambas deducciones simultáneamente (compra + alquiler)
         </div>
       )}
@@ -128,16 +99,15 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
 
 /* ─────────────────────────────────────────────────────────────────────────────
    StepVivienda — Step 3: "Vivienda" (optional)
-   Mortgage and rent deductions
    ───────────────────────────────────────────────────────────────────────────── */
 export default function StepVivienda({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-        {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
+          subtitle="Vivienda habitual"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -150,11 +120,11 @@ export default function StepVivienda({ state, dispatch, showPersonB }) {
           />
         </PersonCard>
 
-        {/* Person B */}
         {showPersonB && (
           <PersonCard
             letter="B"
             label="Persona B"
+            subtitle="Vivienda habitual"
             accent={T.teal}
             accentLight={T.tealL}
           >

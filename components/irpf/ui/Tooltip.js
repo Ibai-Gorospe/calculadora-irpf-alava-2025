@@ -1,58 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 /**
- * Tooltip — shows informational text on hover/focus of an info icon.
+ * Tooltip — click-triggered info panel with wide, readable content.
  *
- * @param {string}    text     - Tooltip content to display
- * @param {ReactNode} children - Optional children to wrap (defaults to info icon)
+ * Replaces the old hover-based tiny dark bubble with a proper
+ * information panel: white background, generous padding, close button,
+ * and closes on click-outside or Escape.
+ *
+ * @param {string}    text     - Info content to display
+ * @param {ReactNode} children - Optional custom trigger (defaults to "i" icon)
  */
 export function Tooltip({ text, children }) {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e) {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target) &&
+        triggerRef.current && !triggerRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [open]);
 
   if (!text) return children ?? null;
 
   return (
-    <span
-      className="relative inline-flex items-center"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
-      onBlur={() => setVisible(false)}
-    >
-      {/* Trigger — defaults to an info icon when no children provided */}
+    <span className="relative inline-flex items-center">
+      {/* Trigger — defaults to an info icon button */}
       {children ?? (
         <button
+          ref={triggerRef}
           type="button"
-          aria-label="Mas informacion"
-          className="ml-1 inline-flex h-[18px] w-[18px] items-center justify-center
-                     rounded-full border border-border text-ink-faint text-[11px]
-                     leading-none cursor-help transition-colors
-                     hover:bg-surface-alt hover:text-ink-mid
-                     focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+          aria-label="Más información"
+          onClick={() => setOpen(!open)}
+          className={`
+            ml-1.5 inline-flex h-[22px] w-[22px] items-center justify-center
+            rounded-full border text-[12px] font-semibold
+            leading-none cursor-pointer transition-all duration-150
+            focus:outline-none focus:ring-2 focus:ring-cobalt/30
+            ${open
+              ? "bg-cobalt text-white border-cobalt shadow-sm"
+              : "border-ink-faint/40 text-ink-faint hover:bg-surface-alt hover:text-ink-mid hover:border-ink-mid/40"
+            }
+          `}
           tabIndex={0}
         >
           i
         </button>
       )}
 
-      {/* Tooltip bubble */}
-      {visible && (
+      {/* Info panel */}
+      {open && (
         <span
+          ref={panelRef}
           role="tooltip"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
-                     z-50 w-max max-w-[260px] px-3 py-2
-                     rounded-lg bg-ink text-white text-xs leading-snug
-                     shadow-lg pointer-events-none
-                     animate-[fadeIn_120ms_ease-out]"
+          className="absolute top-full left-0 mt-2.5
+                     z-50 w-[360px] max-w-[calc(100vw-2rem)]
+                     rounded-xl bg-white border border-border
+                     shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+                     animate-[fadeIn_150ms_ease-out]"
         >
-          {text}
           {/* Arrow */}
           <span
-            className="absolute top-full left-1/2 -translate-x-1/2
-                       border-[5px] border-transparent border-t-ink"
+            className="absolute -top-[7px] left-4
+                       w-3.5 h-3.5 rotate-45
+                       bg-white border-l border-t border-border"
           />
+
+          {/* Content */}
+          <span className="block relative p-5">
+            {/* Close button */}
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-3 right-3 w-7 h-7 rounded-full
+                         flex items-center justify-center
+                         text-ink-faint hover:text-ink hover:bg-surface-alt
+                         transition-colors cursor-pointer text-lg leading-none"
+              aria-label="Cerrar"
+            >
+              &times;
+            </button>
+
+            {/* Icon + header */}
+            <span className="flex items-center gap-2 mb-2.5">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cobalt/10 text-cobalt text-xs font-bold shrink-0">
+                i
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wide text-ink-mid">
+                Información
+              </span>
+            </span>
+
+            {/* Text body */}
+            <span className="block text-[13px] leading-[1.65] text-ink-mid pr-4">
+              {text}
+            </span>
+          </span>
         </span>
       )}
     </span>

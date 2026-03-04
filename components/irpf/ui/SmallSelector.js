@@ -7,15 +7,7 @@ import { T } from "./tokens";
  * SmallSelector — horizontal button group for picking one option.
  *
  * The selected button gets the dynamic accent background with white text;
- * unselected buttons get a neutral look. Accent is applied via inline styles
- * because the color depends on which person (A/B) owns this selector.
- *
- * @param {string}   lbl          - Label text
- * @param {*}        value        - Currently selected value
- * @param {function} onChange     - Called with the new value on click
- * @param {Array}    options      - Array of { value, label }
- * @param {string}   [tooltipText]- Optional tooltip next to label
- * @param {string}   [accent]     - Dynamic accent color (hex)
+ * unselected buttons get a neutral look.
  */
 export function SmallSelector({
   lbl,
@@ -26,11 +18,11 @@ export function SmallSelector({
   accent = T.cobalt,
 }) {
   return (
-    <div className="flex flex-col gap-1.5 mb-3.5">
+    <div className="flex flex-col gap-2 mb-5">
       {/* Label row */}
       {lbl && (
         <div className="flex items-center gap-1">
-          <span className="text-[11px] font-bold uppercase tracking-wide text-ink-mid">
+          <span className="text-xs font-bold uppercase tracking-wide text-ink-mid">
             {lbl}
           </span>
           {tooltipText && <Tooltip text={tooltipText} />}
@@ -38,7 +30,7 @@ export function SmallSelector({
       )}
 
       {/* Button group */}
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {options.map((opt) => {
           const selected = opt.value === value;
           return (
@@ -47,7 +39,7 @@ export function SmallSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={`
-                rounded-lg px-3 py-1.5 text-xs font-semibold
+                rounded-lg px-4 py-2.5 text-[13px] font-semibold
                 transition-all duration-150 cursor-pointer
                 outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                 ${

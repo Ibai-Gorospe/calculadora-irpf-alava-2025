@@ -4,36 +4,7 @@ import { useState } from "react";
 import { n } from "../engine/helpers.js";
 import { T } from "../ui/tokens.js";
 import { NumInput } from "../ui/NumInput.js";
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonCard — shared card wrapper
-   ───────────────────────────────────────────────────────────────────────────── */
-function PersonCard({ letter, label, accent, accentLight, children }) {
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border border-border"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[15px] font-extrabold font-mono"
-            style={{ background: accentLight, border: `2px solid ${accent}30`, color: accent }}
-          >
-            {letter}
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: T.ink }}>{label}</div>
-            <div className="text-[11px]" style={{ color: T.inkFaint }}>
-              Otras rentas y rendimientos
-            </div>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-}
+import { PersonCard } from "../ui/PersonCard.js";
 
 /* ─────────────────────────────────────────────────────────────────────────────
    ToggleSection — disclosure toggle for progressive disclosure
@@ -42,23 +13,23 @@ function ToggleSection({ label, defaultOpen = false, hasData = false, children }
   const [open, setOpen] = useState(defaultOpen || hasData);
 
   return (
-    <div className="mt-3">
-      <label className="flex items-center gap-2.5 cursor-pointer select-none mb-3">
+    <div className="mt-4">
+      <label className="flex items-center gap-3 cursor-pointer select-none mb-4">
         <input
           type="checkbox"
           checked={open}
           onChange={e => setOpen(e.target.checked)}
-          className="w-4 h-4 cursor-pointer accent-current"
+          className="w-4.5 h-4.5 cursor-pointer accent-current"
         />
         <span
-          className="text-xs font-semibold"
+          className="text-sm font-semibold"
           style={{ color: open ? T.ink : T.inkMid }}
         >
           {label}
         </span>
       </label>
       {open && (
-        <div className="pl-1 border-l-2 ml-2 pb-1" style={{ borderColor: T.borderSoft }}>
+        <div className="pl-2 border-l-2 ml-2 pb-1" style={{ borderColor: T.borderSoft }}>
           {children}
         </div>
       )}
@@ -77,12 +48,12 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
   return (
     <>
       {/* ── Capital Inmobiliario ─────────────────────────────────────────── */}
-      <div className="mb-4">
+      <div className="mb-5">
         <div
-          className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+          className="text-[11px] font-bold tracking-widest uppercase mb-3"
           style={{ color: T.inkFaint }}
         >
-          Capital inmobiliario &middot; Arts. 30-34 NF 33/2013
+          Capital inmobiliario · Arts. 30-34 NF 33/2013
         </div>
         <NumInput
           label="Ingresos brutos por alquiler de inmuebles"
@@ -102,20 +73,20 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
           accent={accent}
           accentLight={accentLight}
         />
-        <div className="mb-3.5">
-          <label className="flex items-center gap-2.5 cursor-pointer">
+        <div className="mb-5">
+          <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={data.esViviendaInq}
               onChange={e => set("esViviendaInq", e.target.checked)}
-              className="w-4 h-4 cursor-pointer accent-current"
+              className="w-4.5 h-4.5 cursor-pointer accent-current"
             />
             <div>
-              <div className="text-xs font-semibold" style={{ color: T.ink }}>
+              <div className="text-sm font-semibold" style={{ color: T.ink }}>
                 El inquilino lo usa como su vivienda habitual
               </div>
-              <div className="text-[10px]" style={{ color: T.inkFaint }}>
-                Reducción del 60% sobre el rendimiento neto positivo &middot; Art. 34 NF 33/2013
+              <div className="text-xs" style={{ color: T.inkFaint }}>
+                Reducción del 60% sobre el rendimiento neto positivo · Art. 34 NF 33/2013
               </div>
             </div>
           </label>
@@ -123,12 +94,12 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* ── Capital Mobiliario ────────────────────────────────────────────── */}
-      <div className="mb-4 pt-3 border-t" style={{ borderColor: T.borderSoft }}>
+      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
         <div
-          className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+          className="text-[11px] font-bold tracking-widest uppercase mb-3"
           style={{ color: T.inkFaint }}
         >
-          Capital mobiliario (base del ahorro) &middot; Arts. 35-38 NF 33/2013
+          Capital mobiliario (base del ahorro) · Arts. 35-38 NF 33/2013
         </div>
         <NumInput
           label="Rendimientos netos de capital mobiliario"
@@ -151,18 +122,18 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* ── Ganancias Patrimoniales ──────────────────────────────────────── */}
-      <div className="mb-4 pt-3 border-t" style={{ borderColor: T.borderSoft }}>
+      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
         <div
-          className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+          className="text-[11px] font-bold tracking-widest uppercase mb-3"
           style={{ color: T.inkFaint }}
         >
-          Ganancias/pérdidas patrimoniales (base del ahorro) &middot; Arts. 43-59 NF 33/2013
+          Ganancias/pérdidas patrimoniales (base del ahorro) · Arts. 43-59 NF 33/2013
         </div>
         <NumInput
           label="Saldo neto de ganancias/pérdidas patrimoniales"
           value={data.gananciasPatr}
           onChange={v => set("gananciasPatr", v)}
-          hint="Positivo = ganancias netas &middot; Negativo = pérdidas netas &middot; Venta de acciones, fondos, inmuebles…"
+          hint="Positivo = ganancias netas · Negativo = pérdidas netas · Venta de acciones, fondos, inmuebles…"
           tooltipText="Saldo neto resultante de sumar todas las ganancias y pérdidas patrimoniales del año 2025 derivadas de transmisiones (venta de acciones, participaciones en fondos, inmuebles distintos de la vivienda habitual, etc.). Si el resultado global es negativo, introduce el valor negativo. Arts. 43-59 NF 33/2013."
           accent={accent}
           accentLight={accentLight}
@@ -170,13 +141,13 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       </div>
 
       {/* ── Otros rendimientos del trabajo (toggle) ──────────────────────── */}
-      <div className="pt-3 border-t" style={{ borderColor: T.borderSoft }}>
+      <div className="pt-4 border-t" style={{ borderColor: T.borderSoft }}>
         <ToggleSection
           label="Tengo otros rendimientos del trabajo"
           hasData={hasOtrosRdtos}
         >
           <div
-            className="text-[10px] font-bold tracking-widest uppercase mb-2.5"
+            className="text-[11px] font-bold tracking-widest uppercase mb-3"
             style={{ color: T.inkFaint }}
           >
             Retribuciones en especie, stock options y rescates
@@ -204,19 +175,19 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
             accentLight={accentLight}
           />
           {n(data.stockOptions) > 0 && (
-            <div className="mb-3.5">
-              <label className="flex items-center gap-2.5 cursor-pointer">
+            <div className="mb-5">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={data.stockOptionsReduccion}
                   onChange={e => set("stockOptionsReduccion", e.target.checked)}
-                  className="w-4 h-4 cursor-pointer accent-current"
+                  className="w-4.5 h-4.5 cursor-pointer accent-current"
                 />
                 <div>
-                  <div className="text-xs font-semibold" style={{ color: T.ink }}>
+                  <div className="text-sm font-semibold" style={{ color: T.ink }}>
                     Reducción 40% por renta irregular (art. 19.2)
                   </div>
-                  <div className="text-[10px]" style={{ color: T.inkFaint }}>
+                  <div className="text-xs" style={{ color: T.inkFaint }}>
                     Periodo de generación superior a 2 años
                   </div>
                 </div>
@@ -235,19 +206,19 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
             accentLight={accentLight}
           />
           {n(data.rescatePension) > 0 && (
-            <div className="mb-3.5">
-              <label className="flex items-center gap-2.5 cursor-pointer">
+            <div className="mb-5">
+              <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={data.rescatePensionReduccion}
                   onChange={e => set("rescatePensionReduccion", e.target.checked)}
-                  className="w-4 h-4 cursor-pointer accent-current"
+                  className="w-4.5 h-4.5 cursor-pointer accent-current"
                 />
                 <div>
-                  <div className="text-xs font-semibold" style={{ color: T.ink }}>
+                  <div className="text-sm font-semibold" style={{ color: T.ink }}>
                     Reducción 40% aportaciones pre-2014
                   </div>
-                  <div className="text-[10px]" style={{ color: T.inkFaint }}>
+                  <div className="text-xs" style={{ color: T.inkFaint }}>
                     Para la parte correspondiente a aportaciones anteriores a 01/01/2014
                   </div>
                 </div>
@@ -262,16 +233,15 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
 
 /* ─────────────────────────────────────────────────────────────────────────────
    StepOtrasRentas — Step 4: "Otras rentas" (optional)
-   Capital + gains + work income extras
    ───────────────────────────────────────────────────────────────────────────── */
 export default function StepOtrasRentas({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-        {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
+          subtitle="Otras rentas y rendimientos"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -284,11 +254,11 @@ export default function StepOtrasRentas({ state, dispatch, showPersonB }) {
           />
         </PersonCard>
 
-        {/* Person B */}
         {showPersonB && (
           <PersonCard
             letter="B"
             label="Persona B"
+            subtitle="Otras rentas y rendimientos"
             accent={T.teal}
             accentLight={T.tealL}
           >

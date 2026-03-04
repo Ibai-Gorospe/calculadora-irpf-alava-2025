@@ -2,13 +2,9 @@
 
 import { T } from "./tokens";
 
-/**
- * Wizard step definitions.
- * `optional` steps show "(opcional)" hint below the label.
- */
 const STEPS = [
-  { key: 0, label: "Lo basico",            optional: false },
-  { key: 1, label: "Situacion personal",   optional: false },
+  { key: 0, label: "Lo básico",            optional: false },
+  { key: 1, label: "Situación personal",   optional: false },
   { key: 2, label: "Vivienda",             optional: true  },
   { key: 3, label: "Otras rentas",         optional: true  },
   { key: 4, label: "Deducciones",          optional: true  },
@@ -18,10 +14,6 @@ const STEPS = [
 /**
  * ProgressBar — horizontal wizard stepper with numbered circles and
  * connecting lines. Responsive: compact on mobile, full labels on desktop.
- *
- * @param {number}   currentStep  - Zero-based index of the active step
- * @param {function} onStepClick  - Called with step key when a reachable step is clicked
- * @param {number}   maxVisited   - Highest step index the user has reached
  */
 export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
   return (
@@ -35,17 +27,14 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
           const isLast      = i === STEPS.length - 1;
 
           return (
-            <li
-              key={step.key}
-              className="flex items-start flex-1 last:flex-none"
-            >
+            <li key={step.key} className="flex items-start flex-1 last:flex-none">
               {/* Step circle + label column */}
               <button
                 type="button"
                 disabled={!isReachable}
                 onClick={() => isReachable && onStepClick(step.key)}
                 className={`
-                  flex flex-col items-center gap-1.5 group
+                  flex flex-col items-center gap-2 group
                   outline-none focus-visible:ring-2 focus-visible:ring-cobalt/40
                   focus-visible:rounded-lg
                   ${isReachable ? "cursor-pointer" : "cursor-not-allowed"}
@@ -56,7 +45,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
                 <span
                   className={`
                     flex items-center justify-center
-                    w-9 h-9 rounded-full text-sm font-bold
+                    w-11 h-11 rounded-full text-base font-bold
                     transition-all duration-200 shrink-0
                     ${isCurrent
                       ? "bg-cobalt text-white shadow-md"
@@ -68,9 +57,8 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
                   `}
                 >
                   {isCompleted ? (
-                    /* Checkmark SVG */
                     <svg
-                      className="w-4 h-4"
+                      className="w-5 h-5"
                       viewBox="0 0 16 16"
                       fill="none"
                       stroke="currentColor"
@@ -88,7 +76,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
                 {/* Label */}
                 <span
                   className={`
-                    text-[11px] leading-tight text-center max-w-[90px]
+                    text-xs leading-tight text-center max-w-[100px]
                     ${isCurrent
                       ? "font-bold text-cobalt"
                       : isCompleted
@@ -102,7 +90,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
 
                 {/* Optional hint */}
                 {step.optional && (
-                  <span className="text-[9px] text-ink-faint -mt-0.5">
+                  <span className="text-[10px] text-ink-faint -mt-0.5">
                     (opcional)
                   </span>
                 )}
@@ -111,7 +99,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               {/* Connecting line between circles */}
               {!isLast && (
                 <div
-                  className="flex-1 mt-[18px] mx-2 h-[2px] rounded-full"
+                  className="flex-1 mt-[22px] mx-3 h-[2px] rounded-full"
                   style={{
                     backgroundColor: isCompleted ? T.green : T.border,
                   }}
@@ -138,7 +126,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
                 onClick={() => isReachable && onStepClick(step.key)}
                 className={`
                   flex items-center justify-center shrink-0
-                  w-7 h-7 rounded-full text-xs font-bold
+                  w-9 h-9 rounded-full text-sm font-bold
                   transition-all duration-200
                   outline-none focus-visible:ring-2 focus-visible:ring-cobalt/40
                   ${isCurrent
@@ -154,7 +142,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               >
                 {isCompleted ? (
                   <svg
-                    className="w-3 h-3"
+                    className="w-3.5 h-3.5"
                     viewBox="0 0 16 16"
                     fill="none"
                     stroke="currentColor"
@@ -171,7 +159,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
 
               {/* Current step label shown inline on mobile */}
               {isCurrent && (
-                <span className="ml-1.5 text-xs font-bold text-cobalt truncate">
+                <span className="ml-2 text-sm font-bold text-cobalt truncate">
                   {step.label}
                 </span>
               )}
@@ -179,7 +167,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
               {/* Connector line */}
               {!isLast && (
                 <div
-                  className="flex-1 mx-1 h-[2px] rounded-full min-w-[8px]"
+                  className="flex-1 mx-1.5 h-[2px] rounded-full min-w-[8px]"
                   style={{
                     backgroundColor: isCompleted ? T.green : T.border,
                   }}

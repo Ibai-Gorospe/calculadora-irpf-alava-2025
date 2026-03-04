@@ -9,14 +9,6 @@ import { T } from "./tokens";
  *
  * Dynamic accent colors (person A = cobalt, person B = teal) are applied via
  * inline styles because Tailwind cannot resolve runtime color values.
- *
- * @param {string}   label        - Uppercase label above the input
- * @param {string}   value        - Controlled value (string form)
- * @param {function} onChange     - Called with the raw string value
- * @param {string}   [hint]       - Small gray help text below input
- * @param {string}   [tooltipText]- Tooltip text shown next to label
- * @param {string}   [accent]     - Dynamic accent color (hex), e.g. T.cobalt
- * @param {string}   [accentLight]- Lighter variant for focus bg, e.g. T.cobaltL
  */
 export function NumInput({
   label,
@@ -31,12 +23,12 @@ export function NumInput({
   const id = useId();
 
   return (
-    <div className="flex flex-col gap-1 mb-3.5">
+    <div className="flex flex-col gap-1.5 mb-5">
       {/* Label row */}
       <div className="flex items-center gap-1">
         <label
           htmlFor={id}
-          className="text-[11px] font-bold uppercase tracking-wide transition-colors"
+          className="text-xs font-bold uppercase tracking-wide transition-colors"
           style={{ color: focused ? accent : T.inkMid }}
         >
           {label}
@@ -54,10 +46,10 @@ export function NumInput({
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full rounded-lg border px-3 py-2
-                   font-mono text-sm text-ink
+        className="w-full rounded-lg border px-4 py-3
+                   font-mono text-[15px] text-ink
                    outline-none transition-all duration-150
-                   placeholder:text-ink-faint"
+                   placeholder:text-ink-faint/60"
         style={{
           backgroundColor: focused ? accentLight : T.surface,
           borderColor: focused ? accent : T.border,
@@ -67,7 +59,7 @@ export function NumInput({
 
       {/* Hint */}
       {hint && (
-        <p className="text-[11px] leading-snug text-ink-faint">{hint}</p>
+        <p className="text-xs leading-snug text-ink-faint">{hint}</p>
       )}
     </div>
   );

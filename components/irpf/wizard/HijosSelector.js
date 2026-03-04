@@ -8,33 +8,27 @@ import {
   DEDUC_HIJOS, COMP_M6, COMP_6A15,
 } from "../engine/constants.js";
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   deducHijosTotal — compute total child deduction
-   ───────────────────────────────────────────────────────────────────────────── */
 function deducHijosTotal(num, hijosM6 = 0, hijos6a15 = 0) {
   const base = DEDUC_HIJOS.slice(0, Math.min(num, DEDUC_HIJOS.length)).reduce((a, b) => a + b, 0);
   return base + hijosM6 * COMP_M6 + hijos6a15 * COMP_6A15;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   AgeCounter — sub-selector for age ranges within children
-   ───────────────────────────────────────────────────────────────────────────── */
 function AgeCounter({ label, val, onChange, max, tooltipText }) {
   return (
-    <div className="mt-3">
+    <div className="mt-4">
       <div
-        className="text-[11px] font-bold tracking-wider uppercase mb-1.5 flex items-center gap-1"
+        className="text-xs font-bold tracking-wider uppercase mb-2 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         {label}
         {tooltipText && <Tooltip text={tooltipText}><span /></Tooltip>}
       </div>
-      <div className="flex gap-1">
+      <div className="flex gap-1.5">
         {Array.from({ length: max + 1 }, (_, i) => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-[7px] text-sm font-bold rounded-md cursor-pointer font-mono transition-all duration-150"
+            className="flex-1 py-2.5 text-sm font-bold rounded-lg cursor-pointer font-mono transition-all duration-150"
             style={{
               background: val === i ? T.gold : T.surface,
               color: val === i ? "#fff" : T.inkMid,
@@ -49,10 +43,6 @@ function AgeCounter({ label, val, onChange, max, tooltipText }) {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   HijosSelector
-   Props: { value, onChange, hijosM6, onChangeM6, hijos6a15, onChangej6a15, soloMode }
-   ───────────────────────────────────────────────────────────────────────────── */
 export default function HijosSelector({
   value,
   onChange,
@@ -70,7 +60,7 @@ export default function HijosSelector({
     <div>
       {/* Label */}
       <div
-        className="text-[11px] font-bold tracking-widest uppercase mb-2 flex items-center gap-1"
+        className="text-xs font-bold tracking-widest uppercase mb-2.5 flex items-center gap-1"
         style={{ color: T.inkMid }}
       >
         Hijos en común
@@ -80,12 +70,12 @@ export default function HijosSelector({
       </div>
 
       {/* Count buttons 0-4 */}
-      <div className="flex gap-1.5">
+      <div className="flex gap-2">
         {[0, 1, 2, 3, 4].map(i => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-2.5 text-base font-bold rounded-lg cursor-pointer font-mono transition-all duration-150"
+            className="flex-1 py-3 text-base font-bold rounded-lg cursor-pointer font-mono transition-all duration-150"
             style={{
               background: value === i ? T.gold : T.surface,
               color: value === i ? "#fff" : T.inkMid,
@@ -117,7 +107,7 @@ export default function HijosSelector({
 
           {/* Info box */}
           <div
-            className="mt-3 rounded-lg p-3 text-[11px] leading-relaxed"
+            className="mt-4 rounded-xl p-4 text-xs leading-relaxed"
             style={{
               background: T.goldL,
               border: `1px solid ${T.goldAcc}44`,
@@ -128,14 +118,14 @@ export default function HijosSelector({
               Deducción base: {eur(dedBase)}
               {compExtra > 0 ? ` + ${eur(compExtra)} (suplemento edad)` : ""}
             </div>
-            <div className="font-bold">Total: {eur(dedTotal)}</div>
+            <div className="font-bold mt-1">Total: {eur(dedTotal)}</div>
             {soloMode ? (
-              <div>Individual (100%): {eur(dedTotal)}</div>
+              <div className="mt-1">Individual (100%): {eur(dedTotal)}</div>
             ) : (
-              <>
+              <div className="mt-1">
                 <div>Individual (50% c/u): {eur(dedTotal / 2)} por progenitor</div>
                 <div>Conjunta (100%): {eur(dedTotal)} completa</div>
-              </>
+              </div>
             )}
           </div>
         </>
