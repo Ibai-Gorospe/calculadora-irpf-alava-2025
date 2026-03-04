@@ -108,7 +108,7 @@ export function ProgressBar({ currentStep, onStepClick, maxVisited }) {
                     : ""
                 }
               `}>
-                {isCompleted ? "\u2713" : i + 1}
+                {isCompleted ? "✓" : i + 1}
               </span>
               {isCurrent && <span>{step.label}</span>}
             </button>

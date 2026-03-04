@@ -50,16 +50,16 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
           value={data.ingresosCap_inm}
           onChange={v => set("ingresosCap_inm", v)}
           hint="Alquileres cobrados en 2025 antes de descontar gastos"
-          tooltipText="Ingresos \u00EDntegros de bienes inmuebles arrendados. No incluyas el alquiler de tu propia vivienda habitual (eso es deducci\u00F3n, no ingreso). Art. 30 NF 33/2013."
+          tooltipText="Ingresos íntegros de bienes inmuebles arrendados. No incluyas el alquiler de tu propia vivienda habitual (eso es deducción, no ingreso). Art. 30 NF 33/2013."
           accent={accent}
           accentLight={accentLight}
         />
         <NumInput
-          label="Gastos deducibles (IBI, seguros, reparaciones\u2026)"
+          label="Gastos deducibles (IBI, seguros, reparaciones…)"
           value={data.gastosCap_inm}
           onChange={v => set("gastosCap_inm", v)}
-          hint="IBI, comunidad, seguro, intereses hipoteca del inmueble alquilado, reparaciones, amortizaci\u00F3n (3% del valor construcci\u00F3n)"
-          tooltipText="Gastos necesarios: IBI, tasas, intereses de pr\u00E9stamos para adquirir el inmueble, gastos de conservaci\u00F3n y reparaci\u00F3n, primas de seguro, servicios y suministros, amortizaci\u00F3n del inmueble (3% del valor de construcci\u00F3n). Art. 32 NF 33/2013."
+          hint="IBI, comunidad, seguro, intereses hipoteca del inmueble alquilado, reparaciones, amortización (3% del valor construcción)"
+          tooltipText="Gastos necesarios: IBI, tasas, intereses de préstamos para adquirir el inmueble, gastos de conservación y reparación, primas de seguro, servicios y suministros, amortización del inmueble (3% del valor de construcción). Art. 32 NF 33/2013."
           accent={accent}
           accentLight={accentLight}
         />
@@ -76,7 +76,7 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
                 El inquilino lo usa como su vivienda habitual
               </div>
               <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
-                Reducci\u00F3n del 60% sobre el rendimiento neto positivo &middot; Art. 34 NF 33/2013
+                Reducción del 60% sobre el rendimiento neto positivo &middot; Art. 34 NF 33/2013
               </div>
             </div>
           </label>
@@ -92,8 +92,8 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
           label="Rendimientos netos de capital mobiliario"
           value={data.capMob}
           onChange={v => set("capMob", v)}
-          hint="Dividendos, intereses de cuentas y dep\u00F3sitos, rendimientos de bonos, seguros de ahorro\u2026"
-          tooltipText="Dividendos, intereses de cuentas corrientes y dep\u00F3sitos, rendimientos de bonos y obligaciones, rendimientos de seguros de vida/ahorro. Introduce el importe neto (ya descontados gastos de administraci\u00F3n y custodia). Arts. 35-38 NF 33/2013."
+          hint="Dividendos, intereses de cuentas y depósitos, rendimientos de bonos, seguros de ahorro…"
+          tooltipText="Dividendos, intereses de cuentas corrientes y depósitos, rendimientos de bonos y obligaciones, rendimientos de seguros de vida/ahorro. Introduce el importe neto (ya descontados gastos de administración y custodia). Arts. 35-38 NF 33/2013."
           accent={accent}
           accentLight={accentLight}
         />
@@ -111,14 +111,14 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
       {/* Ganancias Patrimoniales */}
       <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
         <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
-          Ganancias/p\u00E9rdidas patrimoniales (base del ahorro) &middot; Arts. 43-59 NF 33/2013
+          Ganancias/pérdidas patrimoniales (base del ahorro) &middot; Arts. 43-59 NF 33/2013
         </div>
         <NumInput
-          label="Saldo neto de ganancias/p\u00E9rdidas patrimoniales"
+          label="Saldo neto de ganancias/pérdidas patrimoniales"
           value={data.gananciasPatr}
           onChange={v => set("gananciasPatr", v)}
-          hint="Positivo = ganancias netas &middot; Negativo = p\u00E9rdidas netas &middot; Venta de acciones, fondos, inmuebles\u2026"
-          tooltipText="Saldo neto resultante de sumar todas las ganancias y p\u00E9rdidas patrimoniales del a\u00F1o 2025 derivadas de transmisiones (venta de acciones, participaciones en fondos, inmuebles distintos de la vivienda habitual, etc.). Si el resultado global es negativo, introduce el valor negativo. Arts. 43-59 NF 33/2013."
+          hint="Positivo = ganancias netas &middot; Negativo = pérdidas netas &middot; Venta de acciones, fondos, inmuebles…"
+          tooltipText="Saldo neto resultante de sumar todas las ganancias y pérdidas patrimoniales del año 2025 derivadas de transmisiones (venta de acciones, participaciones en fondos, inmuebles distintos de la vivienda habitual, etc.). Si el resultado global es negativo, introduce el valor negativo. Arts. 43-59 NF 33/2013."
           accent={accent}
           accentLight={accentLight}
         />
@@ -132,11 +132,11 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
           </div>
 
           <NumInput
-            label="Retribuci\u00F3n en especie (art. 16)"
+            label="Retribución en especie (art. 16)"
             value={data.retribEspecie}
             onChange={v => set("retribEspecie", v)}
-            hint="Valoraci\u00F3n fiscal neta (uso veh\u00EDculo, seguro m\u00E9dico, etc.)"
-            tooltipText="Retribuciones no dinerarias del trabajo: uso de veh\u00EDculo de empresa, seguro m\u00E9dico, vivienda, pr\u00E9stamos a tipo reducido, etc. Introduce la valoraci\u00F3n fiscal neta seg\u00FAn art. 16 NF 33/2013."
+            hint="Valoración fiscal neta (uso vehículo, seguro médico, etc.)"
+            tooltipText="Retribuciones no dinerarias del trabajo: uso de vehículo de empresa, seguro médico, vivienda, préstamos a tipo reducido, etc. Introduce la valoración fiscal neta según art. 16 NF 33/2013."
             accent={accent}
             accentLight={accentLight}
           />
@@ -161,10 +161,10 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
                 />
                 <div>
                   <div className="text-sm font-medium" style={{ color: T.ink }}>
-                    Reducci\u00F3n 40% por renta irregular (art. 19.2)
+                    Reducción 40% por renta irregular (art. 19.2)
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
-                    Periodo de generaci\u00F3n superior a 2 a\u00F1os
+                    Periodo de generación superior a 2 años
                   </div>
                 </div>
               </label>
@@ -176,7 +176,7 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
             value={data.rescatePension}
             onChange={v => set("rescatePension", v)}
             hint="Importe bruto rescatado en forma de capital"
-            tooltipText="Prestaciones recibidas de planes de pensiones, EPSV, mutualidades, planes de previsi\u00F3n asegurados, etc. Introduce el importe bruto recibido en 2025. Art. 18 NF 33/2013."
+            tooltipText="Prestaciones recibidas de planes de pensiones, EPSV, mutualidades, planes de previsión asegurados, etc. Introduce el importe bruto recibido en 2025. Art. 18 NF 33/2013."
             accent={accent}
             accentLight={accentLight}
           />
@@ -191,7 +191,7 @@ function PersonOtrasRentasFields({ data, dispatch, actionType, accent, accentLig
                 />
                 <div>
                   <div className="text-sm font-medium" style={{ color: T.ink }}>
-                    Reducci\u00F3n 40% aportaciones pre-2014
+                    Reducción 40% aportaciones pre-2014
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
                     Para la parte correspondiente a aportaciones anteriores a 01/01/2014

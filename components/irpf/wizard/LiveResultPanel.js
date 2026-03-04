@@ -32,7 +32,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
       >
         <div>
           <div className="text-[10px] font-bold tracking-[0.15em] uppercase" style={{ color: T.green }}>
-            Mejor opci\u00F3n
+            Mejor opción
           </div>
           <div className="text-sm font-bold text-ink">{optimo.label}</div>
         </div>
@@ -40,7 +40,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
           className="text-[10px] font-bold tracking-[0.12em] uppercase px-3 py-1.5 rounded-lg"
           style={{ background: T.greenAcc, color: "#fff" }}
         >
-          \u2605 \u00D3PTIMO
+          ★ ÓPTIMO
         </span>
       </div>
 
@@ -51,7 +51,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
           style={{ background: resultBg, border: `1.5px solid ${resultColor}22` }}
         >
           <div className="text-xs mb-1.5 text-ink-faint">
-            {optimo.resultado >= 0 ? "Hacienda te devuelve \u2191" : "A pagar a Hacienda \u2193"}
+            {optimo.resultado >= 0 ? "Hacienda te devuelve ↑" : "A pagar a Hacienda ↓"}
           </div>
           <div
             className="text-4xl font-bold font-mono tracking-tight"
@@ -73,7 +73,7 @@ export default function LiveResultPanel({ optimo, scenarios, ready }) {
           </div>
           <div className="rounded-xl p-4" style={{ background: T.surfaceAlt, border: `1px solid ${T.border}` }}>
             <div className="text-[10px] font-bold tracking-widest uppercase mb-1.5 text-ink-faint">
-              Cuota l\u00EDquida
+              Cuota líquida
             </div>
             <div className="text-lg font-bold font-mono text-ink">
               {eur(optimo.cl)}

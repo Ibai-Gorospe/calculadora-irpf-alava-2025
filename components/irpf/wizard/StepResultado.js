@@ -19,18 +19,18 @@ function RecommendationBanner({ optimo, diferencia }) {
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div className="flex-1 min-w-[200px]">
           <div className="text-[10px] font-bold tracking-[0.15em] uppercase mb-2" style={{ color: T.green }}>
-            Recomendaci\u00F3n
+            Recomendación
           </div>
           <div className="text-xl font-bold leading-tight text-ink">
             {optimo.resultado >= 0
               ? `Hacienda te devuelve ${eur(Math.abs(optimo.resultado))}`
-              : `Tendr\u00E1s que pagar ${eur(Math.abs(optimo.resultado))}`
+              : `Tendrás que pagar ${eur(Math.abs(optimo.resultado))}`
             }
           </div>
           <div className="text-[13px] mt-2 leading-relaxed text-ink-mid">
-            Tu mejor opci\u00F3n es{" "}
+            Tu mejor opción es{" "}
             <strong className="text-ink">{optimo.label.toLowerCase()}</strong>.
-            {diferencia > 0 && ` Ahorras ${eur(diferencia)} frente a la peor opci\u00F3n.`}
+            {diferencia > 0 && ` Ahorras ${eur(diferencia)} frente a la peor opción.`}
           </div>
         </div>
         <div className="text-center">
@@ -83,7 +83,7 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
             className="text-[9px] font-bold tracking-[0.12em] uppercase px-2.5 py-1 rounded-lg"
             style={{ background: T.greenAcc, color: "#fff" }}
           >
-            \u2605 \u00D3PTIMO
+            ★ ÓPTIMO
           </span>
         )}
         {isPeor && totalOpciones > 2 && (
@@ -106,7 +106,7 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
         style={{ background: resBg, border: `1.5px solid ${resColor}22` }}
       >
         <div className="text-[11px] mb-0.5 text-ink-faint">
-          {sc.resultado >= 0 ? "Hacienda devuelve \u2191" : "A pagar a Hacienda \u2193"}
+          {sc.resultado >= 0 ? "Hacienda devuelve ↑" : "A pagar a Hacienda ↓"}
         </div>
         <div
           className="text-3xl font-bold font-mono tracking-tight"
@@ -118,7 +118,7 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
 
       {/* Ranking */}
       <div className="flex items-center gap-1.5 text-[11px] text-ink-faint">
-        <span className="text-base">{["\uD83E\uDD47", "\uD83E\uDD48", "\uD83E\uDD49", "4\u00BA", "5\u00BA", "6\u00BA", "7\u00BA"][rank]}</span>
+        <span className="text-base">{["🥇", "🥈", "🥉", "4º", "5º", "6º", "7º"][rank]}</span>
         <span>Puesto {rank + 1} de {totalOpciones}</span>
       </div>
 
@@ -128,7 +128,7 @@ function ScenarioCard({ sc, rank, totalOpciones }) {
           className="mt-3 rounded-xl p-2.5 text-[11px] leading-relaxed font-medium"
           style={{ background: "#FEF3C7", border: "1.5px solid #FCD34D33", color: "#92400E" }}
         >
-          \u26A0 {sc.warning}
+          ⚠ {sc.warning}
         </div>
       )}
     </div>
@@ -166,7 +166,7 @@ function WaterfallRow({ label, value, type, note, isLast }) {
           className="text-[13px] font-mono min-w-[100px] text-right"
           style={{ fontWeight: type === "total" || type === "result" ? 700 : 500, color: c.text }}
         >
-          {type === "minus" ? "\u2212" + eur(absVal) : type === "plus" ? "+" + eur(absVal) : eur(value)}
+          {type === "minus" ? "−" + eur(absVal) : type === "plus" ? "+" + eur(absVal) : eur(value)}
         </div>
       </div>
       {type !== "result" && (
@@ -194,7 +194,7 @@ function WaterfallDesglose({ data, label, accent }) {
         <div className="text-left">
           <div className="text-xs font-bold" style={{ color: accent }}>{label}</div>
           <div className="text-[11px] mt-0.5 text-ink-faint">
-            Cuota l\u00EDquida: {eur(data.cl)} &middot; Tipo efectivo: {pct(data.teReal ?? 0)}
+            Cuota líquida: {eur(data.cl)} &middot; Tipo efectivo: {pct(data.teReal ?? 0)}
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -217,12 +217,12 @@ function WaterfallDesglose({ data, label, accent }) {
 
       {open && (
         <div className="p-4 border-t bg-white" style={{ borderColor: T.border }}>
-          <WaterfallRow label="Retribuci\u00F3n bruta" value={data.bruto ?? ((data.brutoA ?? 0) + (data.brutoB ?? 0))} type="start" />
+          <WaterfallRow label="Retribución bruta" value={data.bruto ?? ((data.brutoA ?? 0) + (data.brutoB ?? 0))} type="start" />
           {(data.otrosRdtosTrabajo ?? data.otrosRdtosTotal ?? 0) > 0 && (
             <WaterfallRow label="Otros rdtos. trabajo" value={data.otrosRdtosTrabajo ?? data.otrosRdtosTotal} type="plus" note="Arts. 16, 18, 19 NF 33/2013" />
           )}
           <WaterfallRow label="Cotizaciones Seg. Social" value={data.ss ?? (data.ssA ?? 0) + (data.ssB ?? 0)} type="minus" />
-          <WaterfallRow label="Bonificaci\u00F3n art. 23" value={data.bonif ?? (data.bonA ?? 0) + (data.bonB ?? 0)} type="minus" />
+          <WaterfallRow label="Bonificación art. 23" value={data.bonif ?? (data.bonA ?? 0) + (data.bonB ?? 0)} type="minus" />
           <WaterfallRow label="Rendimiento neto del trabajo" value={data.rnt ?? (data.rntA ?? 0) + (data.rntB ?? 0)} type="total" />
           {((data.rciNeto ?? ((data.rciNetoA ?? 0) + (data.rciNetoB ?? 0)))) > 0 && (
             <WaterfallRow label="Rdto. neto capital inmobiliario" value={data.rciNeto ?? ((data.rciNetoA ?? 0) + (data.rciNetoB ?? 0))} type="plus" />
@@ -231,26 +231,26 @@ function WaterfallDesglose({ data, label, accent }) {
             <WaterfallRow label="Otras reducciones de base" value={data.redExtra ?? ((data.redExtraA ?? 0) + (data.redExtraB ?? 0))} type="minus" />
           )}
           <WaterfallRow label="Base liquidable general" value={data.bl ?? 0} type="total" />
-          <WaterfallRow label="Cuota \u00EDntegra" value={data.ci ?? 0} type="total" />
-          <WaterfallRow label="Minoraci\u00F3n de cuota" value={data.minTotal ?? 0} type="minus" />
-          {(data.dedH ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n descendientes" value={data.dedH} type="minus" />}
-          {(data.dedViud ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n viudedad" value={data.dedViud} type="minus" />}
-          {(data.dedEdad ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n por edad" value={data.dedEdad} type="minus" />}
-          {(data.dedDiscap ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n discapacidad" value={data.dedDiscap} type="minus" />}
-          {(data.dedCuid ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n cuidado" value={data.dedCuid} type="minus" />}
-          {(data.dedAsc ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n ascendientes" value={data.dedAsc} type="minus" />}
+          <WaterfallRow label="Cuota íntegra" value={data.ci ?? 0} type="total" />
+          <WaterfallRow label="Minoración de cuota" value={data.minTotal ?? 0} type="minus" />
+          {(data.dedH ?? 0) > 0 && <WaterfallRow label="Deducción descendientes" value={data.dedH} type="minus" />}
+          {(data.dedViud ?? 0) > 0 && <WaterfallRow label="Deducción viudedad" value={data.dedViud} type="minus" />}
+          {(data.dedEdad ?? 0) > 0 && <WaterfallRow label="Deducción por edad" value={data.dedEdad} type="minus" />}
+          {(data.dedDiscap ?? 0) > 0 && <WaterfallRow label="Deducción discapacidad" value={data.dedDiscap} type="minus" />}
+          {(data.dedCuid ?? 0) > 0 && <WaterfallRow label="Deducción cuidado" value={data.dedCuid} type="minus" />}
+          {(data.dedAsc ?? 0) > 0 && <WaterfallRow label="Deducción ascendientes" value={data.dedAsc} type="minus" />}
           {(data.dedOtras ?? 0) > 0 && <WaterfallRow label="Otras deducciones" value={data.dedOtras} type="minus" />}
-          {(data.dedViv ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n vivienda" value={data.dedViv} type="minus" />}
-          {(data.dedAlq ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n alquiler" value={data.dedAlq} type="minus" />}
-          {(data.dedAlim ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n alimentos hijos" value={data.dedAlim} type="minus" />}
-          {(data.dedDiscapFam ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n discapacidad familiares" value={data.dedDiscapFam} type="minus" />}
-          {(data.dedAsistPers ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n asistente personal" value={data.dedAsistPers} type="minus" />}
-          {(data.dedDon ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n donaciones" value={data.dedDon} type="minus" />}
-          {(data.dedInv ?? 0) > 0 && <WaterfallRow label="Deducci\u00F3n inversi\u00F3n" value={data.dedInv} type="minus" />}
-          <WaterfallRow label="CUOTA L\u00CDQUIDA" value={data.cl ?? 0} type="total" />
+          {(data.dedViv ?? 0) > 0 && <WaterfallRow label="Deducción vivienda" value={data.dedViv} type="minus" />}
+          {(data.dedAlq ?? 0) > 0 && <WaterfallRow label="Deducción alquiler" value={data.dedAlq} type="minus" />}
+          {(data.dedAlim ?? 0) > 0 && <WaterfallRow label="Deducción alimentos hijos" value={data.dedAlim} type="minus" />}
+          {(data.dedDiscapFam ?? 0) > 0 && <WaterfallRow label="Deducción discapacidad familiares" value={data.dedDiscapFam} type="minus" />}
+          {(data.dedAsistPers ?? 0) > 0 && <WaterfallRow label="Deducción asistente personal" value={data.dedAsistPers} type="minus" />}
+          {(data.dedDon ?? 0) > 0 && <WaterfallRow label="Deducción donaciones" value={data.dedDon} type="minus" />}
+          {(data.dedInv ?? 0) > 0 && <WaterfallRow label="Deducción inversión" value={data.dedInv} type="minus" />}
+          <WaterfallRow label="CUOTA LÍQUIDA" value={data.cl ?? 0} type="total" />
           <div className="h-3" />
           <WaterfallRow label="Retenciones practicadas" value={data.ret ?? data.retTotal ?? 0} type="start" />
-          <WaterfallRow label="Cuota l\u00EDquida" value={data.cl ?? 0} type="minus" />
+          <WaterfallRow label="Cuota líquida" value={data.cl ?? 0} type="minus" />
           <WaterfallRow
             label={data.resultado >= 0 ? "RESULTADO: A devolver" : "RESULTADO: A ingresar"}
             value={data.resultado}
@@ -265,8 +265,8 @@ function WaterfallDesglose({ data, label, accent }) {
               const teRetCalc = data.teRet ?? (brutoTotal > 0 ? retTotal / brutoTotal : 0);
               return [
                 ["Tipo efectivo real", pct(data.teReal ?? 0)],
-                ["% retenci\u00F3n aplicada", pct(teRetCalc)],
-                ["Cuota l\u00EDquida", eur(data.cl ?? 0)],
+                ["% retención aplicada", pct(teRetCalc)],
+                ["Cuota líquida", eur(data.cl ?? 0)],
               ];
             })().map(([k, v]) => (
               <div
@@ -293,14 +293,14 @@ function TablaComparativa({ scenarios }) {
 
   const rows = [
     { label: "Bruto total",        key: "brutoTotal",    fmt: eur },
-    { label: "Cotiz. SS",          key: "ssTotal",       fmt: v => "\u2212" + eur(v) },
-    { label: "Bonif. art. 23",     key: "bonifTotal",    fmt: v => "\u2212" + eur(v) },
+    { label: "Cotiz. SS",          key: "ssTotal",       fmt: v => "−" + eur(v) },
+    { label: "Bonif. art. 23",     key: "bonifTotal",    fmt: v => "−" + eur(v) },
     { label: "Rdto. neto",         key: "rntTotal",      fmt: eur, bold: true },
     { label: "Base liquidable",    key: "bl",            fmt: eur, bold: true },
-    { label: "Cuota \u00EDntegra", key: "ci",            fmt: eur, bold: true },
-    { label: "Minoraci\u00F3n",    key: "minoracion",    fmt: v => "\u2212" + eur(v) },
-    { label: "Deducc. hijos",      key: "dedH",          fmt: v => v > 0 ? "\u2212" + eur(v) : "\u2014" },
-    { label: "CUOTA L\u00CDQUIDA", key: "cl",            fmt: eur, bold: true, highlight: true },
+    { label: "Cuota íntegra", key: "ci",            fmt: eur, bold: true },
+    { label: "Minoración",    key: "minoracion",    fmt: v => "−" + eur(v) },
+    { label: "Deducc. hijos",      key: "dedH",          fmt: v => v > 0 ? "−" + eur(v) : "—" },
+    { label: "CUOTA LÍQUIDA", key: "cl",            fmt: eur, bold: true, highlight: true },
     { label: "Retenciones",        key: "retTotal",      fmt: eur },
     { label: "RESULTADO",          key: "resultado",     fmt: signedEur, bold: true, resultRow: true },
   ];
@@ -324,7 +324,7 @@ function TablaComparativa({ scenarios }) {
               >
                 <div className="text-[10px] font-bold tracking-wider uppercase" style={{ color: sc.accentColor }}>{sc.modalidad}</div>
                 <div className="text-[11px] font-semibold text-ink">{sc.label}</div>
-                {i === 0 && <div className="text-[9px] font-bold mt-0.5" style={{ color: T.greenAcc }}>\u2605 \u00D3PTIMO</div>}
+                {i === 0 && <div className="text-[9px] font-bold mt-0.5" style={{ color: T.greenAcc }}>★ ÓPTIMO</div>}
               </th>
             ))}
           </tr>
@@ -354,7 +354,7 @@ function TablaComparativa({ scenarios }) {
                     {row.fmt(val)}
                     {diff !== null && (
                       <div className="text-[9px] mt-0.5" style={{ color: T.red }}>
-                        \u2212{eur(Math.abs(diff))} vs \u00F3ptimo
+                        −{eur(Math.abs(diff))} vs \u00F3ptimo
                       </div>
                     )}
                   </td>
@@ -436,22 +436,22 @@ export default function StepResultado({
           </div>
 
           <div className="text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: T.cobalt }}>
-            Declaraci\u00F3n individual
+            Declaración individual
           </div>
-          {calc.a_sh && <WaterfallDesglose data={calc.a_sh} label="Persona A \u2014 Individual sin hijos" accent={T.cobalt} />}
+          {calc.a_sh && <WaterfallDesglose data={calc.a_sh} label="Persona A — Individual sin hijos" accent={T.cobalt} />}
           {calc.a_ch && hijos > 0 && (
-            <WaterfallDesglose data={calc.a_ch} label={`Persona A \u2014 Individual con hijos (${calc.solo ? "100%" : "50%"} = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />
+            <WaterfallDesglose data={calc.a_ch} label={`Persona A — Individual con hijos (${calc.solo ? "100%" : "50%"} = ${eur(calc.a_ch.dedH)})`} accent={T.cobalt} />
           )}
 
           {!calc.solo && (
             <>
-              {calc.b_sh && <WaterfallDesglose data={calc.b_sh} label="Persona B \u2014 Individual sin hijos" accent={T.teal} />}
+              {calc.b_sh && <WaterfallDesglose data={calc.b_sh} label="Persona B — Individual sin hijos" accent={T.teal} />}
               {calc.b_ch && hijos > 0 && (
-                <WaterfallDesglose data={calc.b_ch} label={`Persona B \u2014 Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />
+                <WaterfallDesglose data={calc.b_ch} label={`Persona B — Individual con hijos (50% = ${eur(calc.b_ch.dedH)})`} accent={T.teal} />
               )}
 
               <div className="text-[11px] font-bold tracking-widest uppercase mb-2 mt-5" style={{ color: T.gold }}>
-                Declaraci\u00F3n conjunta
+                Declaración conjunta
               </div>
               {calc.c_sh && (
                 <WaterfallDesglose data={calc.c_sh} label="Conjunta sin hijos" accent={T.gold} />
@@ -478,7 +478,7 @@ export default function StepResultado({
         >
           <span>Tabla comparativa lado a lado</span>
           <span className="text-[11px] text-ink-faint">
-            {showTabla ? "Ocultar \u25B4" : "Mostrar \u25BE"}
+            {showTabla ? "Ocultar ▴" : "Mostrar ▾"}
           </span>
         </button>
         {showTabla && (
@@ -497,8 +497,8 @@ export default function StepResultado({
         style={{ background: T.surfaceAlt, border: `1px solid ${T.border}`, color: T.inkMid }}
       >
         <strong>Resultado estimado</strong> conforme a la normativa foral vigente.
-        Su declaraci\u00F3n definitiva puede variar en funci\u00F3n de su situaci\u00F3n particular.
-        Para confirmar, utilice <strong>Rentaf\u00E1cil</strong> de la Hacienda Foral de \u00C1lava
+        Su declaración definitiva puede variar en función de su situación particular.
+        Para confirmar, utilice <strong>Rentafácil</strong> de la Hacienda Foral de Álava
         o consulte con un asesor fiscal.
       </div>
     </div>

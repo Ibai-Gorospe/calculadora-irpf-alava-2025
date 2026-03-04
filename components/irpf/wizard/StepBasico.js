@@ -13,11 +13,11 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
   return (
     <>
       <NumInput
-        label="Retribuci\u00F3n bruta anual"
+        label="Retribución bruta anual"
         value={data.bruto}
         onChange={v => set("bruto", v)}
         hint="Total antes de retenciones y cotizaciones SS"
-        tooltipText="Suma de n\u00F3minas brutas del a\u00F1o 2025, incluyendo pagas extra, complementos y cualquier otra retribuci\u00F3n dineraria del trabajo."
+        tooltipText="Suma de nóminas brutas del año 2025, incluyendo pagas extra, complementos y cualquier otra retribución dineraria del trabajo."
         accent={accent}
         accentLight={accentLight}
       />
@@ -35,14 +35,14 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
         value={data.redExtra}
         onChange={v => set("redExtra", v)}
         hint="Aportaciones a planes de pensiones, EPSV, etc."
-        tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsi\u00F3n social. L\u00EDmite general 2025: 5.000 \u20AC individuales + 8.000 \u20AC empresariales (art. 70-72 NF 33/2013)."
+        tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsión social. Límite general 2025: 5.000 € individuales + 8.000 € empresariales (art. 70-72 NF 33/2013)."
         accent={accent}
         accentLight={accentLight}
       />
 
       {n(data.redExtra) > PENSION_LIMIT_TOTAL && (
         <div className="text-xs leading-relaxed pb-2 font-medium" style={{ color: T.red }}>
-          Las reducciones de base superan el l\u00EDmite de {eur(PENSION_LIMIT_TOTAL)} (5.000 \u20AC individual + 8.000 \u20AC empresarial).
+          Las reducciones de base superan el límite de {eur(PENSION_LIMIT_TOTAL)} (5.000 \u20AC individual + 8.000 \u20AC empresarial).
         </div>
       )}
 
@@ -54,7 +54,7 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
           { value: "indefinido", label: "Indefinido (6,48%)" },
           { value: "temporal",   label: "Temporal (6,53%)" },
         ]}
-        tooltipText="Afecta al tipo de cotizaci\u00F3n SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 \u20AC/a\u00F1o."
+        tooltipText="Afecta al tipo de cotización SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 €/año."
         accent={accent}
         accentLight={accentLight}
       />
@@ -69,7 +69,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
         <PersonCard
           letter="A"
           label="Persona A"
-          subtitle="Rendimientos del trabajo \u00B7 Art. 15 NF 33/2013"
+          subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -86,7 +86,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
           <PersonCard
             letter="B"
             label="Persona B"
-            subtitle="Rendimientos del trabajo \u00B7 Art. 15 NF 33/2013"
+            subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
             accent={T.teal}
             accentLight={T.tealL}
           >
@@ -127,7 +127,7 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
             color: T.teal,
           }}
         >
-          + A\u00F1adir pareja (Persona B)
+          + Añadir pareja (Persona B)
         </button>
       )}
     </div>

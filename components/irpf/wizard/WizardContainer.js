@@ -204,8 +204,8 @@ export default function WizardContainer() {
       const { a_sh, a_ch } = calc;
       const list = [
         {
-          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00B7 Sin hijos",
-          sublabel: "Declaraci\u00F3n individual, sin deducci\u00F3n de descendientes",
+          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
+          sublabel: "Declaración individual, sin deducción de descendientes",
           accentColor: T.cobalt,
           resultado: a_sh.resultado,
           brutoTotal: aB, ssTotal: a_sh.ss,
@@ -220,12 +220,12 @@ export default function WizardContainer() {
           dedAlim: a_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers,
           dedDon: a_sh.dedDon, dedInv: a_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo,
           cl: a_sh.cl, retTotal: aR + aRetCapMob,
-          warning: hasH ? `No aprovechas la deducci\u00F3n de hijos de ${dedHTxt}` : null,
+          warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
           _calcA: a_sh,
         },
         ...(hasH ? [{
-          id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00B7 Con hijos",
-          sublabel: "Declaraci\u00F3n individual, 100% deducci\u00F3n de descendientes",
+          id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
+          sublabel: "Declaración individual, 100% deducción de descendientes",
           accentColor: T.cobalt,
           resultado: a_ch.resultado,
           brutoTotal: aB, ssTotal: a_ch.ss,
@@ -249,8 +249,8 @@ export default function WizardContainer() {
     const { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch } = calc;
     const list = [
       {
-        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00B7 Sin hijos",
-        sublabel: "Dos declaraciones separadas, sin deducci\u00F3n de descendientes",
+        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
+        sublabel: "Dos declaraciones separadas, sin deducción de descendientes",
         accentColor: T.cobalt,
         resultado:  +(a_sh.resultado + b_sh.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_sh.ss + b_sh.ss,
@@ -265,12 +265,12 @@ export default function WizardContainer() {
         dedAlim: a_sh.dedAlim + b_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam + b_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers + b_sh.dedAsistPers,
         dedDon: a_sh.dedDon + b_sh.dedDon, dedInv: a_sh.dedInv + b_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo + b_sh.otrosRdtosTrabajo,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: hasH ? `No aprovechas la deducci\u00F3n de hijos de ${dedHTxt}` : null,
+        warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
         _calcA: a_sh, _calcB: b_sh,
       },
       ...(hasH ? [{
-        id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00B7 Con hijos",
-        sublabel: "Dos declaraciones, 50% de deducci\u00F3n de descendientes cada uno",
+        id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
+        sublabel: "Dos declaraciones, 50% de deducción de descendientes cada uno",
         accentColor: T.cobalt,
         resultado:  +(a_ch.resultado + b_ch.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_ch.ss + b_ch.ss,
@@ -285,12 +285,12 @@ export default function WizardContainer() {
         dedAlim: a_ch.dedAlim + b_ch.dedAlim, dedDiscapFam: a_ch.dedDiscapFam + b_ch.dedDiscapFam, dedAsistPers: a_ch.dedAsistPers + b_ch.dedAsistPers,
         dedDon: a_ch.dedDon + b_ch.dedDon, dedInv: a_ch.dedInv + b_ch.dedInv, otrosRdtosTotal: a_ch.otrosRdtosTrabajo + b_ch.otrosRdtosTrabajo,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: "El hijo NO debe presentar declaraci\u00F3n voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcA: a_ch, _calcB: b_ch,
       }] : []),
       {
-        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta \u00B7 Sin hijos",
-        sublabel: "Una declaraci\u00F3n \u00B7 \u22124.800 \u20AC reducci\u00F3n base (art. 73 NF 3/2025)",
+        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta · Sin hijos",
+        sublabel: "Una declaración · −4.800 € reducción base (art. 73 NF 3/2025)",
         accentColor: T.gold,
         resultado:  c_sh.resultado,
         brutoTotal: aB + bB, ssTotal: c_sh.ssA + c_sh.ssB,
@@ -305,12 +305,12 @@ export default function WizardContainer() {
         dedAlim: c_sh.dedAlim, dedDiscapFam: c_sh.dedDiscapFam, dedAsistPers: c_sh.dedAsistPers,
         dedDon: c_sh.dedDon, dedInv: c_sh.dedInv, otrosRdtosTotal: c_sh.otrosRdtosTotal,
         cl: c_sh.cl, retTotal: c_sh.retTotal,
-        warning: hasH ? `Deducci\u00F3n de hijos no aplicada: te pierdes ${dedHTxt}` : null,
+        warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
         _calcConj: c_sh,
       },
       ...(hasH ? [{
-        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta \u00B7 Con hijos",
-        sublabel: "Una declaraci\u00F3n \u00B7 \u22124.800 \u20AC base \u00B7 deducci\u00F3n hijos 100%",
+        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta · Con hijos",
+        sublabel: "Una declaración · −4.800 € base · deducción hijos 100%",
         accentColor: T.gold,
         resultado:  c_ch.resultado,
         brutoTotal: aB + bB, ssTotal: c_ch.ssA + c_ch.ssB,
@@ -325,7 +325,7 @@ export default function WizardContainer() {
         dedAlim: c_ch.dedAlim, dedDiscapFam: c_ch.dedDiscapFam, dedAsistPers: c_ch.dedAsistPers,
         dedDon: c_ch.dedDon, dedInv: c_ch.dedInv, otrosRdtosTotal: c_ch.otrosRdtosTotal,
         cl: c_ch.cl, retTotal: c_ch.retTotal,
-        warning: "El hijo NO debe presentar declaraci\u00F3n voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
         _calcConj: c_ch,
       }] : []),
     ];
@@ -438,7 +438,7 @@ export default function WizardContainer() {
                            hover:bg-cobalt/90 transition-all duration-200 cursor-pointer
                            shadow-lg shadow-cobalt/20"
               >
-                {currentStep === 4 ? "Ver resultados \u2192" : "Siguiente \u2192"}
+                {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
               </button>
             </div>
           </div>

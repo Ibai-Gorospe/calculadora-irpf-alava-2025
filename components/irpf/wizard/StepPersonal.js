@@ -10,12 +10,12 @@ import HijosSelector from "./HijosSelector.js";
 function DiscapacidadSelector({ value, onChange, accent }) {
   const row1 = [
     { value: "ninguna", label: "Sin discapacidad" },
-    { value: "33-65",   label: "\u226533% <65%" },
-    { value: "65+",     label: "\u226565% / Gr.I" },
+    { value: "33-65",   label: "≥33% <65%" },
+    { value: "65+",     label: "≥65% / Gr.I" },
   ];
   const row2 = [
-    { value: "gradoII",  label: "Grado II severa (1.756,75 \u20AC)" },
-    { value: "gradoIII", label: "Grado III gran dep. (2.191,03 \u20AC)" },
+    { value: "gradoII",  label: "Grado II severa (1.756,75 €)" },
+    { value: "gradoIII", label: "Grado III gran dep. (2.191,03 €)" },
   ];
 
   const Btn = ({ opt }) => (
@@ -38,7 +38,7 @@ function DiscapacidadSelector({ value, onChange, accent }) {
     <div className="mb-5">
       <div className="text-[13px] font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Discapacidad / dependencia (arts. 23.3 + 82)
-        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificaci\u00F3n del trabajo (+100% \u226533%, +250% \u226565%). 2) Art. 82 NF 19/2024: deducci\u00F3n de cuota de 1.025,64 \u20AC (33-65%), 1.464,54 \u20AC (\u226565%/Grado I), 1.756,75 \u20AC (Grado II) o 2.191,03 \u20AC (Grado III)." />
+        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III)." />
       </div>
       <div className="grid grid-cols-3 gap-2 mb-2">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
@@ -52,17 +52,17 @@ function DiscapacidadSelector({ value, onChange, accent }) {
 
 function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
   const opts = [
-    { value: "33-65",    label: "\u226533% <65% (1.025,64 \u20AC)" },
-    { value: "65+",      label: "\u226565% / Gr.I (1.464,54 \u20AC)" },
-    { value: "gradoII",  label: "Gr. II (1.756,75 \u20AC)" },
-    { value: "gradoIII", label: "Gr. III (2.191,03 \u20AC)" },
+    { value: "33-65",    label: "≥33% <65% (1.025,64 €)" },
+    { value: "65+",      label: "≥65% / Gr.I (1.464,54 €)" },
+    { value: "gradoII",  label: "Gr. II (1.756,75 €)" },
+    { value: "gradoIII", label: "Gr. III (2.191,03 €)" },
   ];
 
   return (
     <div className="mb-5">
       <div className="text-[13px] font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Grado discapacidad del/los familiar/es
-        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el m\u00E1s bajo y a\u00F1ade manualmente la diferencia en 'Otras deducciones'." />
+        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'." />
       </div>
       <div className="grid grid-cols-2 gap-2">
         {opts.map(opt => (
@@ -97,10 +97,10 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         onChange={v => set("edad", v)}
         options={[
           { value: "menor65", label: "Menor de 65" },
-          { value: "65-74",   label: "65-74 (385 \u20AC)" },
-          { value: "75+",     label: "75+ (700 \u20AC)" },
+          { value: "65-74",   label: "65-74 (385 €)" },
+          { value: "75+",     label: "75+ (700 €)" },
         ]}
-        tooltipText="Deducci\u00F3n por edad: 385 \u20AC (>65) o 700 \u20AC (>75), BI \u2264 20.000 \u20AC, fase-out hasta 30.000 \u20AC. Incompatible con deducci\u00F3n viudedad: se aplica la m\u00E1s beneficiosa. Art. 83 NF 33/2013."
+        tooltipText="Deducción por edad: 385 € (>65) o 700 € (>75), BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción viudedad: se aplica la más beneficiosa. Art. 83 NF 33/2013."
         accent={accent}
         accentLight={accentLight}
       />
@@ -117,28 +117,28 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         onChange={v => set("viudedad", v === "si")}
         options={[
           { value: "no", label: "No aplica" },
-          { value: "si", label: "Viudo/a (hasta 200 \u20AC)" },
+          { value: "si", label: "Viudo/a (hasta 200 €)" },
         ]}
-        tooltipText="Deducci\u00F3n de 200 \u20AC para contribuyentes viudos con BI \u2264 20.000 \u20AC, fase-out hasta 30.000 \u20AC. Incompatible con deducci\u00F3n por edad (art. 83): se aplica autom\u00E1ticamente la m\u00E1s beneficiosa."
+        tooltipText="Deducción de 200 € para contribuyentes viudos con BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción por edad (art. 83): se aplica automáticamente la más beneficiosa."
         accent={accent}
         accentLight={accentLight}
       />
 
       {data.viudedad && data.edad !== "menor65" && (
         <div className="text-xs leading-relaxed pb-2 font-medium" style={{ color: T.gold }}>
-          Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica autom\u00E1ticamente la m\u00E1s beneficiosa.
+          Viudedad y edad son incompatibles (art. 82 bis / art. 83). Se aplica automáticamente la más beneficiosa.
         </div>
       )}
 
       <SmallSelector
-        lbl="Municipio (art. 77.2 despoblaci\u00F3n)"
+        lbl="Municipio (art. 77.2 despoblación)"
         value={data.despoblacion ? "si" : "no"}
         onChange={v => set("despoblacion", v === "si")}
         options={[
           { value: "no", label: "Normal" },
-          { value: "si", label: "\u2264500 hab. (+200 \u20AC)" },
+          { value: "si", label: "≤500 hab. (+200 €)" },
         ]}
-        tooltipText="Minoraci\u00F3n adicional de 200 \u20AC por residir en municipio con \u2264 500 habitantes. Art. 77.2 NF 19/2024."
+        tooltipText="Minoración adicional de 200 € por residir en municipio con ≤ 500 habitantes. Art. 77.2 NF 19/2024."
         accent={accent}
         accentLight={accentLight}
       />
@@ -149,10 +149,10 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         onChange={v => set("ascendientes", parseInt(v) || 0)}
         options={[
           { value: "0", label: "Ninguno" },
-          { value: "1", label: "1 (423,72 \u20AC)" },
-          { value: "2", label: "2 (847,44 \u20AC)" },
+          { value: "1", label: "1 (423,72 €)" },
+          { value: "2", label: "2 (847,44 €)" },
         ]}
-        tooltipText="423,72 \u20AC por ascendiente que conviva permanentemente con el contribuyente, con rentas \u2264 SMI (16.576 \u20AC) y que no presente declaraci\u00F3n propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
+        tooltipText="423,72 € por ascendiente que conviva permanentemente con el contribuyente, con rentas ≤ SMI (16.576 €) y que no presente declaración propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
         accent={accent}
         accentLight={accentLight}
       />
@@ -163,10 +163,10 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         onChange={v => set("cuidado", v)}
         options={[
           { value: "ninguno",        label: "No aplica" },
-          { value: "empleado_hogar", label: "Empleado hogar (250 \u20AC)" },
-          { value: "profesional",    label: "Profesional cert. (500 \u20AC)" },
+          { value: "empleado_hogar", label: "Empleado hogar (250 €)" },
+          { value: "profesional",    label: "Profesional cert. (500 €)" },
         ]}
-        tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 a\u00F1os o familiares dependientes/discapacitados. 250 \u20AC (general) o 500 \u20AC si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
+        tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 años o familiares dependientes/discapacitados. 250 € (general) o 500 € si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
         accent={accent}
         accentLight={accentLight}
       />
@@ -181,7 +181,7 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "2", label: "2 familiares" },
           { value: "3", label: "3 familiares" },
         ]}
-        tooltipText="Deducci\u00F3n por cada familiar conviviente con discapacidad/dependencia reconocida. Mismos importes que para el contribuyente seg\u00FAn grado. Art. 82 NF 19/2024."
+        tooltipText="Deducción por cada familiar conviviente con discapacidad/dependencia reconocida. Mismos importes que para el contribuyente según grado. Art. 82 NF 19/2024."
         accent={accent}
         accentLight={accentLight}
       />
@@ -198,8 +198,8 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         label="Gasto asistente personal (art. 81 bis)"
         value={data.asistPersonal}
         onChange={v => set("asistPersonal", v)}
-        hint="Para titulares de la prestaci\u00F3n de asistencia personal (DF 39/2014)"
-        tooltipText="Deducci\u00F3n del 30% de las cantidades pagadas por contratar asistentes personales, con un m\u00E1ximo de 900 \u20AC anuales. Solo para titulares de la prestaci\u00F3n de asistencia personal del sistema de dependencia (DF 39/2014). Art. 81 bis NF 33/2013."
+        hint="Para titulares de la prestación de asistencia personal (DF 39/2014)"
+        tooltipText="Deducción del 30% de las cantidades pagadas por contratar asistentes personales, con un máximo de 900 € anuales. Solo para titulares de la prestación de asistencia personal del sistema de dependencia (DF 39/2014). Art. 81 bis NF 33/2013."
         accent={accent}
         accentLight={accentLight}
       />
@@ -213,7 +213,7 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
       <PersonCard
         letter="H"
         label="Descendientes"
-        subtitle="Hijos en com\u00FAn \u00B7 Art. 79 NF 33/2013"
+        subtitle="Hijos en común · Art. 79 NF 33/2013"
         accent={T.gold}
         accentLight={T.goldL}
       >
@@ -232,7 +232,7 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
         <PersonCard
           letter="A"
           label="Persona A"
-          subtitle="Situaci\u00F3n personal y familiar"
+          subtitle="Situación personal y familiar"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -249,7 +249,7 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
           <PersonCard
             letter="B"
             label="Persona B"
-            subtitle="Situaci\u00F3n personal y familiar"
+            subtitle="Situación personal y familiar"
             accent={T.teal}
             accentLight={T.tealL}
           >
