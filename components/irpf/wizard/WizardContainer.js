@@ -39,7 +39,7 @@ export default function WizardContainer() {
   // Dismiss restored banner
   const dismissRestored = useCallback(() => setRestored(false), []);
 
-  // Step navigation — scroll to top on every change
+  // Step navigation
   const goToStep = useCallback((step) => {
     setCurrentStep(step);
     setMaxVisited(prev => Math.max(prev, step));
@@ -56,7 +56,7 @@ export default function WizardContainer() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // ── Extract values ──────────────────────────────────────────────────────────
+  // Extract values
   const aB    = n(state.personA.bruto);
   const aR    = n(state.personA.ret);
   const aRe   = n(state.personA.redExtra);
@@ -137,7 +137,7 @@ export default function WizardContainer() {
   const ready   = aB > 0;
   const hasPairData = showPersonB && bB > 0;
 
-  // ── Cálculos ──────────────────────────────────────────────────────────────
+  // Calculations
   const calc = useMemo(() => {
     if (!ready) return null;
     const dedHTotal = deducHijosTotal(hj, hjM6, hj6a15);
@@ -194,7 +194,7 @@ export default function WizardContainer() {
       bAlimentos, bNumHijosAlim, bDiscFam, bDiscFamGrado, bAsistPers, bVivPrim, bDonac, bDonacPrior, bInvNueva,
       hj, hjM6, hj6a15, ready, hasPairData]);
 
-  // ── Escenarios ────────────────────────────────────────────────────────────
+  // Scenarios
   const scenarios = useMemo(() => {
     if (!calc) return [];
     const hasH    = hj > 0;
@@ -204,8 +204,8 @@ export default function WizardContainer() {
       const { a_sh, a_ch } = calc;
       const list = [
         {
-          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
-          sublabel: "Declaración individual, sin deducción de descendientes",
+          id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00B7 Sin hijos",
+          sublabel: "Declaraci\u00F3n individual, sin deducci\u00F3n de descendientes",
           accentColor: T.cobalt,
           resultado: a_sh.resultado,
           brutoTotal: aB, ssTotal: a_sh.ss,
@@ -220,12 +220,12 @@ export default function WizardContainer() {
           dedAlim: a_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers,
           dedDon: a_sh.dedDon, dedInv: a_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo,
           cl: a_sh.cl, retTotal: aR + aRetCapMob,
-          warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
+          warning: hasH ? `No aprovechas la deducci\u00F3n de hijos de ${dedHTxt}` : null,
           _calcA: a_sh,
         },
         ...(hasH ? [{
-          id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
-          sublabel: "Declaración individual, 100% deducción de descendientes",
+          id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00B7 Con hijos",
+          sublabel: "Declaraci\u00F3n individual, 100% deducci\u00F3n de descendientes",
           accentColor: T.cobalt,
           resultado: a_ch.resultado,
           brutoTotal: aB, ssTotal: a_ch.ss,
@@ -249,8 +249,8 @@ export default function WizardContainer() {
     const { a_sh, b_sh, a_ch, b_ch, c_sh, c_ch } = calc;
     const list = [
       {
-        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual · Sin hijos",
-        sublabel: "Dos declaraciones separadas, sin deducción de descendientes",
+        id: "IND-NOHIJOS", modalidad: "Individual", label: "Individual \u00B7 Sin hijos",
+        sublabel: "Dos declaraciones separadas, sin deducci\u00F3n de descendientes",
         accentColor: T.cobalt,
         resultado:  +(a_sh.resultado + b_sh.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_sh.ss + b_sh.ss,
@@ -265,12 +265,12 @@ export default function WizardContainer() {
         dedAlim: a_sh.dedAlim + b_sh.dedAlim, dedDiscapFam: a_sh.dedDiscapFam + b_sh.dedDiscapFam, dedAsistPers: a_sh.dedAsistPers + b_sh.dedAsistPers,
         dedDon: a_sh.dedDon + b_sh.dedDon, dedInv: a_sh.dedInv + b_sh.dedInv, otrosRdtosTotal: a_sh.otrosRdtosTrabajo + b_sh.otrosRdtosTrabajo,
         cl: a_sh.cl + b_sh.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: hasH ? `No aprovechas la deducción de hijos de ${dedHTxt}` : null,
+        warning: hasH ? `No aprovechas la deducci\u00F3n de hijos de ${dedHTxt}` : null,
         _calcA: a_sh, _calcB: b_sh,
       },
       ...(hasH ? [{
-        id: "IND-HIJOS", modalidad: "Individual", label: "Individual · Con hijos",
-        sublabel: "Dos declaraciones, 50% de deducción de descendientes cada uno",
+        id: "IND-HIJOS", modalidad: "Individual", label: "Individual \u00B7 Con hijos",
+        sublabel: "Dos declaraciones, 50% de deducci\u00F3n de descendientes cada uno",
         accentColor: T.cobalt,
         resultado:  +(a_ch.resultado + b_ch.resultado).toFixed(2),
         brutoTotal: aB + bB, ssTotal: a_ch.ss + b_ch.ss,
@@ -285,12 +285,12 @@ export default function WizardContainer() {
         dedAlim: a_ch.dedAlim + b_ch.dedAlim, dedDiscapFam: a_ch.dedDiscapFam + b_ch.dedDiscapFam, dedAsistPers: a_ch.dedAsistPers + b_ch.dedAsistPers,
         dedDon: a_ch.dedDon + b_ch.dedDon, dedInv: a_ch.dedInv + b_ch.dedInv, otrosRdtosTotal: a_ch.otrosRdtosTrabajo + b_ch.otrosRdtosTrabajo,
         cl: a_ch.cl + b_ch.cl, retTotal: aR + aRetCapMob + bR + bRetCapMob,
-        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaraci\u00F3n voluntaria (art. 79.3.c NF 33/2013)",
         _calcA: a_ch, _calcB: b_ch,
       }] : []),
       {
-        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta · Sin hijos",
-        sublabel: "Una declaración · −4.800 € reducción base (art. 73 NF 3/2025)",
+        id: "CONJ-NOHIJOS", modalidad: "Conjunta", label: "Conjunta \u00B7 Sin hijos",
+        sublabel: "Una declaraci\u00F3n \u00B7 \u22124.800 \u20AC reducci\u00F3n base (art. 73 NF 3/2025)",
         accentColor: T.gold,
         resultado:  c_sh.resultado,
         brutoTotal: aB + bB, ssTotal: c_sh.ssA + c_sh.ssB,
@@ -305,12 +305,12 @@ export default function WizardContainer() {
         dedAlim: c_sh.dedAlim, dedDiscapFam: c_sh.dedDiscapFam, dedAsistPers: c_sh.dedAsistPers,
         dedDon: c_sh.dedDon, dedInv: c_sh.dedInv, otrosRdtosTotal: c_sh.otrosRdtosTotal,
         cl: c_sh.cl, retTotal: c_sh.retTotal,
-        warning: hasH ? `Deducción de hijos no aplicada: te pierdes ${dedHTxt}` : null,
+        warning: hasH ? `Deducci\u00F3n de hijos no aplicada: te pierdes ${dedHTxt}` : null,
         _calcConj: c_sh,
       },
       ...(hasH ? [{
-        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta · Con hijos",
-        sublabel: "Una declaración · −4.800 € base · deducción hijos 100%",
+        id: "CONJ-HIJOS", modalidad: "Conjunta", label: "Conjunta \u00B7 Con hijos",
+        sublabel: "Una declaraci\u00F3n \u00B7 \u22124.800 \u20AC base \u00B7 deducci\u00F3n hijos 100%",
         accentColor: T.gold,
         resultado:  c_ch.resultado,
         brutoTotal: aB + bB, ssTotal: c_ch.ssA + c_ch.ssB,
@@ -325,7 +325,7 @@ export default function WizardContainer() {
         dedAlim: c_ch.dedAlim, dedDiscapFam: c_ch.dedDiscapFam, dedAsistPers: c_ch.dedAsistPers,
         dedDon: c_ch.dedDon, dedInv: c_ch.dedInv, otrosRdtosTotal: c_ch.otrosRdtosTotal,
         cl: c_ch.cl, retTotal: c_ch.retTotal,
-        warning: "El hijo NO debe presentar declaración voluntaria (art. 79.3.c NF 33/2013)",
+        warning: "El hijo NO debe presentar declaraci\u00F3n voluntaria (art. 79.3.c NF 33/2013)",
         _calcConj: c_ch,
       }] : []),
     ];
@@ -346,30 +346,34 @@ export default function WizardContainer() {
   }, []);
 
   const isOptionalStep = currentStep >= 2 && currentStep <= 4;
-
-  // ── Render ────────────────────────────────────────────────────────────────
   const contentWidth = showPersonB ? "max-w-5xl" : "max-w-2xl";
 
   return (
-    <div className="min-h-screen bg-bg font-serif text-ink">
-      {/* ── HEADER ─────────────────────────────────────────────────────────── */}
-      <header className="bg-white border-b border-border px-6 lg:px-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between py-5 gap-4">
+    <div className="min-h-screen bg-bg font-sans text-ink">
+      {/* Gradient accent line */}
+      <div className="h-1 bg-gradient-to-r from-cobalt via-teal to-positive" />
+
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-40">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 gap-4">
             <div className="min-w-0">
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: T.ink }}>
-                Calculadora IRPF Álava 2025
+              <h1 className="text-lg font-bold tracking-tight text-ink">
+                Calculadora IRPF Alava 2025
               </h1>
-              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
-                Ejercicio 2025 · NF 33/2013 · NF 3/2025 · DF 23/2025
+              <div className="text-[11px] mt-0.5 text-ink-faint">
+                Ejercicio 2025 &middot; NF 33/2013 &middot; NF 3/2025 &middot; DF 23/2025
               </div>
             </div>
             {ready && optimo && currentStep < 5 && (
               <div className="text-right shrink-0">
-                <div className="text-[11px] font-medium" style={{ color: T.inkFaint }}>
+                <div className="text-[11px] font-medium text-ink-faint">
                   {optimo.label}
                 </div>
-                <div className="text-xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}>
+                <div
+                  className="text-xl font-bold font-mono tracking-tight"
+                  style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}
+                >
                   {signedEur(optimo.resultado)}
                 </div>
               </div>
@@ -378,61 +382,79 @@ export default function WizardContainer() {
         </div>
       </header>
 
-      {/* ── PROGRESS BAR ───────────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 lg:px-10">
+      {/* Progress Bar */}
+      <div className="bg-white border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8">
           <ProgressBar currentStep={currentStep} onStepClick={goToStep} maxVisited={maxVisited} />
         </div>
       </div>
 
-      {/* ── RESTORED BANNER ──────────────────────────────────────────────── */}
+      {/* Restored Banner */}
       {restored && (
         <div className="bg-cobalt-light border-b border-cobalt/20">
-          <div className="max-w-5xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
-            <span className="text-sm text-cobalt">Datos restaurados de tu sesión anterior</span>
+          <div className="max-w-5xl mx-auto px-6 lg:px-8 py-3 flex items-center justify-between">
+            <span className="text-sm text-cobalt font-medium">Datos restaurados de tu sesion anterior</span>
             <button onClick={dismissRestored} className="text-sm text-cobalt/60 hover:text-cobalt underline cursor-pointer">Cerrar</button>
           </div>
         </div>
       )}
 
-      {/* ── BODY ───────────────────────────────────────────────────────────── */}
+      {/* Body */}
       {currentStep < 5 ? (
-        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-10 pb-28 lg:pb-10`}>
+        <div className={`${contentWidth} mx-auto px-6 lg:px-8 py-10 pb-28 lg:pb-10`}>
           {/* Step content */}
-          {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
-          {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-          {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-          {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-          {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+          <div className="animate-[slideUp_300ms_ease-out]">
+            {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
+            {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+            {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+            {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+            {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+          </div>
 
           {/* Navigation buttons */}
           <div className="flex items-center justify-between mt-12 gap-4">
             {currentStep > 0 ? (
-              <button onClick={goPrev} className="px-7 py-3.5 rounded-xl border border-border text-ink-mid font-semibold text-sm hover:bg-surface-alt transition-colors cursor-pointer">
-                ← Anterior
+              <button
+                onClick={goPrev}
+                className="px-6 py-3 rounded-xl border border-border text-ink-mid font-medium text-sm
+                           hover:bg-surface-alt hover:border-ink-faint/40 transition-all duration-200 cursor-pointer"
+              >
+                &larr; Anterior
               </button>
             ) : <div />}
             <div className="flex items-center gap-3">
               {isOptionalStep && (
-                <button onClick={goNext} className="px-6 py-3.5 rounded-xl text-ink-faint text-sm hover:text-ink-mid transition-colors cursor-pointer">
+                <button
+                  onClick={goNext}
+                  className="px-5 py-3 rounded-xl text-ink-faint text-sm font-medium
+                             hover:text-ink-mid hover:bg-surface-alt transition-all duration-200 cursor-pointer"
+                >
                   Saltar
                 </button>
               )}
-              <button onClick={goNext} className="px-10 py-4 rounded-xl bg-cobalt text-white font-bold text-[15px] hover:opacity-90 transition-opacity shadow-sm cursor-pointer">
-                {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
+              <button
+                onClick={goNext}
+                className="px-8 py-3.5 rounded-xl bg-cobalt text-white font-semibold text-sm
+                           hover:bg-cobalt/90 transition-all duration-200 cursor-pointer
+                           shadow-lg shadow-cobalt/20"
+              >
+                {currentStep === 4 ? "Ver resultados \u2192" : "Siguiente \u2192"}
               </button>
             </div>
           </div>
 
           {/* Reset button */}
           <div className="mt-8 text-center">
-            <button onClick={handleReset} className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer">
-              ↻ Limpiar todos los datos
+            <button
+              onClick={handleReset}
+              className="text-sm text-ink-faint hover:text-ink-mid transition-colors cursor-pointer"
+            >
+              Limpiar todos los datos
             </button>
           </div>
         </div>
       ) : (
-        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-10">
+        <div className="max-w-5xl mx-auto px-6 lg:px-8 py-10">
           <StepResultado
             calc={calc}
             scenarios={scenarios}
@@ -448,29 +470,34 @@ export default function WizardContainer() {
         </div>
       )}
 
-      {/* ── MOBILE STICKY RESULT ──────────────────────────────────────────── */}
+      {/* Mobile Sticky Result */}
       {ready && optimo && currentStep < 5 && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-ink text-white px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,.12)]">
+        <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden
+                        bg-white/90 backdrop-blur-xl border-t border-border
+                        px-5 py-4 shadow-[0_-4px_20px_rgba(0,0,0,.08)]">
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-[10px] text-white/50 tracking-widest uppercase">Mejor opción</div>
-              <div className="text-sm font-bold">{optimo.label}</div>
+              <div className="text-[10px] text-ink-faint tracking-widest uppercase font-medium">Mejor opcion</div>
+              <div className="text-sm font-bold text-ink">{optimo.label}</div>
             </div>
-            <div className="text-2xl font-black font-mono" style={{ color: optimo.resultado >= 0 ? "#4ade80" : "#f87171" }}>
+            <div
+              className="text-2xl font-bold font-mono"
+              style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}
+            >
               {signedEur(optimo.resultado)}
             </div>
           </div>
         </div>
       )}
 
-      {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="text-center px-6 lg:px-10 py-8 text-[11px] text-ink-faint border-t border-border leading-relaxed">
-        <div>Normativa aplicada: NF 33/2013 · NF 19/2024 · NF 3/2025 · DF 23/2025 · Orden PJC/178/2025</div>
-        <div className="mt-2">
-          Los resultados de esta calculadora tienen carácter meramente informativo y orientativo.
-          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situación particular, consulte con un profesional o utilice Rentafácil (Hacienda Foral de Álava).
+      {/* Footer */}
+      <footer className="text-center px-6 lg:px-8 py-8 text-[11px] text-ink-faint border-t border-border/50 leading-relaxed">
+        <div>Normativa aplicada: NF 33/2013 &middot; NF 19/2024 &middot; NF 3/2025 &middot; DF 23/2025 &middot; Orden PJC/178/2025</div>
+        <div className="mt-2 max-w-2xl mx-auto">
+          Los resultados de esta calculadora tienen caracter meramente informativo y orientativo.
+          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situacion particular, consulte con un profesional o utilice Rentafacil (Hacienda Foral de Alava).
         </div>
-        <div className="mt-2 opacity-60">Ejercicio fiscal 2025 · Trabajo, capital y patrimonio · Actualizado a marzo 2026</div>
+        <div className="mt-2 opacity-60">Ejercicio fiscal 2025 &middot; Trabajo, capital y patrimonio &middot; Actualizado a marzo 2026</div>
       </footer>
     </div>
   );

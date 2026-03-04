@@ -6,20 +6,14 @@ import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
 import { PersonCard } from "../ui/PersonCard.js";
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonDeduccionesFields — fields for one person
-   ───────────────────────────────────────────────────────────────────────────── */
 function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLight }) {
   const set = (field, value) => dispatch({ type: actionType, field, value });
 
   return (
     <>
-      {/* ── Rentas y reducciones ─────────────────────────────────────────── */}
+      {/* Rentas y reducciones */}
       <div className="mb-5">
-        <div
-          className="text-[11px] font-bold tracking-widest uppercase mb-3"
-          style={{ color: T.inkFaint }}
-        >
+        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
           Rentas adicionales y otras deducciones
         </div>
 
@@ -27,8 +21,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           label="Otras rentas no laborales adicionales (art. 23.2)"
           value={data.rentasNoLab}
           onChange={v => set("rentasNoLab", v)}
-          hint="Solo si tienes rentas NO incluidas en la sección 'Otras rentas' de abajo"
-          tooltipText="Rentas no laborales que no hayas introducido ya en la sección 'Otras rentas' (capital inmobiliario, mobiliario, ganancias). Si el total de todas las rentas no laborales supera 7.500 €, la bonificación del trabajo se limita a 3.000 € (art. 23.2 NF 33/2013). Las rentas introducidas abajo ya se suman automáticamente."
+          hint="Solo si tienes rentas NO incluidas en la secci\u00F3n 'Otras rentas' de abajo"
+          tooltipText="Rentas no laborales que no hayas introducido ya en la secci\u00F3n 'Otras rentas' (capital inmobiliario, mobiliario, ganancias). Si el total de todas las rentas no laborales supera 7.500 \u20AC, la bonificaci\u00F3n del trabajo se limita a 3.000 \u20AC (art. 23.2 NF 33/2013). Las rentas introducidas abajo ya se suman autom\u00E1ticamente."
           accent={accent}
           accentLight={accentLight}
         />
@@ -37,27 +31,27 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           label="Otras deducciones no individualizadas"
           value={data.otrasDeducNF3}
           onChange={v => set("otrasDeducNF3", v)}
-          hint="Corresponsabilidad (≤200 €), reincorporación (≤1.500 €), rehabilitación (18%, máx 3.000 €), eficiencia energética (15%), recarga VE (15%)"
-          tooltipText="Introduce la suma de las deducciones que no tienen campo propio: Art. 83 bis: hasta 200 €/año (corresponsabilidad masculina). Art. 83 ter: hasta 1.500 €/año (reincorporación femenina). Art. 87 bis: 18% rehabilitación vivienda protegida, máx 3.000 €. Art. 87 ter/quater: 15% mejoras eficiencia energética. Art. 87 quinquies: 15% puntos de recarga VE. Calcula el importe de cada deducción e introduce aquí la suma total."
+          hint="Corresponsabilidad (\u2264200 \u20AC), reincorporaci\u00F3n (\u22641.500 \u20AC), rehabilitaci\u00F3n (18%, m\u00E1x 3.000 \u20AC), eficiencia energ\u00E9tica (15%), recarga VE (15%)"
+          tooltipText="Introduce la suma de las deducciones que no tienen campo propio: Art. 83 bis: hasta 200 \u20AC/a\u00F1o (corresponsabilidad masculina). Art. 83 ter: hasta 1.500 \u20AC/a\u00F1o (reincorporaci\u00F3n femenina). Art. 87 bis: 18% rehabilitaci\u00F3n vivienda protegida, m\u00E1x 3.000 \u20AC. Art. 87 ter/quater: 15% mejoras eficiencia energ\u00E9tica. Art. 87 quinquies: 15% puntos de recarga VE. Calcula el importe de cada deducci\u00F3n e introduce aqu\u00ED la suma total."
           accent={accent}
           accentLight={accentLight}
         />
       </div>
 
-      {/* ── Anualidades por alimentos ────────────────────────────────────── */}
-      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
+      {/* Anualidades por alimentos */}
+      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
         <NumInput
           label="Anualidades por alimentos a hijos (art. 80)"
           value={data.anualidadesAlimentos}
           onChange={v => set("anualidadesAlimentos", v)}
-          hint="Importe anual por decisión judicial"
-          tooltipText="Deducción del 15% de las anualidades por alimentos satisfechas a los hijos por decisión judicial. Límite por hijo: 30% de la deducción del art. 79 correspondiente a ese hijo. Art. 80 NF 3/2025."
+          hint="Importe anual por decisi\u00F3n judicial"
+          tooltipText="Deducci\u00F3n del 15% de las anualidades por alimentos satisfechas a los hijos por decisi\u00F3n judicial. L\u00EDmite por hijo: 30% de la deducci\u00F3n del art. 79 correspondiente a ese hijo. Art. 80 NF 3/2025."
           accent={accent}
           accentLight={accentLight}
         />
         {n(data.anualidadesAlimentos) > 0 && (
           <SmallSelector
-            lbl="Nº hijos que reciben alimentos"
+            lbl="N\u00BA hijos que reciben alimentos"
             value={String(data.numHijosAlimentos)}
             onChange={v => set("numHijosAlimentos", parseInt(v) || 1)}
             options={[
@@ -66,19 +60,16 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
               { value: "3", label: "3 hijos" },
               { value: "4", label: "4 hijos" },
             ]}
-            tooltipText="Número de hijos a los que se satisfacen anualidades por alimentos. Se necesita para calcular el límite del 30% de la deducción del art. 79 por cada hijo."
+            tooltipText="N\u00FAmero de hijos a los que se satisfacen anualidades por alimentos. Se necesita para calcular el l\u00EDmite del 30% de la deducci\u00F3n del art. 79 por cada hijo."
             accent={accent}
             accentLight={accentLight}
           />
         )}
       </div>
 
-      {/* ── Incentivos fiscales ──────────────────────────────────────────── */}
-      <div className="mb-5 pt-4 border-t" style={{ borderColor: T.borderSoft }}>
-        <div
-          className="text-[11px] font-bold tracking-widest uppercase mb-3"
-          style={{ color: T.inkFaint }}
-        >
+      {/* Incentivos fiscales */}
+      <div className="mb-5 pt-5 border-t" style={{ borderColor: T.border }}>
+        <div className="text-[11px] font-bold tracking-widest uppercase mb-3" style={{ color: T.inkFaint }}>
           Incentivos fiscales
         </div>
 
@@ -86,8 +77,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           label="Donaciones a entidades cualificadas (NF 35/2021)"
           value={data.donaciones}
           onChange={v => set("donaciones", v)}
-          hint="Fundaciones, asociaciones de utilidad pública, etc."
-          tooltipText="Deducción del 30% (general) o 45% (actividades prioritarias de mecenazgo) de las donaciones a entidades beneficiarias de mecenazgo. Base máxima: 30% de la base liquidable (art. 91 NF 33/2013). NF 35/2021 de régimen fiscal del mecenazgo."
+          hint="Fundaciones, asociaciones de utilidad p\u00FAblica, etc."
+          tooltipText="Deducci\u00F3n del 30% (general) o 45% (actividades prioritarias de mecenazgo) de las donaciones a entidades beneficiarias de mecenazgo. Base m\u00E1xima: 30% de la base liquidable (art. 91 NF 33/2013). NF 35/2021 de r\u00E9gimen fiscal del mecenazgo."
           accent={accent}
           accentLight={accentLight}
         />
@@ -98,14 +89,14 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
                 type="checkbox"
                 checked={data.donacionesPrioritarias}
                 onChange={e => set("donacionesPrioritarias", e.target.checked)}
-                className="w-4.5 h-4.5 cursor-pointer accent-current"
+                className="w-5 h-5 cursor-pointer rounded accent-current"
               />
               <div>
-                <div className="text-sm font-semibold" style={{ color: T.ink }}>
+                <div className="text-sm font-medium" style={{ color: T.ink }}>
                   Actividades prioritarias de mecenazgo (45%)
                 </div>
-                <div className="text-xs" style={{ color: T.inkFaint }}>
-                  En lugar del 30% general · Art. 25 NF 35/2021
+                <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                  En lugar del 30% general &middot; Art. 25 NF 35/2021
                 </div>
               </div>
             </label>
@@ -113,11 +104,11 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
         )}
 
         <NumInput
-          label="Inversión en empresas de nueva creación"
+          label="Inversi\u00F3n en empresas de nueva creaci\u00F3n"
           value={data.inversionNuevaCreacion}
           onChange={v => set("inversionNuevaCreacion", v)}
-          hint="Participaciones en empresas de nueva o reciente creación"
-          tooltipText="Deducción del 10% de las cantidades invertidas en empresas de nueva o reciente creación, con un máximo de 6.000 € de deducción."
+          hint="Participaciones en empresas de nueva o reciente creaci\u00F3n"
+          tooltipText="Deducci\u00F3n del 10% de las cantidades invertidas en empresas de nueva o reciente creaci\u00F3n, con un m\u00E1ximo de 6.000 \u20AC de deducci\u00F3n."
           accent={accent}
           accentLight={accentLight}
         />
@@ -126,9 +117,6 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   StepDeducciones — Step 5: "Deducciones" (optional)
-   ───────────────────────────────────────────────────────────────────────────── */
 export default function StepDeducciones({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">

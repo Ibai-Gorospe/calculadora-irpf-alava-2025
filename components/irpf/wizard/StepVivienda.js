@@ -6,100 +6,88 @@ import { NumInput } from "../ui/NumInput.js";
 import { SmallSelector } from "../ui/SmallSelector.js";
 import { PersonCard } from "../ui/PersonCard.js";
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonViviendaFields — fields for one person
-   ───────────────────────────────────────────────────────────────────────────── */
 function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight }) {
   const set = (field, value) => dispatch({ type: actionType, field, value });
 
   return (
     <>
-      {/* Hipoteca */}
       <NumInput
         label="Pagos hipoteca anual (art. 87)"
         value={data.viviendaCompra}
         onChange={v => set("viviendaCompra", v)}
-        hint="Amortización + intereses anuales"
-        tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €). Mun. <4.000 hab.: 20% (máx. 1.836 €). <36 años / fam. num.: 25% (máx. 2.346 €). Art. 87 NF 33/2013 (mod. NF 3/2025)."
+        hint="Amortizaci\u00F3n + intereses anuales"
+        tooltipText="Deducci\u00F3n por adquisici\u00F3n de vivienda habitual. General: 18% (m\u00E1x. 1.530 \u20AC). Mun. <4.000 hab.: 20% (m\u00E1x. 1.836 \u20AC). <36 a\u00F1os / fam. num.: 25% (m\u00E1x. 2.346 \u20AC). Art. 87 NF 33/2013 (mod. NF 3/2025)."
         accent={accent}
         accentLight={accentLight}
       />
 
-      {/* Perfil vivienda compra */}
       <SmallSelector
         lbl="Perfil vivienda compra (art. 87)"
         value={data.viviendaPerfil}
         onChange={v => set("viviendaPerfil", v)}
         options={[
-          { value: "general",   label: "General (18%, 1.530 €)" },
-          { value: "municipio", label: "Mun. <4.000 (20%, 1.836 €)" },
-          { value: "joven",     label: "<36 / Fam.num (25%, 2.346 €)" },
+          { value: "general",   label: "General (18%, 1.530 \u20AC)" },
+          { value: "municipio", label: "Mun. <4.000 (20%, 1.836 \u20AC)" },
+          { value: "joven",     label: "<36 / Fam.num (25%, 2.346 \u20AC)" },
         ]}
-        tooltipText="General: 18%/1.530 €. Municipio <4.000 hab.: 20%/1.836 €. Menores de 36 años y familias numerosas: 25%/2.346 €. Art. 87 NF 33/2013 (mod. NF 3/2025)."
+        tooltipText="General: 18%/1.530 \u20AC. Municipio <4.000 hab.: 20%/1.836 \u20AC. Menores de 36 a\u00F1os y familias numerosas: 25%/2.346 \u20AC. Art. 87 NF 33/2013 (mod. NF 3/2025)."
         accent={accent}
         accentLight={accentLight}
       />
 
-      {/* Primer año checkbox */}
       {data.viviendaPerfil === "joven" && n(data.viviendaCompra) > 0 && (
         <div className="mb-5">
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex items-center gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={data.viviendaPrimerAnio}
               onChange={e => set("viviendaPrimerAnio", e.target.checked)}
-              className="w-4.5 h-4.5 cursor-pointer accent-current"
+              className="w-5 h-5 cursor-pointer rounded accent-current"
             />
             <div>
-              <div className="text-sm font-semibold" style={{ color: T.ink }}>
-                Primer año de adquisición (art. 87.4ter)
+              <div className="text-sm font-medium" style={{ color: T.ink }}>
+                Primer a\u00F1o de adquisici\u00F3n (art. 87.4ter)
               </div>
-              <div className="text-xs" style={{ color: T.inkFaint }}>
-                Sin límite máximo en la deducción para menores de 36 años
+              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
+                Sin l\u00EDmite m\u00E1ximo en la deducci\u00F3n para menores de 36 a\u00F1os
               </div>
             </div>
           </label>
         </div>
       )}
 
-      {/* Alquiler */}
       <NumInput
         label="Alquiler vivienda habitual (art. 86)"
         value={data.alquilerAnual}
         onChange={v => set("alquilerAnual", v)}
-        hint="Importe total del alquiler pagado en el año"
-        tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €). Mejorado: 35% (máx. 2.800 €). Art. 86 NF 33/2013 (mod. NF 3/2025)."
+        hint="Importe total del alquiler pagado en el a\u00F1o"
+        tooltipText="Deducci\u00F3n por alquiler de vivienda habitual. General: 20% (m\u00E1x. 1.600 \u20AC). Mejorado: 35% (m\u00E1x. 2.800 \u20AC). Art. 86 NF 33/2013 (mod. NF 3/2025)."
         accent={accent}
         accentLight={accentLight}
       />
 
-      {/* Perfil alquiler */}
       <SmallSelector
         lbl="Perfil alquiler (art. 86)"
         value={data.alquilerPerfil}
         onChange={v => set("alquilerPerfil", v)}
         options={[
-          { value: "general",  label: "General (20%, 1.600 €)" },
-          { value: "mejorado", label: "Mejorado (35%, 2.800 €)" },
+          { value: "general",  label: "General (20%, 1.600 \u20AC)" },
+          { value: "mejorado", label: "Mejorado (35%, 2.800 \u20AC)" },
         ]}
-        tooltipText="Perfil mejorado (35%/2.800 €) para: menores de 36 años, familias numerosas o monoparentales, discapacidad ≥65%, dependencia, víctimas violencia de género, o municipios en riesgo de despoblación. Art. 86 NF 33/2013 (mod. NF 3/2025)."
+        tooltipText="Perfil mejorado (35%/2.800 \u20AC) para: menores de 36 a\u00F1os, familias numerosas o monoparentales, discapacidad \u226565%, dependencia, v\u00EDctimas violencia de g\u00E9nero, o municipios en riesgo de despoblaci\u00F3n. Art. 86 NF 33/2013 (mod. NF 3/2025)."
         accent={accent}
         accentLight={accentLight}
       />
 
-      {/* Warning: both mortgage and rent */}
       {n(data.viviendaCompra) > 0 && n(data.alquilerAnual) > 0 && (
-        <div className="text-xs py-1" style={{ color: T.red }}>
-          Normalmente no se aplican ambas deducciones simultáneamente (compra + alquiler)
+        <div className="text-xs py-1 font-medium" style={{ color: T.red }}>
+          Normalmente no se aplican ambas deducciones simult\u00E1neamente (compra + alquiler)
         </div>
       )}
     </>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   StepVivienda — Step 3: "Vivienda" (optional)
-   ───────────────────────────────────────────────────────────────────────────── */
 export default function StepVivienda({ state, dispatch, showPersonB }) {
   return (
     <div className="space-y-6">

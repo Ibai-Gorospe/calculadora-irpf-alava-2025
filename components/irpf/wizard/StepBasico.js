@@ -7,20 +7,17 @@ import { SmallSelector } from "../ui/SmallSelector.js";
 import { PersonCard } from "../ui/PersonCard.js";
 import { PENSION_LIMIT_TOTAL } from "../engine/constants.js";
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   PersonBasicoFields — fields for one person
-   ───────────────────────────────────────────────────────────────────────────── */
 function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight }) {
   const set = (field, value) => dispatch({ type: actionType, field, value });
 
   return (
     <>
       <NumInput
-        label="Retribución bruta anual"
+        label="Retribuci\u00F3n bruta anual"
         value={data.bruto}
         onChange={v => set("bruto", v)}
         hint="Total antes de retenciones y cotizaciones SS"
-        tooltipText="Suma de nóminas brutas del año 2025, incluyendo pagas extra, complementos y cualquier otra retribución dineraria del trabajo."
+        tooltipText="Suma de n\u00F3minas brutas del a\u00F1o 2025, incluyendo pagas extra, complementos y cualquier otra retribuci\u00F3n dineraria del trabajo."
         accent={accent}
         accentLight={accentLight}
       />
@@ -38,14 +35,14 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
         value={data.redExtra}
         onChange={v => set("redExtra", v)}
         hint="Aportaciones a planes de pensiones, EPSV, etc."
-        tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsión social. Límite general 2025: 5.000 € individuales + 8.000 € empresariales (art. 70-72 NF 33/2013)."
+        tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsi\u00F3n social. L\u00EDmite general 2025: 5.000 \u20AC individuales + 8.000 \u20AC empresariales (art. 70-72 NF 33/2013)."
         accent={accent}
         accentLight={accentLight}
       />
 
       {n(data.redExtra) > PENSION_LIMIT_TOTAL && (
-        <div className="text-xs leading-relaxed pb-2" style={{ color: T.red }}>
-          Las reducciones de base superan el límite de {eur(PENSION_LIMIT_TOTAL)} (5.000 € individual + 8.000 € empresarial).
+        <div className="text-xs leading-relaxed pb-2 font-medium" style={{ color: T.red }}>
+          Las reducciones de base superan el l\u00EDmite de {eur(PENSION_LIMIT_TOTAL)} (5.000 \u20AC individual + 8.000 \u20AC empresarial).
         </div>
       )}
 
@@ -57,7 +54,7 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
           { value: "indefinido", label: "Indefinido (6,48%)" },
           { value: "temporal",   label: "Temporal (6,53%)" },
         ]}
-        tooltipText="Afecta al tipo de cotización SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 €/año."
+        tooltipText="Afecta al tipo de cotizaci\u00F3n SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 \u20AC/a\u00F1o."
         accent={accent}
         accentLight={accentLight}
       />
@@ -65,18 +62,14 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   StepBasico — Step 1: "Lo básico"
-   ───────────────────────────────────────────────────────────────────────────── */
 export default function StepBasico({ state, dispatch, showPersonB, setShowPersonB }) {
   return (
     <div className="space-y-6">
       <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-        {/* Person A */}
         <PersonCard
           letter="A"
           label="Persona A"
-          subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
+          subtitle="Rendimientos del trabajo \u00B7 Art. 15 NF 33/2013"
           accent={T.cobalt}
           accentLight={T.cobaltL}
         >
@@ -89,12 +82,11 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
           />
         </PersonCard>
 
-        {/* Person B */}
         {showPersonB && (
           <PersonCard
             letter="B"
             label="Persona B"
-            subtitle="Rendimientos del trabajo · Art. 15 NF 33/2013"
+            subtitle="Rendimientos del trabajo \u00B7 Art. 15 NF 33/2013"
             accent={T.teal}
             accentLight={T.tealL}
           >
@@ -105,16 +97,16 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
               accent={T.teal}
               accentLight={T.tealL}
             />
-            {/* Remove person B button */}
             <button
               onClick={() => {
                 dispatch({ type: "RESET_B" });
                 setShowPersonB(false);
               }}
-              className="mt-4 w-full py-3 rounded-lg text-sm font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
+              className="mt-4 w-full py-3 rounded-xl text-sm font-medium cursor-pointer
+                         transition-all duration-200 hover:opacity-80"
               style={{
                 background: T.redL,
-                border: `1px solid ${T.redAcc}44`,
+                border: `1.5px solid ${T.redAcc}33`,
                 color: T.red,
               }}
             >
@@ -124,18 +116,18 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
         )}
       </div>
 
-      {/* Add person B button */}
       {!showPersonB && (
         <button
           onClick={() => setShowPersonB(true)}
-          className="w-full py-4 rounded-xl text-sm font-semibold cursor-pointer transition-all duration-150 hover:opacity-80"
+          className="w-full py-4 rounded-xl text-sm font-medium cursor-pointer
+                     transition-all duration-200 hover:bg-teal-light/50 group"
           style={{
             background: "transparent",
-            border: `2px dashed ${T.teal}55`,
+            border: `2px dashed ${T.teal}44`,
             color: T.teal,
           }}
         >
-          + Añadir pareja (Persona B)
+          + A\u00F1adir pareja (Persona B)
         </button>
       )}
     </div>

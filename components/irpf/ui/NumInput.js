@@ -4,9 +4,6 @@ import { useState, useId } from "react";
 import { Tooltip } from "./Tooltip";
 import { T } from "./tokens";
 
-/**
- * NumInput — numeric field with label, optional hint & tooltip.
- */
 export function NumInput({
   label,
   value,
@@ -20,12 +17,12 @@ export function NumInput({
   const id = useId();
 
   return (
-    <div className="flex flex-col gap-1.5 mb-6">
+    <div className="flex flex-col gap-1.5 mb-5">
       {/* Label row */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <label
           htmlFor={id}
-          className="text-[13px] font-semibold transition-colors"
+          className="text-[13px] font-medium transition-colors duration-200"
           style={{ color: focused ? accent : T.inkMid }}
         >
           {label}
@@ -38,19 +35,19 @@ export function NumInput({
         id={id}
         type="text"
         inputMode="decimal"
-        placeholder="0,00 €"
+        placeholder="0,00 \u20AC"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className="w-full rounded-xl border px-4 py-3.5
-                   font-mono text-base text-ink
-                   outline-none transition-all duration-150
-                   placeholder:text-ink-faint/50"
+        className="w-full rounded-xl px-4 py-3
+                   font-mono text-[15px] text-ink
+                   outline-none transition-all duration-200
+                   placeholder:text-ink-faint/40"
         style={{
           backgroundColor: focused ? accentLight : T.surface,
-          borderColor: focused ? accent : T.border,
-          boxShadow: focused ? `0 0 0 3px ${accent}18` : "none",
+          border: `2px solid ${focused ? accent : T.border}`,
+          boxShadow: focused ? `0 0 0 4px ${accent}12` : "none",
         }}
       />
 

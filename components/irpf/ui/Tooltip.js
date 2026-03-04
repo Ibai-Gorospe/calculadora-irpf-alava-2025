@@ -2,16 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 
-/**
- * Tooltip — click-triggered info panel with wide, readable content.
- *
- * Replaces the old hover-based tiny dark bubble with a proper
- * information panel: white background, generous padding, close button,
- * and closes on click-outside or Escape.
- *
- * @param {string}    text     - Info content to display
- * @param {ReactNode} children - Optional custom trigger (defaults to "i" icon)
- */
 export function Tooltip({ text, children }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
@@ -46,26 +36,26 @@ export function Tooltip({ text, children }) {
 
   return (
     <span className="relative inline-flex items-center">
-      {/* Trigger — defaults to an info icon button */}
+      {/* Trigger */}
       {children ?? (
         <button
           ref={triggerRef}
           type="button"
-          aria-label="Más información"
+          aria-label="Mas informacion"
           onClick={() => setOpen(!open)}
           className={`
-            ml-1.5 inline-flex h-[22px] w-[22px] items-center justify-center
-            rounded-full border text-[12px] font-semibold
-            leading-none cursor-pointer transition-all duration-150
-            focus:outline-none focus:ring-2 focus:ring-cobalt/30
+            ml-1 inline-flex h-5 w-5 items-center justify-center
+            rounded-full text-[11px] font-semibold
+            leading-none cursor-pointer transition-all duration-200
+            focus:outline-none focus:ring-2 focus:ring-cobalt/20
             ${open
-              ? "bg-cobalt text-white border-cobalt shadow-sm"
-              : "border-ink-faint/40 text-ink-faint hover:bg-surface-alt hover:text-ink-mid hover:border-ink-mid/40"
+              ? "bg-cobalt text-white shadow-sm"
+              : "bg-surface-alt text-ink-faint hover:bg-cobalt/10 hover:text-cobalt"
             }
           `}
           tabIndex={0}
         >
-          i
+          ?
         </button>
       )}
 
@@ -74,45 +64,45 @@ export function Tooltip({ text, children }) {
         <span
           ref={panelRef}
           role="tooltip"
-          className="absolute top-full left-0 mt-2.5
-                     z-50 w-[360px] max-w-[calc(100vw-2rem)]
+          className="absolute top-full left-0 mt-2
+                     z-50 w-[340px] max-w-[calc(100vw-2rem)]
                      rounded-xl bg-white border border-border
-                     shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+                     shadow-xl
                      animate-[fadeIn_150ms_ease-out]"
         >
           {/* Arrow */}
           <span
-            className="absolute -top-[7px] left-4
-                       w-3.5 h-3.5 rotate-45
+            className="absolute -top-[6px] left-3
+                       w-3 h-3 rotate-45
                        bg-white border-l border-t border-border"
           />
 
           {/* Content */}
-          <span className="block relative p-5">
+          <span className="block relative p-4">
             {/* Close button */}
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-3 right-3 w-7 h-7 rounded-full
+              className="absolute top-2.5 right-2.5 w-6 h-6 rounded-lg
                          flex items-center justify-center
                          text-ink-faint hover:text-ink hover:bg-surface-alt
-                         transition-colors cursor-pointer text-lg leading-none"
+                         transition-colors cursor-pointer text-sm leading-none"
               aria-label="Cerrar"
             >
               &times;
             </button>
 
             {/* Icon + header */}
-            <span className="flex items-center gap-2 mb-2.5">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-cobalt/10 text-cobalt text-xs font-bold shrink-0">
+            <span className="flex items-center gap-2 mb-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-cobalt/10 text-cobalt text-[10px] font-bold shrink-0">
                 i
               </span>
-              <span className="text-xs font-bold uppercase tracking-wide text-ink-mid">
-                Información
+              <span className="text-[10px] font-bold uppercase tracking-wider text-ink-faint">
+                Info
               </span>
             </span>
 
             {/* Text body */}
-            <span className="block text-[13px] leading-[1.65] text-ink-mid pr-4">
+            <span className="block text-[13px] leading-[1.7] text-ink-mid pr-3">
               {text}
             </span>
           </span>

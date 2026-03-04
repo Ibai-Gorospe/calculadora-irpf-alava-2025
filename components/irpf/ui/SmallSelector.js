@@ -3,9 +3,6 @@
 import { Tooltip } from "./Tooltip";
 import { T } from "./tokens";
 
-/**
- * SmallSelector — horizontal button group for picking one option.
- */
 export function SmallSelector({
   lbl,
   value,
@@ -15,11 +12,11 @@ export function SmallSelector({
   accent = T.cobalt,
 }) {
   return (
-    <div className="flex flex-col gap-2 mb-6">
+    <div className="flex flex-col gap-2 mb-5">
       {/* Label row */}
       {lbl && (
-        <div className="flex items-center gap-1">
-          <span className="text-[13px] font-semibold text-ink-mid">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[13px] font-medium text-ink-mid">
             {lbl}
           </span>
           {tooltipText && <Tooltip text={tooltipText} />}
@@ -36,18 +33,18 @@ export function SmallSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={`
-                rounded-xl px-5 py-3 text-sm font-semibold
-                transition-all duration-150 cursor-pointer
+                rounded-xl px-4 py-2.5 text-sm font-medium
+                transition-all duration-200 cursor-pointer
                 outline-none focus-visible:ring-2 focus-visible:ring-offset-1
                 ${
                   selected
-                    ? "text-white shadow-sm"
-                    : "bg-white text-ink-mid border border-border hover:border-ink-faint"
+                    ? "text-white shadow-md"
+                    : "bg-white text-ink-mid border border-border hover:border-ink-faint/60 hover:bg-surface-alt"
                 }
               `}
               style={
                 selected
-                  ? { backgroundColor: accent, boxShadow: `0 2px 8px ${accent}30` }
+                  ? { backgroundColor: accent, boxShadow: `0 4px 12px ${accent}30` }
                   : undefined
               }
             >
