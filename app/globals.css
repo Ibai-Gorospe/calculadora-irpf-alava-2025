@@ -1,5 +1,40 @@
+/* Custom fonts */
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Literata:wght@400;600;700;800;900&display=swap');
 
+@import "tailwindcss";
+
+/* Design tokens from T object */
+@theme {
+  --color-bg: #F7F5F0;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F2EFE9;
+  --color-border: #E3DDD4;
+  --color-border-soft: #EDE9E2;
+
+  --color-ink: #1A1714;
+  --color-ink-mid: #4A4642;
+  --color-ink-faint: #9A9490;
+
+  --color-cobalt: #1B3F6E;
+  --color-cobalt-light: #E8EEF6;
+  --color-teal: #0D6B5E;
+  --color-teal-light: #E4F2F0;
+  --color-gold: #8B6400;
+  --color-gold-light: #FDF3D8;
+  --color-gold-accent: #D4A017;
+
+  --color-positive: #1A6B3A;
+  --color-positive-light: #E4F5EC;
+  --color-positive-accent: #2CA85A;
+  --color-negative: #8B1F1F;
+  --color-negative-light: #FBEAEA;
+  --color-negative-accent: #D94040;
+
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+  --font-serif: 'Literata', Georgia, serif;
+}
+
+/* Base reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -16,39 +51,3 @@ body {
   min-height: 100vh;
 }
 
-/* Desktop layout */
-@media (min-width: 861px) {
-  .mobile-sticky-result {
-    display: none !important;
-  }
-}
-
-/* Responsive: tablet + mobile */
-@media (max-width: 860px) {
-  .grid-main {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-  .sticky-panel {
-    position: static !important;
-  }
-  .scenario-grid {
-    grid-template-columns: 1fr !important;
-  }
-  .mobile-sticky-result {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 200;
-    padding: 10px 16px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,.12);
-  }
-}
-
-/* Bigger touch targets on mobile */
-@media (max-width: 600px) {
-  .grid-main {
-    padding: 16px 12px !important;
-  }
-}

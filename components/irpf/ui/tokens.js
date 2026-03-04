@@ -1,0 +1,27 @@
+// Slim design tokens object — used only for dynamic color props in JS
+// The primary source of truth is the @theme block in globals.css
+export const T = {
+  bg:         "#F7F5F0",
+  surface:    "#FFFFFF",
+  surfaceAlt: "#F2EFE9",
+  border:     "#E3DDD4",
+  borderSoft: "#EDE9E2",
+  ink:        "#1A1714",
+  inkMid:     "#4A4642",
+  inkFaint:   "#9A9490",
+  cobalt:     "#1B3F6E",
+  cobaltL:    "#E8EEF6",
+  teal:       "#0D6B5E",
+  tealL:      "#E4F2F0",
+  gold:       "#8B6400",
+  goldL:      "#FDF3D8",
+  goldAcc:    "#D4A017",
+  green:      "#1A6B3A",
+  greenL:     "#E4F5EC",
+  greenAcc:   "#2CA85A",
+  red:        "#8B1F1F",
+  redL:       "#FBEAEA",
+  redAcc:     "#D94040",
+  fontMono:   "'Courier Prime', 'Courier New', monospace",
+  fontSans:   "'Literata', Georgia, serif",
+};
