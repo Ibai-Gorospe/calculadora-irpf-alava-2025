@@ -16,7 +16,17 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
         value={data.viviendaCompra}
         onChange={v => set("viviendaCompra", v)}
         hint="Amortización + intereses anuales"
-        tooltipText="Deducción por adquisición de vivienda habitual. General: 18% (máx. 1.530 €). Mun. <4.000 hab.: 20% (m\u00E1x. 1.836 \u20AC). <36 a\u00F1os / fam. num.: 25% (m\u00E1x. 2.346 \u20AC). Art. 87 NF 33/2013 (mod. NF 3/2025)."
+        tooltipData={{
+          title: "Pagos hipoteca anual",
+          norm: "Art. 87 NF 33/2013 (mod. NF 3/2025)",
+          iconColor: "teal",
+          text: "Deducción por adquisición de vivienda habitual.",
+          rows: [
+            { label: "General",              value: "18% (máx. 1.530 €)", highlight: true },
+            { label: "Mun. <4.000 hab.",     value: "20% (máx. 1.836 €)", highlight: true },
+            { label: "<36 / Fam. num.",      value: "25% (máx. 2.346 €)", highlight: true },
+          ],
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -30,25 +40,34 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
           { value: "municipio", label: "Mun. <4.000 (20%, 1.836 €)" },
           { value: "joven",     label: "<36 / Fam.num (25%, 2.346 €)" },
         ]}
-        tooltipText="General: 18%/1.530 €. Municipio <4.000 hab.: 20%/1.836 €. Menores de 36 años y familias numerosas: 25%/2.346 €. Art. 87 NF 33/2013 (mod. NF 3/2025)."
+        tooltipData={{
+          title: "Perfil vivienda compra",
+          norm: "Art. 87 NF 33/2013 (mod. NF 3/2025)",
+          iconColor: "teal",
+          rows: [
+            { label: "General",          value: "18% / 1.530 €" },
+            { label: "Mun. <4.000 hab.", value: "20% / 1.836 €" },
+            { label: "<36 / Fam. num.",  value: "25% / 2.346 €" },
+          ],
+        }}
         accent={accent}
         accentLight={accentLight}
       />
 
       {data.viviendaPerfil === "joven" && n(data.viviendaCompra) > 0 && (
-        <div className="mb-8">
-          <label className="flex items-center gap-3 cursor-pointer group">
+        <div className="mb-5">
+          <label className="flex items-center gap-2.5 cursor-pointer group">
             <input
               type="checkbox"
               checked={data.viviendaPrimerAnio}
               onChange={e => set("viviendaPrimerAnio", e.target.checked)}
-              className="w-6 h-6 cursor-pointer rounded accent-current"
+              className="w-5 h-5 cursor-pointer rounded accent-current"
             />
             <div>
-              <div className="text-[15px] font-medium" style={{ color: T.ink }}>
+              <div className="text-sm font-medium" style={{ color: T.ink }}>
                 Primer año de adquisición (art. 87.4ter)
               </div>
-              <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
+              <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
                 Sin límite máximo en la deducción para menores de 36 años
               </div>
             </div>
@@ -61,7 +80,16 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
         value={data.alquilerAnual}
         onChange={v => set("alquilerAnual", v)}
         hint="Importe total del alquiler pagado en el año"
-        tooltipText="Deducción por alquiler de vivienda habitual. General: 20% (máx. 1.600 €). Mejorado: 35% (máx. 2.800 €). Art. 86 NF 33/2013 (mod. NF 3/2025)."
+        tooltipData={{
+          title: "Alquiler vivienda habitual",
+          norm: "Art. 86 NF 33/2013 (mod. NF 3/2025)",
+          iconColor: "teal",
+          text: "Deducción por alquiler de vivienda habitual.",
+          rows: [
+            { label: "General",  value: "20% (máx. 1.600 €)", highlight: true },
+            { label: "Mejorado", value: "35% (máx. 2.800 €)", highlight: true },
+          ],
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -74,7 +102,16 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
           { value: "general",  label: "General (20%, 1.600 €)" },
           { value: "mejorado", label: "Mejorado (35%, 2.800 €)" },
         ]}
-        tooltipText="Perfil mejorado (35%/2.800 €) para: menores de 36 años, familias numerosas o monoparentales, discapacidad ≥65%, dependencia, víctimas violencia de género, o municipios en riesgo de despoblación. Art. 86 NF 33/2013 (mod. NF 3/2025)."
+        tooltipData={{
+          title: "Perfil alquiler",
+          norm: "Art. 86 NF 33/2013 (mod. NF 3/2025)",
+          iconColor: "teal",
+          text: "Perfil mejorado para: menores de 36 años, familias numerosas o monoparentales, discapacidad ≥65%, dependencia, víctimas violencia de género, o municipios en riesgo de despoblación.",
+          rows: [
+            { label: "General",  value: "20% / 1.600 €" },
+            { label: "Mejorado", value: "35% / 2.800 €" },
+          ],
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -90,8 +127,8 @@ function PersonViviendaFields({ data, dispatch, actionType, accent, accentLight 
 
 export default function StepVivienda({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-10">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
+    <div className="space-y-8">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

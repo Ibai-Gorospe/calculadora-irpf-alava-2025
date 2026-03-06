@@ -12,7 +12,7 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
   return (
     <>
       {/* Rentas y reducciones */}
-      <div className="mb-8">
+      <div className="mb-5">
         <div className="text-[12px] font-bold tracking-widest uppercase mb-4" style={{ color: T.inkFaint }}>
           Rentas adicionales y otras deducciones
         </div>
@@ -22,7 +22,13 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           value={data.rentasNoLab}
           onChange={v => set("rentasNoLab", v)}
           hint="Solo si tienes rentas NO incluidas en la sección 'Otras rentas' de abajo"
-          tooltipText="Rentas no laborales que no hayas introducido ya en la sección 'Otras rentas' (capital inmobiliario, mobiliario, ganancias). Si el total de todas las rentas no laborales supera 7.500 €, la bonificación del trabajo se limita a 3.000 € (art. 23.2 NF 33/2013). Las rentas introducidas abajo ya se suman automáticamente."
+          tooltipData={{
+            title: "Otras rentas no laborales",
+            norm: "Art. 23.2 NF 33/2013",
+            iconColor: "teal",
+            text: "Rentas no laborales no introducidas en la sección 'Otras rentas'. Las rentas de capital y ganancias ya se suman automáticamente.",
+            footnote: "Si el total supera 7.500 €, la bonificación del trabajo se limita a 3.000 €.",
+          }}
           accent={accent}
           accentLight={accentLight}
         />
@@ -32,7 +38,18 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           value={data.otrasDeducNF3}
           onChange={v => set("otrasDeducNF3", v)}
           hint="Corresponsabilidad (≤200 €), reincorporación (≤1.500 €), rehabilitación (18%, máx 3.000 €), eficiencia energética (15%), recarga VE (15%)"
-          tooltipText="Introduce la suma de las deducciones que no tienen campo propio: Art. 83 bis: hasta 200 €/año (corresponsabilidad masculina). Art. 83 ter: hasta 1.500 €/año (reincorporación femenina). Art. 87 bis: 18% rehabilitación vivienda protegida, máx 3.000 €. Art. 87 ter/quater: 15% mejoras eficiencia energética. Art. 87 quinquies: 15% puntos de recarga VE. Calcula el importe de cada deducción e introduce aquí la suma total."
+          tooltipData={{
+            title: "Otras deducciones",
+            iconColor: "teal",
+            text: "Suma de deducciones sin campo propio. Calcula el importe de cada una e introduce la suma total.",
+            rows: [
+              { label: "Corresponsabilidad (83 bis)",    value: "≤ 200 €" },
+              { label: "Reincorporación (83 ter)",       value: "≤ 1.500 €" },
+              { label: "Rehab. vivienda (87 bis)",       value: "18%, máx 3.000 €" },
+              { label: "Eficiencia energ. (87 ter/qua)", value: "15%" },
+              { label: "Recarga VE (87 quinquies)",      value: "15%" },
+            ],
+          }}
           accent={accent}
           accentLight={accentLight}
         />
@@ -45,7 +62,13 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           value={data.anualidadesAlimentos}
           onChange={v => set("anualidadesAlimentos", v)}
           hint="Importe anual por decisión judicial"
-          tooltipText="Deducción del 15% de las anualidades por alimentos satisfechas a los hijos por decisión judicial. Límite por hijo: 30% de la deducción del art. 79 correspondiente a ese hijo. Art. 80 NF 3/2025."
+          tooltipData={{
+            title: "Anualidades por alimentos",
+            norm: "Art. 80 NF 3/2025",
+            iconColor: "teal",
+            text: "Deducción del 15% de las anualidades por alimentos satisfechas a los hijos por decisión judicial.",
+            footnote: "Límite por hijo: 30% de la deducción del art. 79 correspondiente a ese hijo.",
+          }}
           accent={accent}
           accentLight={accentLight}
         />
@@ -60,7 +83,12 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
               { value: "3", label: "3 hijos" },
               { value: "4", label: "4 hijos" },
             ]}
-            tooltipText="Número de hijos a los que se satisfacen anualidades por alimentos. Se necesita para calcular el límite del 30% de la deducción del art. 79 por cada hijo."
+            tooltipData={{
+              title: "Nº hijos que reciben alimentos",
+              norm: "Art. 80 NF 3/2025",
+              iconColor: "teal",
+              text: "Se necesita para calcular el límite del 30% de la deducción del art. 79 por cada hijo.",
+            }}
             accent={accent}
             accentLight={accentLight}
           />
@@ -78,24 +106,34 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           value={data.donaciones}
           onChange={v => set("donaciones", v)}
           hint="Fundaciones, asociaciones de utilidad pública, etc."
-          tooltipText="Deducción del 30% (general) o 45% (actividades prioritarias de mecenazgo) de las donaciones a entidades beneficiarias de mecenazgo. Base máxima: 30% de la base liquidable (art. 91 NF 33/2013). NF 35/2021 de régimen fiscal del mecenazgo."
+          tooltipData={{
+            title: "Donaciones a entidades cualificadas",
+            norm: "NF 35/2021",
+            iconColor: "teal",
+            text: "Donaciones a entidades beneficiarias de mecenazgo.",
+            rows: [
+              { label: "General",                value: "30%", highlight: true },
+              { label: "Actividades prioritarias",value: "45%", highlight: true },
+            ],
+            footnote: "Base máxima: 30% de la base liquidable (art. 91 NF 33/2013).",
+          }}
           accent={accent}
           accentLight={accentLight}
         />
         {n(data.donaciones) > 0 && (
-          <div className="mb-8">
-            <label className="flex items-center gap-3 cursor-pointer">
+          <div className="mb-5">
+            <label className="flex items-center gap-2.5 cursor-pointer">
               <input
                 type="checkbox"
                 checked={data.donacionesPrioritarias}
                 onChange={e => set("donacionesPrioritarias", e.target.checked)}
-                className="w-6 h-6 cursor-pointer rounded accent-current"
+                className="w-5 h-5 cursor-pointer rounded accent-current"
               />
               <div>
-                <div className="text-[15px] font-medium" style={{ color: T.ink }}>
+                <div className="text-sm font-medium" style={{ color: T.ink }}>
                   Actividades prioritarias de mecenazgo (45%)
                 </div>
-                <div className="text-[13px] mt-0.5" style={{ color: T.inkFaint }}>
+                <div className="text-xs mt-0.5" style={{ color: T.inkFaint }}>
                   En lugar del 30% general &middot; Art. 25 NF 35/2021
                 </div>
               </div>
@@ -108,7 +146,12 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
           value={data.inversionNuevaCreacion}
           onChange={v => set("inversionNuevaCreacion", v)}
           hint="Participaciones en empresas de nueva o reciente creación"
-          tooltipText="Deducción del 10% de las cantidades invertidas en empresas de nueva o reciente creación, con un máximo de 6.000 € de deducción."
+          tooltipData={{
+            title: "Inversión en empresas de nueva creación",
+            iconColor: "teal",
+            text: "Deducción del 10% de las cantidades invertidas en empresas de nueva o reciente creación.",
+            footnote: "Máximo de 6.000 € de deducción.",
+          }}
           accent={accent}
           accentLight={accentLight}
         />
@@ -119,8 +162,8 @@ function PersonDeduccionesFields({ data, dispatch, actionType, accent, accentLig
 
 export default function StepDeducciones({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-10">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
+    <div className="space-y-8">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

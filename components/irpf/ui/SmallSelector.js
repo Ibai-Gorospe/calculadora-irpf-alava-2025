@@ -9,22 +9,23 @@ export function SmallSelector({
   onChange,
   options,
   tooltipText,
+  tooltipData,
   accent = T.cobalt,
 }) {
   return (
-    <div className="flex flex-col gap-3 mb-8">
+    <div className="space-y-1.5 mb-5">
       {/* Label row */}
       {lbl && (
         <div className="flex items-center gap-1.5">
-          <span className="text-[15px] font-medium text-ink-mid">
+          <span className="text-sm font-medium text-ink-mid">
             {lbl}
           </span>
-          {tooltipText && <Tooltip text={tooltipText} />}
+          {(tooltipData || tooltipText) && <Tooltip data={tooltipData} text={tooltipData ? undefined : tooltipText} />}
         </div>
       )}
 
-      {/* Button group */}
-      <div className="flex flex-wrap gap-3">
+      {/* Segmented control */}
+      <div className="inline-flex bg-surface-alt rounded-lg p-1 gap-1 flex-wrap">
         {options.map((opt) => {
           const selected = opt.value === value;
           return (
@@ -33,20 +34,15 @@ export function SmallSelector({
               type="button"
               onClick={() => onChange(opt.value)}
               className={`
-                rounded-2xl px-5 py-3.5 text-[15px] font-medium min-h-[48px]
+                px-4 py-2 rounded-md text-sm font-medium
                 transition-all duration-200 cursor-pointer
-                outline-none focus-visible:ring-2 focus-visible:ring-offset-1
+                outline-none focus-visible:ring-2 focus-visible:ring-cobalt/30
                 ${
                   selected
-                    ? "text-white shadow-md"
-                    : "bg-white text-ink-mid border border-border hover:border-ink-faint/60 hover:bg-surface-alt"
+                    ? "bg-white text-ink shadow-sm"
+                    : "text-ink-mid hover:text-ink"
                 }
               `}
-              style={
-                selected
-                  ? { backgroundColor: accent, boxShadow: `0 4px 12px ${accent}30` }
-                  : undefined
-              }
             >
               {opt.label}
             </button>

@@ -11,24 +11,23 @@ function deducHijosTotal(num, hijosM6 = 0, hijos6a15 = 0) {
   return base + hijosM6 * COMP_M6 + hijos6a15 * COMP_6A15;
 }
 
-function AgeCounter({ label, val, onChange, max, tooltipText }) {
+function AgeCounter({ label, val, onChange, max, tooltipData }) {
   return (
     <div className="mt-6">
-      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+      <div className="text-sm font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         {label}
-        {tooltipText && <Tooltip text={tooltipText} />}
+        {tooltipData && <Tooltip data={tooltipData} />}
       </div>
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         {Array.from({ length: max + 1 }, (_, i) => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-3.5 text-base font-bold rounded-2xl cursor-pointer font-mono transition-all duration-200"
+            className="flex-1 py-2.5 text-sm font-bold rounded-lg cursor-pointer font-mono transition-all duration-200"
             style={{
               background: val === i ? T.gold : T.surface,
               color: val === i ? "#fff" : T.inkMid,
-              border: `2px solid ${val === i ? T.goldAcc : T.border}`,
-              boxShadow: val === i ? `0 4px 12px ${T.gold}30` : "none",
+              border: `1px solid ${val === i ? T.goldAcc : T.border}`,
             }}
           >
             {i === 0 ? "—" : i}
@@ -54,22 +53,26 @@ export default function HijosSelector({
 
   return (
     <div>
-      <div className="text-[15px] font-medium mb-4 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+      <div className="text-sm font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Hijos en común
-        <Tooltip text="Descendientes convivientes con rentas ≤ SMI (16.576 €/año) y edad < 30 años. Art. 79 NF 33/2013." />
+        <Tooltip data={{
+          title: "Hijos en común",
+          norm: "Art. 79 NF 33/2013",
+          iconColor: "cobalt",
+          text: "Descendientes convivientes con rentas ≤ SMI (16.576 €/año) y edad menor de 30 años.",
+        }} />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         {[0, 1, 2, 3, 4].map(i => (
           <button
             key={i}
             onClick={() => onChange(i)}
-            className="flex-1 py-4 text-lg font-bold rounded-2xl min-h-[52px] cursor-pointer font-mono transition-all duration-200"
+            className="flex-1 py-2.5 text-sm font-bold rounded-lg cursor-pointer font-mono transition-all duration-200"
             style={{
               background: value === i ? T.gold : T.surface,
               color: value === i ? "#fff" : T.inkMid,
-              border: `2px solid ${value === i ? T.goldAcc : T.border}`,
-              boxShadow: value === i ? `0 4px 12px ${T.gold}30` : "none",
+              border: `1px solid ${value === i ? T.goldAcc : T.border}`,
             }}
           >
             {i === 0 ? "—" : i}
@@ -84,21 +87,33 @@ export default function HijosSelector({
             val={hijosM6}
             onChange={v => onChangeM6(v)}
             max={value}
-            tooltipText={`+${eur(COMP_M6)} por cada hijo menor de 6 años. Art. 79.2 NF 19/2024.`}
+            tooltipData={{
+              title: "Hijos menores de 6 años",
+              norm: "Art. 79 NF 33/2013",
+              iconColor: "cobalt",
+              text: "Complemento por cada hijo menor de 6 años.",
+              rows: [{ label: "Complemento por hijo", value: `+ ${eur(COMP_M6)}`, highlight: true }],
+            }}
           />
           <AgeCounter
             label="De 6 a 15 años"
             val={hijos6a15}
             onChange={v => onChangej6a15(v)}
             max={value - hijosM6}
-            tooltipText={`+${eur(COMP_6A15)} por cada hijo de 6 a 15 años. Art. 79.2 NF 19/2024.`}
+            tooltipData={{
+              title: "Hijos de 6 a 15 años",
+              norm: "Art. 79 NF 33/2013",
+              iconColor: "cobalt",
+              text: "Complemento por cada hijo en edad escolar entre 6 y 15 años.",
+              rows: [{ label: "Complemento por hijo", value: `+ ${eur(COMP_6A15)}`, highlight: true }],
+            }}
           />
 
           <div
-            className="mt-6 rounded-2xl p-6 text-sm leading-relaxed"
+            className="mt-5 rounded-lg p-4 text-sm leading-relaxed"
             style={{
               background: T.goldL,
-              border: `1.5px solid ${T.goldAcc}33`,
+              border: `1px solid ${T.goldAcc}33`,
               color: T.gold,
             }}
           >

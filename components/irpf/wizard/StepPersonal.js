@@ -21,13 +21,12 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   const Btn = ({ opt }) => (
     <button
       onClick={() => onChange(opt.value)}
-      className="py-4 px-4 text-[14px] font-medium rounded-xl cursor-pointer
-                 transition-all duration-200 leading-tight min-h-[48px]"
+      className="py-2.5 px-3 text-sm font-medium rounded-lg cursor-pointer
+                 transition-all duration-200 leading-tight"
       style={{
         background: value === opt.value ? accent : T.surface,
         color: value === opt.value ? "#fff" : T.inkMid,
-        border: `1.5px solid ${value === opt.value ? accent : T.border}`,
-        boxShadow: value === opt.value ? `0 4px 12px ${accent}30` : "none",
+        border: `1px solid ${value === opt.value ? accent : T.border}`,
       }}
     >
       {opt.label}
@@ -35,15 +34,26 @@ function DiscapacidadSelector({ value, onChange, accent }) {
   );
 
   return (
-    <div className="mb-8">
-      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+    <div className="mb-5">
+      <div className="text-sm font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Discapacidad / dependencia (arts. 23.3 + 82)
-        <Tooltip text="Doble efecto: 1) Art. 23.3: incrementa bonificación del trabajo (+100% ≥33%, +250% ≥65%). 2) Art. 82 NF 19/2024: deducción de cuota de 1.025,64 € (33-65%), 1.464,54 € (≥65%/Grado I), 1.756,75 € (Grado II) o 2.191,03 € (Grado III)." />
+        <Tooltip data={{
+          title: "Discapacidad / dependencia",
+          norm: "Arts. 23.3 + 82 NF 19/2024",
+          iconColor: "cobalt",
+          text: "Doble efecto: incrementa la bonificación del trabajo y genera una deducción directa en cuota.",
+          rows: [
+            { label: "≥33% <65%",          value: "1.025,64 €", highlight: true },
+            { label: "≥65% / Grado I",     value: "1.464,54 €", highlight: true },
+            { label: "Grado II severa",    value: "1.756,75 €", highlight: true },
+            { label: "Grado III gran dep.",value: "2.191,03 €", highlight: true },
+          ],
+        }} />
       </div>
-      <div className="grid grid-cols-3 gap-3 mb-2">
+      <div className="grid grid-cols-3 gap-2 mb-2">
         {row1.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {row2.map(opt => <Btn key={opt.value} opt={opt} />)}
       </div>
     </div>
@@ -59,23 +69,33 @@ function DiscapFamiliarGradoSelector({ value, onChange, accent }) {
   ];
 
   return (
-    <div className="mb-8">
-      <div className="text-[15px] font-medium mb-3 flex items-center gap-1.5" style={{ color: T.inkMid }}>
+    <div className="mb-5">
+      <div className="text-sm font-medium mb-2.5 flex items-center gap-1.5" style={{ color: T.inkMid }}>
         Grado discapacidad del/los familiar/es
-        <Tooltip text="Selecciona el grado de discapacidad/dependencia de los familiares convivientes. Si tienen grados diferentes, introduce cada uno por separado o selecciona el más bajo y añade manualmente la diferencia en 'Otras deducciones'." />
+        <Tooltip data={{
+          title: "Grado discapacidad familiar",
+          norm: "Art. 82 NF 19/2024",
+          iconColor: "cobalt",
+          text: "Si los familiares convivientes tienen grados diferentes, selecciona el más frecuente.",
+          rows: [
+            { label: "≥33% <65%",          value: "1.025,64 €", highlight: true },
+            { label: "≥65% / Grado I",     value: "1.464,54 €", highlight: true },
+            { label: "Grado II severa",    value: "1.756,75 €", highlight: true },
+            { label: "Grado III gran dep.",value: "2.191,03 €", highlight: true },
+          ],
+        }} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {opts.map(opt => (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className="py-4 px-4 text-[14px] font-medium rounded-xl cursor-pointer
-                       transition-all duration-200 leading-tight min-h-[48px]"
+            className="py-2.5 px-3 text-sm font-medium rounded-lg cursor-pointer
+                       transition-all duration-200 leading-tight"
             style={{
               background: value === opt.value ? accent : T.surface,
               color: value === opt.value ? "#fff" : T.inkMid,
-              border: `1.5px solid ${value === opt.value ? accent : T.border}`,
-              boxShadow: value === opt.value ? `0 4px 12px ${accent}30` : "none",
+              border: `1px solid ${value === opt.value ? accent : T.border}`,
             }}
           >
             {opt.label}
@@ -100,7 +120,17 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "65-74",   label: "65-74 (385 €)" },
           { value: "75+",     label: "75+ (700 €)" },
         ]}
-        tooltipText="Deducción por edad: 385 € (>65) o 700 € (>75), BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción viudedad: se aplica la más beneficiosa. Art. 83 NF 33/2013."
+        tooltipData={{
+          title: "Deducción por edad",
+          norm: "Art. 83 NF 33/2013",
+          iconColor: "cobalt",
+          rows: [
+            { label: "Menor de 65 años",   value: "—" },
+            { label: "Entre 65 y 74 años", value: "+ 385 €",  highlight: true },
+            { label: "75 años o más",      value: "+ 700 €",  highlight: true },
+          ],
+          footnote: "Incompatible con deducción viudedad: se aplica la más beneficiosa. BI ≤ 20.000 €, fase-out hasta 30.000 €.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -119,7 +149,13 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "no", label: "No aplica" },
           { value: "si", label: "Viudo/a (hasta 200 €)" },
         ]}
-        tooltipText="Deducción de 200 € para contribuyentes viudos con BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción por edad (art. 83): se aplica automáticamente la más beneficiosa."
+        tooltipData={{
+          title: "Deducción por viudedad",
+          norm: "Art. 82 bis NF 3/2025",
+          iconColor: "cobalt",
+          rows: [{ label: "Deducción máxima", value: "200 €", highlight: true }],
+          footnote: "BI ≤ 20.000 €, fase-out hasta 30.000 €. Incompatible con deducción por edad.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -138,7 +174,13 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "no", label: "Normal" },
           { value: "si", label: "≤500 hab. (+200 €)" },
         ]}
-        tooltipText="Minoración adicional de 200 € por residir en municipio con ≤ 500 habitantes. Art. 77.2 NF 19/2024."
+        tooltipData={{
+          title: "Municipio de despoblación",
+          norm: "Art. 77.2 NF 33/2013",
+          iconColor: "cobalt",
+          rows: [{ label: "Municipio ≤500 hab.", value: "+ 200 €", highlight: true }],
+          footnote: "Deducción adicional por residencia en municipios en riesgo de despoblación.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -152,7 +194,12 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "1", label: "1 (423,72 €)" },
           { value: "2", label: "2 (847,44 €)" },
         ]}
-        tooltipText="423,72 € por ascendiente que conviva permanentemente con el contribuyente, con rentas ≤ SMI (16.576 €) y que no presente declaración propia. Art. 81 NF 33/2013 (mod. NF 19/2024)."
+        tooltipData={{
+          title: "Ascendientes convivientes",
+          norm: "Art. 81 NF 33/2013",
+          iconColor: "cobalt",
+          text: "Padres o abuelos mayores de 65 años (o con discapacidad) que conviven contigo y tienen rentas ≤ SMI.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -166,7 +213,16 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "empleado_hogar", label: "Empleado hogar (250 €)" },
           { value: "profesional",    label: "Profesional cert. (500 €)" },
         ]}
-        tooltipText="Por contratar a un empleado del hogar para el cuidado de hijos <12 años o familiares dependientes/discapacitados. 250 € (general) o 500 € si el cuidador es profesional certificado. Art. 81 ter NF 3/2025."
+        tooltipData={{
+          title: "Cuidado menores/dependientes",
+          norm: "Art. 81 ter NF 3/2025",
+          iconColor: "cobalt",
+          text: "Por contratar a un empleado del hogar para el cuidado de hijos <12 años o familiares dependientes/discapacitados.",
+          rows: [
+            { label: "Empleado hogar",        value: "250 €", highlight: true },
+            { label: "Profesional certificado",value: "500 €", highlight: true },
+          ],
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -181,7 +237,12 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
           { value: "2", label: "2 familiares" },
           { value: "3", label: "3 familiares" },
         ]}
-        tooltipText="Deducción por cada familiar conviviente con discapacidad/dependencia reconocida. Mismos importes que para el contribuyente según grado. Art. 82 NF 19/2024."
+        tooltipData={{
+          title: "Familiares con discapacidad",
+          norm: "Art. 82 NF 19/2024",
+          iconColor: "cobalt",
+          text: "Deducción por cada familiar conviviente con discapacidad/dependencia reconocida. Mismos importes que para el contribuyente según grado.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -199,7 +260,13 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
         value={data.asistPersonal}
         onChange={v => set("asistPersonal", v)}
         hint="Para titulares de la prestación de asistencia personal (DF 39/2014)"
-        tooltipText="Deducción del 30% de las cantidades pagadas por contratar asistentes personales, con un máximo de 900 € anuales. Solo para titulares de la prestación de asistencia personal del sistema de dependencia (DF 39/2014). Art. 81 bis NF 33/2013."
+        tooltipData={{
+          title: "Gasto asistente personal",
+          norm: "Art. 81 bis NF 33/2013",
+          iconColor: "cobalt",
+          text: "Deducción del 30% de las cantidades pagadas por contratar asistentes personales.",
+          footnote: "Máximo 900 €/año. Solo para titulares de la prestación de asistencia personal (DF 39/2014).",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -209,7 +276,7 @@ function PersonPersonalFields({ data, dispatch, actionType, accent, accentLight 
 
 export default function StepPersonal({ state, dispatch, showPersonB }) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <PersonCard
         letter="H"
         label="Descendientes"
@@ -228,7 +295,7 @@ export default function StepPersonal({ state, dispatch, showPersonB }) {
         />
       </PersonCard>
 
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"

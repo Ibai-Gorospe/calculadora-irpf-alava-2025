@@ -10,6 +10,7 @@ export function NumInput({
   onChange,
   hint,
   tooltipText,
+  tooltipData,
   accent = T.cobalt,
   accentLight = T.cobaltL,
 }) {
@@ -17,43 +18,47 @@ export function NumInput({
   const id = useId();
 
   return (
-    <div className="flex flex-col gap-2.5 mb-8">
+    <div className="space-y-1.5 mb-5">
       {/* Label row */}
       <div className="flex items-center gap-1.5">
         <label
           htmlFor={id}
-          className="text-[15px] font-medium transition-colors duration-200"
-          style={{ color: focused ? accent : T.inkMid }}
+          className="text-sm font-medium text-ink-mid"
         >
           {label}
         </label>
-        {tooltipText && <Tooltip text={tooltipText} />}
+        {(tooltipData || tooltipText) && <Tooltip data={tooltipData} text={tooltipData ? undefined : tooltipText} />}
       </div>
 
-      {/* Input */}
-      <input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        placeholder="0,00 €"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        className="w-full rounded-2xl px-5 py-4 min-h-[56px]
-                   font-mono text-base text-ink
-                   outline-none transition-all duration-200
-                   placeholder:text-ink-faint/40"
-        style={{
-          backgroundColor: focused ? accentLight : T.surface,
-          border: `2px solid ${focused ? accent : T.border}`,
-          boxShadow: focused ? `0 0 0 4px ${accent}12` : "none",
-        }}
-      />
+      {/* Input with € prefix */}
+      <div className="relative">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint text-sm select-none pointer-events-none">
+          &euro;
+        </span>
+        <input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          placeholder="0,00"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="w-full rounded-lg pl-7 pr-3 py-2.5
+                     font-mono text-base text-ink text-right tabular-nums
+                     outline-none transition-all duration-150
+                     placeholder:text-ink-faint/40"
+          style={{
+            backgroundColor: T.surface,
+            border: `1px solid ${focused ? accent : T.border}`,
+            boxShadow: focused ? `0 0 0 2px ${accent}26` : "none",
+          }}
+        />
+      </div>
 
       {/* Hint */}
       {hint && (
-        <p className="text-[13px] leading-snug text-ink-faint">{hint}</p>
+        <p className="text-xs text-ink-faint leading-snug">{hint}</p>
       )}
     </div>
   );

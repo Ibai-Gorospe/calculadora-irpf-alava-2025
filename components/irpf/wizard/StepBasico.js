@@ -17,7 +17,13 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
         value={data.bruto}
         onChange={v => set("bruto", v)}
         hint="Total antes de retenciones y cotizaciones SS"
-        tooltipText="Suma de nóminas brutas del año 2025, incluyendo pagas extra, complementos y cualquier otra retribución dineraria del trabajo."
+        tooltipData={{
+          title: "Retribución bruta anual",
+          norm: "Art. 15 NF 33/2013",
+          iconColor: "cobalt",
+          text: "Suma de todas tus nóminas brutas de 2025, incluyendo pagas extra y complementos.",
+          tag: "Lo encontrarás en tu certificado de retenciones",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -26,7 +32,12 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
         value={data.ret}
         onChange={v => set("ret", v)}
         hint="Figura en el certificado de retenciones del pagador"
-        tooltipText="Importe total retenido por la empresa durante 2025 a cuenta del IRPF. Aparece en el certificado de retenciones que debe entregarte el pagador."
+        tooltipData={{
+          title: "Retenciones IRPF",
+          iconColor: "cobalt",
+          text: "Importe total retenido por la empresa durante 2025 a cuenta del IRPF.",
+          tag: "Figura en el certificado de retenciones del pagador",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -35,7 +46,13 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
         value={data.redExtra}
         onChange={v => set("redExtra", v)}
         hint="Aportaciones a planes de pensiones, EPSV, etc."
-        tooltipText="Aportaciones a planes de pensiones, EPSV u otros sistemas de previsión social. Límite general 2025: 5.000 € individuales + 8.000 € empresariales (art. 70-72 NF 33/2013)."
+        tooltipData={{
+          title: "Otras reducciones de base",
+          norm: "Arts. 70–72 NF 33/2013",
+          iconColor: "gold",
+          text: "Aportaciones a planes de pensiones, EPSV u otros sistemas de previsión social.",
+          footnote: "Límite 2025: 5.000 € individuales + 8.000 € empresariales.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -54,7 +71,16 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
           { value: "indefinido", label: "Indefinido (6,48%)" },
           { value: "temporal",   label: "Temporal (6,53%)" },
         ]}
-        tooltipText="Afecta al tipo de cotización SS. Indefinido: 6,48% (4,70+1,55+0,10+0,13 MEI). Temporal: 6,53% (4,70+1,60+0,10+0,13 MEI). Orden PJC/178/2025. Tope base: 58.914 €/año."
+        tooltipData={{
+          title: "Tipo de contrato",
+          norm: "Orden PJC/178/2025",
+          iconColor: "gold",
+          rows: [
+            { label: "Indefinido", value: "6,48 %" },
+            { label: "Temporal",   value: "6,53 %" },
+          ],
+          footnote: "Tope base SS: 58.914 €/año.",
+        }}
         accent={accent}
         accentLight={accentLight}
       />
@@ -64,8 +90,8 @@ function PersonBasicoFields({ data, dispatch, actionType, accent, accentLight })
 
 export default function StepBasico({ state, dispatch, showPersonB, setShowPersonB }) {
   return (
-    <div className="space-y-10">
-      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-8" : ""}>
+    <div className="space-y-8">
+      <div className={showPersonB ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
         <PersonCard
           letter="A"
           label="Persona A"
@@ -102,11 +128,11 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
                 dispatch({ type: "RESET_B" });
                 setShowPersonB(false);
               }}
-              className="mt-6 w-full py-4 rounded-2xl text-sm font-medium cursor-pointer
+              className="mt-5 w-full py-2.5 rounded-lg text-sm font-medium cursor-pointer
                          transition-all duration-200 hover:opacity-80"
               style={{
                 background: T.redL,
-                border: `1.5px solid ${T.redAcc}33`,
+                border: `1px solid ${T.redAcc}33`,
                 color: T.red,
               }}
             >
@@ -119,11 +145,11 @@ export default function StepBasico({ state, dispatch, showPersonB, setShowPerson
       {!showPersonB && (
         <button
           onClick={() => setShowPersonB(true)}
-          className="w-full py-5 rounded-2xl text-base font-medium cursor-pointer
+          className="w-full py-3 rounded-lg text-sm font-medium cursor-pointer
                      transition-all duration-200 hover:bg-teal-light/50 group"
           style={{
             background: "transparent",
-            border: `2px dashed ${T.teal}44`,
+            border: `1.5px dashed ${T.teal}44`,
             color: T.teal,
           }}
         >

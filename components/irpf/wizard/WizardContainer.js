@@ -1,6 +1,7 @@
 "use client";
 
-import { useReducer, useMemo, useState, useEffect, useCallback } from "react";
+import { useReducer, useMemo, useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { reducer } from "../state/reducer.js";
 import { initialState } from "../state/initialState.js";
 import { useAutoSave, loadSavedState, clearSavedState } from "../state/useLocalStorage.js";
@@ -16,12 +17,36 @@ import StepOtrasRentas from "./StepOtrasRentas.js";
 import StepDeducciones from "./StepDeducciones.js";
 import StepResultado from "./StepResultado.js";
 
+const STEP_LABELS = [
+  "Ingresos del trabajo",
+  "Situacion personal",
+  "Vivienda habitual",
+  "Otras rentas",
+  "Deducciones",
+  "Calcular IRPF",
+];
+
+const stepVariants = {
+  enter: (direction) => ({ x: direction > 0 ? 40 : -40, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (direction) => ({ x: direction < 0 ? 40 : -40, opacity: 0 }),
+};
+
 export default function WizardContainer() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentStep, setCurrentStep] = useState(0);
   const [maxVisited, setMaxVisited] = useState(0);
   const [showPersonB, setShowPersonB] = useState(false);
   const [restored, setRestored] = useState(false);
+  const [direction, setDirection] = useState(1);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Track scroll for header effect
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // localStorage restore on mount
   useEffect(() => {
@@ -41,17 +66,20 @@ export default function WizardContainer() {
 
   // Step navigation
   const goToStep = useCallback((step) => {
+    setDirection(step > currentStep ? 1 : -1);
     setCurrentStep(step);
     setMaxVisited(prev => Math.max(prev, step));
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [currentStep]);
 
   const goNext = useCallback(() => {
     const next = Math.min(currentStep + 1, 5);
+    setDirection(1);
     goToStep(next);
   }, [currentStep, goToStep]);
 
   const goPrev = useCallback(() => {
+    setDirection(-1);
     setCurrentStep(prev => Math.max(prev - 1, 0));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -346,115 +374,176 @@ export default function WizardContainer() {
   }, []);
 
   const isOptionalStep = currentStep >= 2 && currentStep <= 4;
-  const contentWidth = showPersonB ? "max-w-6xl" : "max-w-3xl";
+  const contentWidth = showPersonB ? "max-w-5xl" : "max-w-2xl";
+
+  const nextLabel = currentStep === 4
+    ? "Calcular IRPF"
+    : `Continuar a ${STEP_LABELS[currentStep + 1] || "siguiente"}`;
 
   return (
     <div className="min-h-screen bg-bg font-sans text-ink">
-      {/* Gradient accent line */}
-      <div className="h-1.5 bg-gradient-to-r from-cobalt via-teal to-gold" />
+      {/* Header — sticky with glassmorphic blur on scroll */}
+      <header
+        className="sticky top-0 z-40 h-16 transition-all duration-200"
+        style={{
+          backgroundColor: scrolled ? "rgba(255,255,255,0.80)" : "transparent",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+          borderBottom: scrolled ? `1px solid ${T.border}` : "1px solid transparent",
+          boxShadow: scrolled ? T.shadowSm : "none",
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+          <h1 className="text-base font-semibold tracking-tight" style={{ color: T.cobalt }}>
+            Calculadora IRPF Alava 2025
+          </h1>
 
-      {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-border/40 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
-          <div className="flex items-center justify-between py-6 gap-6">
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight text-ink">
-                Calculadora IRPF Alava 2025
-              </h1>
-              <div className="text-xs mt-1 text-ink-faint">
-                Ejercicio 2025 &middot; NF 33/2013 &middot; NF 3/2025 &middot; DF 23/2025
-              </div>
-            </div>
-            {ready && optimo && currentStep < 5 && (
-              <div className="text-right shrink-0 hidden lg:block">
-                <div className="text-xs font-medium text-ink-faint">
-                  {optimo.label}
-                </div>
+          {/* Badge — desktop only */}
+          <div className="hidden md:flex items-center gap-3">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1"
+              style={{ backgroundColor: T.goldL, color: T.gold }}
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Ejercicio 2025
+            </span>
+          </div>
+
+          {/* Mini result — desktop, when we have data */}
+          {ready && optimo && currentStep < 5 && (
+            <div className="hidden lg:flex items-center gap-2 rounded-lg px-4 py-1.5"
+              style={{
+                backgroundColor: scrolled ? "rgba(255,255,255,0.6)" : T.surface,
+                border: `1px solid ${T.border}`,
+              }}
+            >
+              <div className="text-right">
+                <div className="text-[10px] uppercase tracking-wider font-medium text-ink-faint">Resultado</div>
                 <div
-                  className="text-2xl font-bold font-mono tracking-tight"
-                  style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}
+                  className="text-lg font-bold font-mono tabular-nums"
+                  style={{ color: optimo.resultado >= 0 ? T.green : T.red }}
                 >
                   {signedEur(optimo.resultado)}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Progress Bar */}
-      <div className="bg-white border-b border-border/40">
-        <div className="max-w-6xl mx-auto px-6 lg:px-10">
+      <div className="bg-white border-b" style={{ borderColor: T.border }}>
+        <div className="max-w-5xl mx-auto px-4 md:px-6">
           <ProgressBar currentStep={currentStep} onStepClick={goToStep} maxVisited={maxVisited} />
         </div>
       </div>
 
       {/* Restored Banner */}
       {restored && (
-        <div className="bg-cobalt-light border-b border-cobalt/20">
-          <div className="max-w-6xl mx-auto px-6 lg:px-10 py-3 flex items-center justify-between">
-            <span className="text-sm text-cobalt font-medium">Datos restaurados de tu sesion anterior</span>
-            <button onClick={dismissRestored} className="text-sm text-cobalt/60 hover:text-cobalt underline cursor-pointer">Cerrar</button>
+        <div style={{ backgroundColor: T.cobaltL, borderBottom: `1px solid ${T.cobalt}33` }}>
+          <div className="max-w-5xl mx-auto px-4 md:px-6 py-2.5 flex items-center justify-between">
+            <span className="text-sm font-medium" style={{ color: T.cobalt }}>Datos restaurados de tu sesion anterior</span>
+            <button onClick={dismissRestored} className="text-sm underline cursor-pointer" style={{ color: T.cobalt + "99" }}>Cerrar</button>
           </div>
         </div>
       )}
 
       {/* Body */}
       {currentStep < 5 ? (
-        <div className={`${contentWidth} mx-auto px-6 lg:px-10 py-16 pb-32 lg:pb-16`}>
-          {/* Step content */}
-          <div className="animate-[slideUp_300ms_ease-out]">
-            {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
-            {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-            {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-            {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-            {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
-          </div>
-
-          {/* Navigation buttons */}
-          <div className="flex items-center justify-between mt-16 gap-6">
-            {currentStep > 0 ? (
-              <button
-                onClick={goPrev}
-                className="px-8 py-4 rounded-2xl border-2 border-border text-ink-mid font-medium text-base
-                           hover:bg-surface-alt hover:border-ink-faint/40 transition-all duration-200 cursor-pointer"
-              >
-                &larr; Anterior
-              </button>
-            ) : <div />}
-            <div className="flex items-center gap-4">
+        <div className={`${contentWidth} mx-auto px-4 md:px-6 py-10 pb-32 lg:pb-10`}>
+          {/* Elevated card wrapper */}
+          <div
+            className="bg-white rounded-2xl p-6 md:p-8"
+            style={{
+              border: `1px solid ${T.border}`,
+              boxShadow: T.shadowCard,
+            }}
+          >
+            {/* Step title */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-ink tracking-tight">
+                {STEP_LABELS[currentStep]}
+              </h2>
               {isOptionalStep && (
+                <p className="text-sm text-ink-faint leading-relaxed mt-1">
+                  Este paso es opcional. Puedes saltarlo si no aplica a tu situacion.
+                </p>
+              )}
+            </div>
+            <div className="border-b mb-6" style={{ borderColor: T.surfaceAlt }} />
+
+            {/* Animated step content */}
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={currentStep}
+                custom={direction}
+                variants={stepVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.15 },
+                }}
+              >
+                {currentStep === 0 && <StepBasico state={state} dispatch={dispatch} showPersonB={showPersonB} setShowPersonB={setShowPersonB} />}
+                {currentStep === 1 && <StepPersonal state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+                {currentStep === 2 && <StepVivienda state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+                {currentStep === 3 && <StepOtrasRentas state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+                {currentStep === 4 && <StepDeducciones state={state} dispatch={dispatch} showPersonB={showPersonB} />}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation buttons */}
+            <div className="flex items-center justify-between mt-8 gap-4">
+              {currentStep > 0 ? (
+                <button
+                  onClick={goPrev}
+                  className="px-4 py-3 rounded-lg text-ink-mid font-medium text-sm
+                             hover:text-ink hover:bg-surface-alt transition-all duration-150 cursor-pointer"
+                >
+                  &larr; Volver
+                </button>
+              ) : <div />}
+              <div className="flex items-center gap-3">
+                {isOptionalStep && (
+                  <button
+                    onClick={goNext}
+                    className="px-4 py-3 rounded-lg text-ink-faint text-sm font-medium
+                               hover:text-ink-mid hover:bg-surface-alt transition-all duration-150 cursor-pointer"
+                  >
+                    Saltar
+                  </button>
+                )}
                 <button
                   onClick={goNext}
-                  className="px-6 py-4 rounded-2xl text-ink-faint text-base font-medium
-                             hover:text-ink-mid hover:bg-surface-alt transition-all duration-200 cursor-pointer"
+                  className="px-8 py-3 rounded-lg text-white font-medium text-sm
+                             transition-all duration-150 cursor-pointer
+                             active:scale-[0.98]"
+                  style={{
+                    backgroundColor: currentStep === 4 ? T.green : T.cobalt,
+                  }}
                 >
-                  Saltar
+                  {nextLabel} &rarr;
                 </button>
-              )}
-              <button
-                onClick={goNext}
-                className="px-10 py-[18px] rounded-2xl bg-cobalt text-white font-semibold text-base min-h-[52px]
-                           hover:bg-cobalt/90 transition-all duration-200 cursor-pointer
-                           shadow-lg shadow-cobalt/25"
-              >
-                {currentStep === 4 ? "Ver resultados →" : "Siguiente →"}
-              </button>
+              </div>
             </div>
           </div>
 
           {/* Reset button */}
-          <div className="mt-10 text-center">
+          <div className="mt-6 text-center">
             <button
               onClick={handleReset}
-              className="text-[13px] text-ink-faint hover:text-ink-mid transition-colors cursor-pointer"
+              className="text-xs text-ink-faint hover:text-ink-mid transition-colors cursor-pointer"
             >
               Limpiar todos los datos
             </button>
           </div>
         </div>
       ) : (
-        <div className="max-w-6xl mx-auto px-6 lg:px-10 py-16">
+        <div className="max-w-5xl mx-auto px-4 md:px-6 py-10">
           <StepResultado
             calc={calc}
             scenarios={scenarios}
@@ -473,16 +562,17 @@ export default function WizardContainer() {
       {/* Mobile Sticky Result */}
       {ready && optimo && currentStep < 5 && (
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden
-                        bg-white/90 backdrop-blur-xl border-t border-border
-                        px-6 py-5 shadow-[0_-4px_20px_rgba(0,0,0,.08)]">
+                        bg-white/90 backdrop-blur-xl border-t
+                        px-4 py-3"
+             style={{ borderColor: T.border, boxShadow: "0 -2px 12px rgba(0,0,0,.06)" }}>
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-[11px] text-ink-faint tracking-widest uppercase font-medium">Mejor opcion</div>
-              <div className="text-base font-bold text-ink">{optimo.label}</div>
+              <div className="text-[10px] text-ink-faint tracking-wider uppercase font-medium">Mejor opcion</div>
+              <div className="text-sm font-semibold text-ink">{optimo.label}</div>
             </div>
             <div
-              className="text-2xl font-bold font-mono"
-              style={{ color: optimo.resultado >= 0 ? T.green : T.redAcc }}
+              className="text-xl font-bold font-mono tabular-nums"
+              style={{ color: optimo.resultado >= 0 ? T.green : T.red }}
             >
               {signedEur(optimo.resultado)}
             </div>
@@ -490,14 +580,27 @@ export default function WizardContainer() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="text-center px-6 lg:px-10 py-12 text-xs text-ink-faint border-t border-border/40 leading-relaxed">
-        <div>Normativa aplicada: NF 33/2013 &middot; NF 19/2024 &middot; NF 3/2025 &middot; DF 23/2025 &middot; Orden PJC/178/2025</div>
-        <div className="mt-2 max-w-3xl mx-auto">
-          Los resultados de esta calculadora tienen caracter meramente informativo y orientativo.
-          No constituyen asesoramiento fiscal y no tienen efectos vinculantes. Para su situacion particular, consulte con un profesional o utilice Rentafacil (Hacienda Foral de Alava).
+      {/* Footer with trust signals */}
+      <footer className="border-t px-4 md:px-6 py-10" style={{ borderColor: T.border }}>
+        <div className="max-w-3xl mx-auto text-center space-y-3">
+          {/* Privacy badge */}
+          <div className="inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-3 py-1 mb-2"
+            style={{ backgroundColor: T.surfaceAlt, color: T.inkMid }}>
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Tus datos no se almacenan ni se envian a ningun servidor
+          </div>
+          <div className="text-xs text-ink-faint leading-relaxed">
+            Normativa: NF 33/2013 &middot; NF 19/2024 &middot; NF 3/2025 &middot; DF 23/2025 &middot; Orden PJC/178/2025
+          </div>
+          <div className="text-xs text-ink-faint leading-relaxed max-w-2xl mx-auto italic">
+            Los resultados son orientativos y no vinculantes. Basado en la normativa foral de Alava vigente para el ejercicio 2025. Consulte con su asesor fiscal para una estimacion definitiva.
+          </div>
+          <div className="text-[11px] text-ink-faint/60">
+            Actualizado a marzo 2026
+          </div>
         </div>
-        <div className="mt-2 opacity-60">Ejercicio fiscal 2025 &middot; Trabajo, capital y patrimonio &middot; Actualizado a marzo 2026</div>
       </footer>
     </div>
   );
