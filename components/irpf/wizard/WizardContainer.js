@@ -374,7 +374,7 @@ export default function WizardContainer() {
   }, []);
 
   const isOptionalStep = currentStep >= 2 && currentStep <= 4;
-  const contentWidth = showPersonB ? "max-w-5xl" : "max-w-2xl";
+  const contentWidth = showPersonB ? "max-w-5xl" : "max-w-xl";
 
   const nextLabel = currentStep === 4
     ? "Calcular IRPF"
@@ -393,7 +393,7 @@ export default function WizardContainer() {
           boxShadow: scrolled ? T.shadowSm : "none",
         }}
       >
-        <div className="max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
           <h1 className="text-base font-semibold tracking-tight" style={{ color: T.cobalt }}>
             Calculadora IRPF Alava 2025
           </h1>
@@ -435,7 +435,7 @@ export default function WizardContainer() {
 
       {/* Progress Bar */}
       <div className="bg-white border-b" style={{ borderColor: T.border }}>
-        <div className="max-w-5xl mx-auto px-4 md:px-6">
+        <div className="max-w-3xl mx-auto px-4 md:px-6">
           <ProgressBar currentStep={currentStep} onStepClick={goToStep} maxVisited={maxVisited} />
         </div>
       </div>
@@ -452,7 +452,8 @@ export default function WizardContainer() {
 
       {/* Body */}
       {currentStep < 5 ? (
-        <div className={`${contentWidth} mx-auto px-4 md:px-6 py-10 pb-32 lg:pb-10`}>
+        <div className="w-full flex justify-center px-4 md:px-6 py-10 pb-32 lg:pb-10">
+          <div className={`${contentWidth} w-full`}>
           {/* Elevated card wrapper */}
           <div
             className="bg-white rounded-2xl p-6 md:p-8"
@@ -540,6 +541,7 @@ export default function WizardContainer() {
             >
               Limpiar todos los datos
             </button>
+          </div>
           </div>
         </div>
       ) : (

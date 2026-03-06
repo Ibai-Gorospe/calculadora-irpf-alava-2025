@@ -32,7 +32,7 @@ export function NumInput({
 
       {/* Input with € prefix */}
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint text-sm select-none pointer-events-none">
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint text-sm select-none pointer-events-none">
           &euro;
         </span>
         <input
@@ -44,7 +44,7 @@ export function NumInput({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className="w-full rounded-lg pl-7 pr-3 py-2.5
+          className="w-full rounded-lg pl-8 pr-4 py-3
                      font-mono text-base text-ink text-right tabular-nums
                      outline-none transition-all duration-150
                      placeholder:text-ink-faint/40"
@@ -58,7 +58,7 @@ export function NumInput({
 
       {/* Hint */}
       {hint && (
-        <p className="text-xs text-ink-faint leading-snug">{hint}</p>
+        <p className="text-xs text-ink-faint leading-snug mt-1">{hint}</p>
       )}
     </div>
   );

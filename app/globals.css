@@ -97,3 +97,13 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #9C9690;
 }
+
+html, body {
+  background-color: #F5F3EF;
+  min-height: 100%;
+}
+
+#__next, main {
+  background-color: #F5F3EF;
+  min-height: 100vh;
+}

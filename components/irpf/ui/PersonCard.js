@@ -11,7 +11,7 @@ export function PersonCard({ letter, label, subtitle, accent, accentLight, child
         boxShadow: T.shadowCard,
       }}
     >
-      <div className="p-6 md:p-8">
+      <div className="p-5 md:p-7">
         {/* Header with avatar */}
         <div className="flex items-center gap-3 mb-6">
           <div
